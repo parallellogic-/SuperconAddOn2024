@@ -33,5 +33,11 @@ I2C
 
 
 GPIO / UART
-By default the GPIO pins are inputs to the SAO.  They can be configured as a UART pair by issuing the following command over I2C:
+By default on boot-up the GPIO pins are inputs to the SAO.  They can be configured as a UART pair by issuing the following command over I2C:
 
+EEPROM
+
+# Resources
+
+SAO Standard https://hackaday.io/project/175182-simple-add-ons-sao
+Contest Specifications https://hackaday.io/contest/197237-supercon-8-add-on-contest/details
