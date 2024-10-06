@@ -3,6 +3,7 @@
 This repo contains the project files for a Supercon Add-On (SAO) Printed Circuit Board (PCB) for Hackaday Supercon 2024, held November 1-3rd in Pasadena.
 
 <img src="/img/front.png" height="420">
+<img src="/img/back.png" height="420">
 
 # User Guide
 
@@ -30,15 +31,15 @@ You must enter the same Element of Harmony as her
 # API
 
 I2C
-Echo
-Write with effect (dummy register that holds value and reads back)
-Debug LED ON/OFF
-White LED ON/OFF
-RGB LED ON/OFF
-RGB hue (get/set)
-Any LED brightness
-Full screen get/set
-enable UART, baud rate
+- Echo
+- Write with effect (dummy register that holds value and reads back)
+- Debug LED ON/OFF
+- White LED ON/OFF
+- RGB LED ON/OFF
+- RGB hue (get/set)
+- Any LED brightness
+- Full screen get/set
+- enable UART, baud rate
 
 GPIO / UART
 By default on boot-up the GPIO pins are inputs to the SAO.  They can be configured as a UART pair by issuing the following command over I2C:
@@ -47,7 +48,7 @@ EEPROM
 
 # Resources
 
-Artwork hotglwed.com
-SAO Standard https://hackaday.io/project/175182-simple-add-ons-sao
-Contest Specifications https://hackaday.io/contest/197237-supercon-8-add-on-contest/details
-JLCPCB Multi Color Silkscreen Spec https://jlcpcb.com/help/article/How-to-design-multi-color-silkscreen-using-EasyEDA
+- Artwork by hotglwed.com
+- JLCPCB Multi Color Silkscreen Specification https://jlcpcb.com/help/article/How-to-design-multi-color-silkscreen-using-EasyEDA
+- Contest Specifications https://hackaday.io/contest/197237-supercon-8-add-on-contest/details
+- SAO Standard https://hackaday.io/project/175182-simple-add-ons-sao
