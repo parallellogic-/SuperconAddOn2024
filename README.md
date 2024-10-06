@@ -2,7 +2,7 @@
 
 This repo contains the project files for a Supercon Add-On (SAO) Printed Circuit Board (PCB) for Hackaday Supercon 2024, held November 1-3rd in Pasadena.
 
-<img src="/img/front.png" height="420"><img src="/img/front.png" height="420">
+<img src="/img/front.png" height="420">
 
 # User Guide
 
