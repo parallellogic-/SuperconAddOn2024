@@ -4,7 +4,9 @@
 #include "stm8s_uart1.h"
 
 //time state
-u32 api_counter=0;//increments roughly every millisecond, give-or-take a factor of 2 based on clock divider settings, this is the basis of millis()
+u8 visible_index=0;//which led is being displayed this moment
+u16 micros_counter=0;//counting the amount of sleep each led has taken
+u16 millis_counter=0;//increments roughly every millisecond, give-or-take a factor of 2 based on clock divider settings, this is the basis of millis()
 
 //application space settings
 #define LED_COUNT 31 //10 RGB (3 LEDs each) + 12 white + 1 debug
@@ -27,11 +29,13 @@ bool button_pressed_event[BUTTON_COUNT][2];//event flag registering a button pus
 #define BUTTON_LONG_PRESS_MS 512 //number of millisconds to consititue a long press rather than a short press
 #define BUTTON_MINIMUM_PRESS_MS 50 //minimum time a button needs to be pressed down to be registered as a complete button press
 
-u8 temp_delete_me=0;
+u16 temp_delete_me=0;
+u16 temp3_delete_me=0;
 
 void hello_world()
 {//basic program that blinks the debug LED ON/OFF
 	u16 temp2_delete_me;
+	u16 temp4_delete_me;
 	bool is_high=0;
 	long frame=0;
 	//GPIO_Init(GPIOA, GPIO_PIN_3, GPIO_MODE_IN_PU_NO_IT);
@@ -41,8 +45,12 @@ void hello_world()
 		//temp_delete_me=(frame/64/256)%2?(~(frame/64)):(frame/64);
 		temp2_delete_me=0x00FF&((frame/256/256)%2?(~(frame/256)):(frame/256));
 		temp2_delete_me=temp2_delete_me*temp2_delete_me;
-		temp2_delete_me=temp2_delete_me/256;
+		temp2_delete_me=temp2_delete_me>>6;
 		temp_delete_me=temp2_delete_me;
+		temp4_delete_me=0x00FF&((frame/256/256)%2?((frame/256)):(~frame/256));
+		temp4_delete_me=temp4_delete_me*temp4_delete_me;
+		temp4_delete_me=temp4_delete_me>>6;
+		temp3_delete_me=(temp4_delete_me%2)<<9;
 		//temp_delete_me=(frame/256/256)%2?(~(frame/256)):(frame/256);
 	}
 }
@@ -97,23 +105,25 @@ void setup_main()
 		
 	//run pwm interrupt at 2.000 kHz period (to allow for >40 Hz frames with all LEDs ON)
 	TIM2->CCR1H=0;//this will always be zero based on application architecutre
-	TIM2->PSCR= 5;// init divider register 16MHz/2^X
-	TIM2->ARRH= 0;// init auto reload register
-	TIM2->ARRL= PWM_MAX_PERIOD;// init auto reload register
-	TIM2->CR1|= TIM2_CR1_ARPE | TIM2_CR1_URS | TIM2_CR1_CEN;// enable timer
-	TIM2->IER= TIM2_IER_UIE | TIM2_IER_CC1IE;// enable TIM2 interrupt
+	TIM2->PSCR= 4;// init divider register 16MHz/2^X
+	TIM2->ARRH= 16;// init auto reload register
+	TIM2->ARRL= 255;// init auto reload register
+	//TIM2->CR1|= TIM2_CR1_ARPE | TIM2_CR1_URS | TIM2_CR1_CEN;// enable timer
+	TIM2->CR1|= TIM2_CR1_URS | TIM2_CR1_CEN;// enable timer
+	//TIM2->IER= TIM2_IER_UIE | TIM2_IER_CC1IE;// enable TIM2 interrupt
+	TIM2->IER= TIM2_IER_UIE;// enable TIM2 interrupt
 	enableInterrupts();
 	
 }
 
 u32 millis()
 {
-	return api_counter;
+	return millis_counter;
 }
 
 void set_millis(u32 new_time)
 {
-	api_counter=new_time;
+	millis_counter=new_time;
 }
 
 //log short or long rpess button events for applicatio layer to use as user input
@@ -176,23 +186,59 @@ bool is_button_down(u8 index)
 
 //millisecond-ish interrupt and LED OFF to ON
 @far @interrupt void TIM2_UPD_OVF_IRQHandler (void) {
+	u16 this_sleep=temp_delete_me;
+	bool is_debug_led=0;
+	bool is_other_led=0;
+	//turn OFF LEDs
+	GPIOC->CR1 &= (uint8_t)(~(GPIO_PIN_7 | GPIO_PIN_6 | GPIO_PIN_5 | GPIO_PIN_4 | GPIO_PIN_3));
+	GPIOD->CR1 &= (uint8_t)(~(GPIO_PIN_2));
+	GPIOA->CR1 &= (uint8_t)(~(GPIO_PIN_3));
+  TIM2->CR1 &= ~TIM2_CR1_CEN;  // Clear the CEN bit to stop the timer
 	TIM2->SR1&=~TIM2_SR1_UIF;//reset interrupt
-	api_counter++;
-	//read buttons (if in application mode), update state
+	visible_index++;
+	if(visible_index>6) visible_index=0;
 	
-	//read audio, update state
-	if(api_counter%7==0 && temp_delete_me>0)//simulate other LEDs ON
+	
+	if(visible_index==0)//simulate other LEDs ON
+	{
+		is_debug_led=this_sleep>0;
+	}else if(visible_index==1){
+		this_sleep=temp3_delete_me;
+		is_other_led=this_sleep>0;
+	}else{
+		this_sleep=0x400;
+	}
+	if(this_sleep<1) this_sleep=1;
+	// Disable TIM2 to ensure a consistent write operation
+	
+  TIM2->CNTRH = 0;// Set the high byte of the counter
+  TIM2->CNTRL = 0;// Set the low byte of the counter
+	//TIM2->CCR1L = this_sleep&0x00FF;//set wakeup alarm
+	//TIM2->CCR1H = this_sleep>>8;//set wakeup alarm
+	TIM2->ARRH= this_sleep>>8;// init auto reload register
+	TIM2->ARRL= this_sleep&0x00FF;// init auto reload register
+	micros_counter+=this_sleep;
+	millis_counter+=micros_counter>>10;
+	micros_counter&=0x03FF;
+	
+	if(is_debug_led)
 		GPIO_Init(GPIOA, GPIO_PIN_3, GPIO_MODE_OUT_PP_HIGH_SLOW);
-	TIM2->CCR1L = temp_delete_me;//set wakeup alarm relative to current time
+	if(is_other_led)
+	{
+		GPIO_Init(GPIOC, GPIO_PIN_3, GPIO_MODE_OUT_PP_HIGH_SLOW);
+		GPIO_Init(GPIOC, GPIO_PIN_6, GPIO_MODE_OUT_PP_LOW_SLOW);
+	}
+	
+  // Re-enable TIM2 after setting the counter value
+  TIM2->CR1 |= TIM2_CR1_CEN;   // Set the CEN bit to restart the timer
 }
 
 //LED interrupt (LED ON to OFF)
-@far @interrupt void TIM2_CapComp_IRQ_Handler (void) {
+/*@far @interrupt void TIM2_CapComp_IRQ_Handler (void) {
 	//u16 brightness=temp_delete_me;
 	//if(brightness>=250) brightness=250;
 	TIM2->SR1&=~TIM2_SR1_CC1IF;//reset interrupt
-	set_matrix_high_z();
-}
+}*/
 
 void flush_leds(u8 led_count)
 {

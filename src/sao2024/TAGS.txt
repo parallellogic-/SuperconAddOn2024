@@ -1477,7 +1477,7 @@ TIM2_CR1_OPM	stm8s.h	889;"	macro
 TIM2_CR1_RESET_VALUE	stm8s.h	858;"	macro
 TIM2_CR1_UDIS	stm8s.h	891;"	macro
 TIM2_CR1_URS	stm8s.h	890;"	macro
-TIM2_CapComp_IRQ_Handler	api.c	190;"	function	signature:(void)
+TIM2_CapComp_IRQ_Handler	api.c	206;"	function	signature:(void)
 TIM2_CapComp_IRQ_Handler	stm8_interrupt_vector.c	24;"	prototype	file:	signature:(void)
 TIM2_EGR_CC1G	stm8s.h	910;"	macro
 TIM2_EGR_CC2G	stm8s.h	909;"	macro
@@ -1501,7 +1501,7 @@ TIM2_SR2_CC2OF	stm8s.h	905;"	macro
 TIM2_SR2_CC3OF	stm8s.h	904;"	macro
 TIM2_SR2_RESET_VALUE	stm8s.h	861;"	macro
 TIM2_TypeDef	stm8s.h	852;"	typedef	typeref:struct:TIM2_struct
-TIM2_UPD_OVF_IRQHandler	api.c	178;"	function	signature:(void)
+TIM2_UPD_OVF_IRQHandler	api.c	179;"	function	signature:(void)
 TIM2_UPD_OVF_IRQHandler	stm8_interrupt_vector.c	23;"	prototype	file:	signature:(void)
 TIM2_struct	stm8s.h	824;"	struct
 TIM3	stm8s.h	2686;"	macro
@@ -2081,9 +2081,9 @@ assert_param	stm8s.h	2836;"	macro
 bool	stm8s.h	231;"	typedef	typeref:enum:__anon32
 button_pressed_event	api.c	26;"	variable
 button_start_ms	api.c	25;"	variable
-clear_button_event	api.c	148;"	function	signature:(u8 button_index,bool is_long)
+clear_button_event	api.c	149;"	function	signature:(u8 button_index,bool is_long)
 clear_button_event	api.h	22;"	prototype	signature:(u8 button_index,bool is_long)
-clear_button_events	api.c	155;"	function
+clear_button_events	api.c	156;"	function
 clear_button_events	api.h	23;"	prototype	signature:(void)
 disableInterrupts	stm8s.h	2717;"	macro
 disableInterrupts	stm8s.h	2726;"	macro
@@ -2093,11 +2093,11 @@ enableInterrupts	stm8s.h	2725;"	macro
 enableInterrupts	stm8s.h	2735;"	macro
 execute_terminal_command	developer.c	70;"	function	signature:(char command,u32 (*parameters)[MAX_TERMINAL_PARAMETERS],u8 parameter_count)
 execute_terminal_command	developer.h	8;"	prototype	signature:(char command,u32 (*parameters)[MAX_TERMINAL_PARAMETERS],u8 parameter_count)
-flush_leds	api.c	197;"	function	signature:(u8 led_count)
+flush_leds	api.c	212;"	function	signature:(u8 led_count)
 flush_leds	api.h	14;"	prototype	signature:(u8 led_count)
-get_button_event	api.c	144;"	function	signature:(u8 button_index,bool is_long)
+get_button_event	api.c	145;"	function	signature:(u8 button_index,bool is_long)
 get_button_event	api.h	21;"	prototype	signature:(u8 button_index,bool is_long)
-get_eeprom_byte	api.c	292;"	function	signature:(u16 eeprom_address)
+get_eeprom_byte	api.c	307;"	function	signature:(u16 eeprom_address)
 get_eeprom_byte	api.h	27;"	prototype	signature:(u16 address)
 get_random	api.c	50;"	function	signature:(u16 x)
 get_random	api.h	25;"	prototype	signature:(u16 x)
@@ -2118,7 +2118,7 @@ interrupt_vector	stm8_interrupt_vector.c	9;"	struct	file:
 is_application_valid	api.c	75;"	function
 is_application_valid	api.h	17;"	prototype	signature:(void)
 is_application_valid	api.h	7;"	prototype	signature:(void)
-is_button_down	api.c	166;"	function	signature:(u8 index)
+is_button_down	api.c	167;"	function	signature:(u8 index)
 is_button_down	api.h	24;"	prototype	signature:(u8 index)
 is_developer_valid	api.c	81;"	function
 is_developer_valid	api.h	18;"	prototype	signature:(void)
@@ -2127,7 +2127,7 @@ is_sleep_valid	api.h	19;"	prototype	signature:(void)
 is_submenu_valid	application.c	43;"	function
 is_submenu_valid	application.h	8;"	prototype	signature:(void)
 main	main.c	6;"	function
-millis	api.c	109;"	function
+millis	api.c	110;"	function
 millis	api.h	9;"	prototype	signature:(void)
 nop	stm8s.h	2720;"	macro
 nop	stm8s.h	2729;"	macro
@@ -2149,21 +2149,21 @@ run_developer	developer.h	6;"	prototype	signature:(void)
 s16	stm8s.h	223;"	typedef
 s32	stm8s.h	222;"	typedef
 s8	stm8s.h	224;"	typedef
-set_debug	api.c	277;"	function	signature:(u8 brightness)
+set_debug	api.c	292;"	function	signature:(u8 brightness)
 set_debug	api.h	13;"	prototype	signature:(u8 brightness)
 set_frame_blink	application.c	81;"	function
 set_frame_blink	application.h	10;"	prototype	signature:(void)
 set_frame_rainbow	application.c	74;"	function
 set_frame_rainbow	application.h	9;"	prototype	signature:(void)
-set_hue	api.c	222;"	function	signature:(u8 index,u16 color,u8 brightness)
+set_hue	api.c	237;"	function	signature:(u8 index,u16 color,u8 brightness)
 set_hue	api.h	16;"	prototype	signature:(u8 index,u16 color,u8 brightness)
-set_matrix_high_z	api.c	282;"	function
+set_matrix_high_z	api.c	297;"	function
 set_matrix_high_z	api.h	10;"	prototype	signature:(void)
-set_millis	api.c	114;"	function	signature:(u32 new_time)
+set_millis	api.c	115;"	function	signature:(u32 new_time)
 set_millis	api.h	26;"	prototype	signature:(u32 new_time)
-set_rgb	api.c	266;"	function	signature:(u8 index,u8 color,u8 brightness)
+set_rgb	api.c	281;"	function	signature:(u8 index,u8 color,u8 brightness)
 set_rgb	api.h	11;"	prototype	signature:(u8 index,u8 color,u8 brightness)
-set_white	api.c	271;"	function	signature:(u8 index,u8 brightness)
+set_white	api.c	286;"	function	signature:(u8 index,u8 brightness)
 set_white	api.h	12;"	prototype	signature:(u8 index,u8 brightness)
 setup_application	application.c	11;"	function
 setup_application	application.h	3;"	prototype	signature:(void)
@@ -2192,7 +2192,7 @@ u8	stm8s.h	228;"	typedef
 uint16_t	stm8s.h	217;"	typedef
 uint32_t	stm8s.h	218;"	typedef
 uint8_t	stm8s.h	216;"	typedef
-update_buttons	api.c	122;"	function
+update_buttons	api.c	123;"	function
 update_buttons	api.h	20;"	prototype	signature:(void)
 wfi	stm8s.h	2722;"	macro
 wfi	stm8s.h	2731;"	macro

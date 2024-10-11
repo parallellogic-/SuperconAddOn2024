@@ -61,7 +61,7 @@ String.100.2=STM8 Cosmic
 String.100.3=ST7 Metrowerks V1.1
 String.100.4=Raisonance
 String.101.0=STM8 Cosmic
-String.102.0=C:\Program Files (x86)\COSMIC\FSE_Compilers\CXSTM8
+String.102.0=
 String.103.0=
 String.104.0=Hstm8
 String.105.0=Lib
@@ -141,7 +141,7 @@ String.100.2=STM8 Cosmic
 String.100.3=ST7 Metrowerks V1.1
 String.100.4=Raisonance
 String.101.0=STM8 Cosmic
-String.102.0=C:\Program Files (x86)\COSMIC\FSE_Compilers\CXSTM8
+String.102.0=
 String.103.0=
 String.104.0=Hstm8
 String.105.0=Lib
@@ -294,11 +294,6 @@ Next=Root.Source Files.stm8s103_serial.c
 [Root.Source Files.stm8s103_serial.c]
 ElemType=File
 PathName=stm8s103_serial.c
-Next=Root.Source Files.stm8s_adc1.c
-
-[Root.Source Files.stm8s_adc1.c]
-ElemType=File
-PathName=stm8s_adc1.c
 Next=Root.Source Files.stm8s_clk.c
 
 [Root.Source Files.stm8s_clk.c]
@@ -319,11 +314,6 @@ Next=Root.Source Files.api.c
 [Root.Source Files.api.c]
 ElemType=File
 PathName=api.c
-Next=Root.Source Files.sleep.c
-
-[Root.Source Files.sleep.c]
-ElemType=File
-PathName=sleep.c
 Next=Root.Source Files.developer.c
 
 [Root.Source Files.developer.c]
@@ -426,11 +416,6 @@ Next=Root.Include Files.stm8s103_serial.h
 [Root.Include Files.stm8s103_serial.h]
 ElemType=File
 PathName=stm8s103_serial.h
-Next=Root.Include Files.stm8s_adc1.h
-
-[Root.Include Files.stm8s_adc1.h]
-ElemType=File
-PathName=stm8s_adc1.h
 Next=Root.Include Files.stm8s_clk.h
 
 [Root.Include Files.stm8s_clk.h]
@@ -451,11 +436,6 @@ Next=Root.Include Files.api.h
 [Root.Include Files.api.h]
 ElemType=File
 PathName=api.h
-Next=Root.Include Files.sleep.h
-
-[Root.Include Files.sleep.h]
-ElemType=File
-PathName=sleep.h
 Next=Root.Include Files.developer.h
 
 [Root.Include Files.developer.h]
