@@ -7,5 +7,4 @@ void show_cyclone(void);
 void show_puzzle(void);
 bool is_submenu_valid(void);
 void set_frame_rainbow(void);
-void set_frame_audio(void);
 void set_frame_blink(void);

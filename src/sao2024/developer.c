@@ -128,10 +128,6 @@ void execute_terminal_command(char command,u32 (*parameters)[MAX_TERMINAL_PARAME
 				flush_leds(2);//1 RGB led element and 1 for status led
 			}
 		}break;
-		case 'a':{ //get audio level reading
-			Serial_print_u32(get_audio_level());
-			is_valid=1;
-		}break;
 	}
 	if(!is_valid) Serial_print_string("Invalid. h");
 	Serial_newline();

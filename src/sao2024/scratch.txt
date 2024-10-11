@@ -68,6 +68,8 @@ void set_next_led()
 	GPIO_Pin_TypeDef PortPin_high=PortPin_buffer[visible_index][0];
 	GPIO_TypeDef* GPIOx_low=GPIOx_buffer[visible_index][1];
 	GPIO_Pin_TypeDef PortPin_low=PortPin_buffer[visible_index][1];
+	if(visible_index==255)
+		return//if OFF/invalid LED command, skip
 	TIM2->CCR1L = pwm_brightness_buffer[visible_index];//set the brightness (how long LED is ON for)
 	GPIO_Init(GPIOx_high, PortPin_high, GPIO_MODE_OUT_PP_HIGH_SLOW);
 	if(pwm_led_index!=DEBUG_LED_INDEX) GPIO_Init(GPIOx_low,  PortPin_low,  GPIO_MODE_OUT_PP_LOW_SLOW);

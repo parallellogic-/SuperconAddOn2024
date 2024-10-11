@@ -1126,7 +1126,7 @@ NOPT3	stm8s.h	1592;"	member	struct:OPT_struct
 NOPT4	stm8s.h	1594;"	member	struct:OPT_struct
 NOPT5	stm8s.h	1596;"	member	struct:OPT_struct
 NOPT7	stm8s.h	1600;"	member	struct:OPT_struct
-NonHandledInterrupt	stm8_interrupt_vector.c	12;"	function	signature:(void)
+NonHandledInterrupt	stm8_interrupt_vector.c	14;"	function	signature:(void)
 OARH	stm8s.h	1334;"	member	struct:I2C_struct
 OARL	stm8s.h	1333;"	member	struct:I2C_struct
 ODR	stm8s.h	267;"	member	struct:GPIO_struct
@@ -1476,7 +1476,8 @@ TIM2_CR1_OPM	stm8s.h	889;"	macro
 TIM2_CR1_RESET_VALUE	stm8s.h	858;"	macro
 TIM2_CR1_UDIS	stm8s.h	891;"	macro
 TIM2_CR1_URS	stm8s.h	890;"	macro
-TIM2_CapComp_IRQ_Handler	api.c	255;"	function	signature:(void)
+TIM2_CapComp_IRQ_Handler	api.c	243;"	function	signature:(void)
+TIM2_CapComp_IRQ_Handler	stm8_interrupt_vector.c	24;"	prototype	file:	signature:(void)
 TIM2_EGR_CC1G	stm8s.h	910;"	macro
 TIM2_EGR_CC2G	stm8s.h	909;"	macro
 TIM2_EGR_CC3G	stm8s.h	908;"	macro
@@ -1499,7 +1500,8 @@ TIM2_SR2_CC2OF	stm8s.h	905;"	macro
 TIM2_SR2_CC3OF	stm8s.h	904;"	macro
 TIM2_SR2_RESET_VALUE	stm8s.h	861;"	macro
 TIM2_TypeDef	stm8s.h	852;"	typedef	typeref:struct:TIM2_struct
-TIM2_UPD_OVF_IRQHandler	api.c	246;"	function	signature:(void)
+TIM2_UPD_OVF_IRQHandler	api.c	234;"	function	signature:(void)
+TIM2_UPD_OVF_IRQHandler	stm8_interrupt_vector.c	23;"	prototype	file:	signature:(void)
 TIM2_struct	stm8s.h	824;"	struct
 TIM3	stm8s.h	2686;"	macro
 TIM3_ARRH_ARR	stm8s.h	1041;"	macro
@@ -2071,8 +2073,8 @@ __STM8S_STDPERIPH_VERSION_RC	stm8s.h	185;"	macro
 __STM8S_STDPERIPH_VERSION_SUB1	stm8s.h	183;"	macro
 __STM8S_STDPERIPH_VERSION_SUB2	stm8s.h	184;"	macro
 __STM8S_UART1_H	stm8s_uart1.h	30;"	macro
-_stext	stm8_interrupt_vector.c	20;"	prototype	file:
-_vectab	stm8_interrupt_vector.c	22;"	variable
+_stext	stm8_interrupt_vector.c	22;"	prototype	file:
+_vectab	stm8_interrupt_vector.c	26;"	variable
 api_counter	api.c	11;"	variable
 assert_param	stm8s.h	2836;"	macro
 audio_mean	api.c	39;"	variable
@@ -2083,9 +2085,9 @@ audio_std	api.c	40;"	variable
 bool	stm8s.h	231;"	typedef	typeref:enum:__anon32
 button_pressed_event	api.c	33;"	variable
 button_start_ms	api.c	32;"	variable
-clear_button_event	api.c	213;"	function	signature:(u8 button_index,bool is_long)
+clear_button_event	api.c	201;"	function	signature:(u8 button_index,bool is_long)
 clear_button_event	api.h	24;"	prototype	signature:(u8 button_index,bool is_long)
-clear_button_events	api.c	220;"	function
+clear_button_events	api.c	208;"	function
 clear_button_events	api.h	25;"	prototype	signature:(void)
 disableInterrupts	stm8s.h	2717;"	macro
 disableInterrupts	stm8s.h	2726;"	macro
@@ -2095,18 +2097,18 @@ enableInterrupts	stm8s.h	2725;"	macro
 enableInterrupts	stm8s.h	2735;"	macro
 execute_terminal_command	developer.c	70;"	function	signature:(char command,u32 (*parameters)[MAX_TERMINAL_PARAMETERS],u8 parameter_count)
 execute_terminal_command	developer.h	8;"	prototype	signature:(char command,u32 (*parameters)[MAX_TERMINAL_PARAMETERS],u8 parameter_count)
-flush_leds	api.c	282;"	function	signature:(u8 led_count)
+flush_leds	api.c	248;"	function	signature:(u8 led_count)
 flush_leds	api.h	16;"	prototype	signature:(u8 led_count)
-get_audio_level	api.c	242;"	function
-get_audio_level	api.h	29;"	prototype	signature:(void)
-get_audio_sample	api.c	380;"	function
+get_audio_level	api.c	230;"	function
+get_audio_level	api.h	30;"	prototype	signature:(void)
+get_audio_sample	api.c	346;"	function
 get_audio_sample	api.h	14;"	prototype	signature:(void)
-get_button_event	api.c	209;"	function	signature:(u8 button_index,bool is_long)
+get_button_event	api.c	197;"	function	signature:(u8 button_index,bool is_long)
 get_button_event	api.h	23;"	prototype	signature:(u8 button_index,bool is_long)
-get_eeprom_byte	api.c	474;"	function	signature:(u16 eeprom_address)
-get_eeprom_byte	api.h	31;"	prototype	signature:(u16 address)
+get_eeprom_byte	api.c	440;"	function	signature:(u16 eeprom_address)
+get_eeprom_byte	api.h	32;"	prototype	signature:(u16 address)
 get_random	api.c	103;"	function	signature:(u16 x)
-get_random	api.h	28;"	prototype	signature:(u16 x)
+get_random	api.h	29;"	prototype	signature:(u16 x)
 get_terminal_command	developer.c	39;"	function	signature:(char *command,u32 (*parameters)[MAX_TERMINAL_PARAMETERS],u8 *parameter_count)
 get_terminal_command	developer.h	7;"	prototype	signature:(char *command,u32 (*parameters)[MAX_TERMINAL_PARAMETERS],u8 *parameter_count)
 halt	stm8s.h	2723;"	macro
@@ -2118,25 +2120,25 @@ hw_revision	api.c	6;"	variable
 int16_t	stm8s.h	212;"	typedef
 int32_t	stm8s.h	213;"	typedef
 int8_t	stm8s.h	211;"	typedef
-interrupt_handler	stm8_interrupt_vector.c	9;"	member	struct:interrupt_vector	file:
-interrupt_handler_t	stm8_interrupt_vector.c	5;"	typedef	file:
-interrupt_instruction	stm8_interrupt_vector.c	8;"	member	struct:interrupt_vector	file:
-interrupt_vector	stm8_interrupt_vector.c	7;"	struct	file:
+interrupt_handler	stm8_interrupt_vector.c	11;"	member	struct:interrupt_vector	file:
+interrupt_handler_t	stm8_interrupt_vector.c	7;"	typedef	file:
+interrupt_instruction	stm8_interrupt_vector.c	10;"	member	struct:interrupt_vector	file:
+interrupt_vector	stm8_interrupt_vector.c	9;"	struct	file:
 is_application_valid	api.c	128;"	function
 is_application_valid	api.h	19;"	prototype	signature:(void)
 is_application_valid	api.h	7;"	prototype	signature:(void)
-is_button_down	api.c	231;"	function	signature:(u8 index)
+is_button_down	api.c	219;"	function	signature:(u8 index)
 is_button_down	api.h	26;"	prototype	signature:(u8 index)
 is_developer_valid	api.c	134;"	function
 is_developer_valid	api.h	20;"	prototype	signature:(void)
 is_sleep_valid	api.c	140;"	function
 is_sleep_valid	api.h	21;"	prototype	signature:(void)
-is_space_sao	api.c	469;"	function
-is_space_sao	api.h	27;"	prototype	signature:(void)
+is_space_sao	api.c	435;"	function
+is_space_sao	api.h	28;"	prototype	signature:(void)
 is_submenu_valid	application.c	43;"	function
 is_submenu_valid	application.h	8;"	prototype	signature:(void)
 main	main.c	6;"	function
-millis	api.c	174;"	function
+millis	api.c	162;"	function
 millis	api.h	9;"	prototype	signature:(void)
 nop	stm8s.h	2720;"	macro
 nop	stm8s.h	2729;"	macro
@@ -2158,7 +2160,7 @@ run_developer	developer.h	6;"	prototype	signature:(void)
 s16	stm8s.h	223;"	typedef
 s32	stm8s.h	222;"	typedef
 s8	stm8s.h	224;"	typedef
-set_debug	api.c	362;"	function	signature:(u8 brightness)
+set_debug	api.c	328;"	function	signature:(u8 brightness)
 set_debug	api.h	13;"	prototype	signature:(u8 brightness)
 set_frame_audio	application.c	81;"	function
 set_frame_audio	application.h	10;"	prototype	signature:(void)
@@ -2166,17 +2168,17 @@ set_frame_blink	application.c	106;"	function
 set_frame_blink	application.h	11;"	prototype	signature:(void)
 set_frame_rainbow	application.c	74;"	function
 set_frame_rainbow	application.h	9;"	prototype	signature:(void)
-set_hue	api.c	307;"	function	signature:(u8 index,u16 color,u8 brightness)
+set_hue	api.c	273;"	function	signature:(u8 index,u16 color,u8 brightness)
 set_hue	api.h	18;"	prototype	signature:(u8 index,u16 color,u8 brightness)
-set_led	api.c	391;"	function	signature:(u8 led_index)
+set_led	api.c	357;"	function	signature:(u8 led_index)
 set_led	api.h	15;"	prototype	signature:(u8 index)
-set_matrix_high_z	api.c	367;"	function
+set_matrix_high_z	api.c	333;"	function
 set_matrix_high_z	api.h	10;"	prototype	signature:(void)
-set_millis	api.c	179;"	function	signature:(u32 new_time)
-set_millis	api.h	30;"	prototype	signature:(u32 new_time)
-set_rgb	api.c	351;"	function	signature:(u8 index,u8 color,u8 brightness)
+set_millis	api.c	167;"	function	signature:(u32 new_time)
+set_millis	api.h	31;"	prototype	signature:(u32 new_time)
+set_rgb	api.c	317;"	function	signature:(u8 index,u8 color,u8 brightness)
 set_rgb	api.h	11;"	prototype	signature:(u8 index,u8 color,u8 brightness)
-set_white	api.c	356;"	function	signature:(u8 index,u8 brightness)
+set_white	api.c	322;"	function	signature:(u8 index,u8 brightness)
 set_white	api.h	12;"	prototype	signature:(u8 index,u8 brightness)
 setup_application	application.c	11;"	function
 setup_application	application.h	3;"	prototype	signature:(void)
@@ -2204,7 +2206,8 @@ u8	stm8s.h	228;"	typedef
 uint16_t	stm8s.h	217;"	typedef
 uint32_t	stm8s.h	218;"	typedef
 uint8_t	stm8s.h	216;"	typedef
-update_buttons	api.c	187;"	function
+update_audio	api.h	27;"	prototype	signature:(void)
+update_buttons	api.c	175;"	function
 update_buttons	api.h	22;"	prototype	signature:(void)
 wfi	stm8s.h	2722;"	macro
 wfi	stm8s.h	2731;"	macro

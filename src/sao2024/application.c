@@ -59,12 +59,12 @@ void show_screen_savers()
 			if(clear_button_event(1,0)) screen_saver_index++;//short right button push to go to next screen saver
 			if(clear_button_event(1,1)) is_auto_cycle=1;//long right button push to resume auto-cycling
 		}
-		screen_saver_index%=SCREEN_SAVER_COUNT_PONY+(is_space_sao()?SCREEN_SAVER_COUNT_SPACE:0);
+		
 		switch(screen_saver_index)
 		{
 			case 0:{ set_frame_rainbow(); }break;
 			case 1:{ set_frame_blink(); }break;
-			case 2:{ set_frame_audio(); }break;
+			case 2:{  }break;
 			case 3:{  }break;
 			case 4:{  }break;
 		}
@@ -76,31 +76,6 @@ void set_frame_rainbow()
 	u8 iter;
 	for(iter=0;iter<RGB_LED_COUNT;iter++) set_hue(iter,(u16)(millis()*32+(0xFFFF/10)*iter),255);
 	flush_leds(2*RGB_LED_COUNT+1);//max 2 colors ON at a time and one led for button pushes
-}
-
-void set_frame_audio()
-{
-	u8 audio_level,iter;
-	audio_level=get_audio_level()/2;
-	for(iter=0;iter<RGB_LED_COUNT;iter++)
-	{
-		if(audio_level>iter)
-		{
-			if(iter>7)
-			{//red for loud
-				set_rgb(iter,0,255);
-			}
-			else if(iter>4)
-			{//yellow for medium
-				set_rgb(iter,0,128);
-				set_rgb(iter,1,128);
-			}else{
-				//green quiet
-				set_rgb(iter,1,255);
-			}
-		}
-	}
-	flush_leds(RGB_LED_COUNT+3+1);//3 yellow LEDs is double-count, 1 for status led for button pushes
 }
 
 void set_frame_blink()
@@ -119,7 +94,7 @@ void set_frame_blink()
 		led_index=x%m;
 		if(led_index>=RGB_ELEMENT_COUNT)
 		{
-			if(is_space_sao()) set_white(led_index-RGB_ELEMENT_COUNT,255);
+			
 		}else{
 			set_rgb(led_index/3,led_index%3,255);
 		}

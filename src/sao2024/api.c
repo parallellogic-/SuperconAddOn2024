@@ -4,8 +4,6 @@
 #include "stm8s_uart1.h"
 
 const u8 hw_revision=1;
-//1: v1r1 has MAT0 on PD3 and mic on PD4, which precludes audio input (no analog connection) <-- prototype units
-//2: v1r2 moved MAT0 to PD4, and audio input to PD3 <-- defcon31 as-built/delivered version
 
 //time state
 u32 api_counter=0;//increments roughly every millisecond, give-or-take a factor of 2 based on clock divider settings, this is the basis of millis()
@@ -34,55 +32,7 @@ bool button_pressed_event[BUTTON_COUNT][2];//event flag registering a button pus
 #define BUTTON_LONG_PRESS_MS 512 //number of millisconds to consititue a long press rather than a short press
 #define BUTTON_MINIMUM_PRESS_MS 50 //minimum time a button needs to be pressed down to be registered as a complete button press
 
-//audio input mic
-u8 audio_measurement_count=0;//state machine, triggers re-computation of mean and "standard deviation" every roll over
-u8 audio_mean;//the mean computed over the PREVIOUS 256 samples
-u8 audio_std;//the "standard deviation" computed during the PREVIOUS 256 samples
-u16 audio_running_mean;//the running sum of the mean CURRENTLY being computed
-u16 audio_running_std;//the running sum of the std CURRENTLY being computed
-
-//temporary debugging
-/*u16 get_val(u8 index)
-{
-	switch(index)
-	{
-		case 0:{
-			return pwm_state;//2-3
-		}
-		case 1:{
-			return pwm_led_count[pwm_state&0x01];//4?
-		}
-		case 2:{
-			return pwm_sleep[pwm_state&0x01];
-		}
-		case 3:{
-			return pwm_brightness[0][0][pwm_state&0x01];
-		}
-		case 4:{
-			return pwm_brightness[1][0][pwm_state&0x01];
-		}
-		case 5:{
-			return pwm_brightness[2][0][pwm_state&0x01];
-		}
-		case 6:{
-			return pwm_brightness[3][0][pwm_state&0x01];
-		}
-		case 7:{
-			return pwm_brightness[0][1][pwm_state&0x01];
-		}
-		case 8:{
-			return pwm_brightness[1][1][pwm_state&0x01];
-		}
-		case 9:{
-			return pwm_brightness[2][1][pwm_state&0x01];
-		}
-		case 10:{
-			return pwm_brightness[3][1][pwm_state&0x01];
-		}
-		default:{}
-	}
-	return 0;
-}*/
+u8 temp_delete_me=0;
 
 void hello_world()
 {//basic program that blinks the debug LED ON/OFF
@@ -91,12 +41,8 @@ void hello_world()
 	GPIO_Init(GPIOA, GPIO_PIN_3, GPIO_MODE_IN_PU_NO_IT);
 	while(1)
 	{
-		GPIO_Init(GPIOA, GPIO_PIN_3, is_high?GPIO_MODE_OUT_PP_HIGH_SLOW:GPIO_MODE_OUT_PP_LOW_SLOW);
 		frame++;
-		if(frame%1000==0)
-		{
-			is_high=!is_high;
-		}
+		temp_delete_me=(frame/64/256)%2?(-frame/64):(frame/64);
 	}
 }
 
@@ -227,9 +173,6 @@ bool is_button_down(u8 index)
 	return 0;
 }
 
-u8 get_audio_level()
-{ return audio_std; }
-
 //millisecond interrupt
 @far @interrupt void TIM2_UPD_OVF_IRQHandler (void) {
 	TIM2->SR1&=~TIM2_SR1_UIF;//reset interrupt
@@ -237,12 +180,17 @@ u8 get_audio_level()
 	//read buttons (if in application mode), update state
 	
 	//read audio, update state
+	GPIO_Init(GPIOA, GPIO_PIN_3, GPIO_MODE_OUT_PP_HIGH_SLOW);
 }
 
 //LED interrupt
 @far @interrupt void TIM2_CapComp_IRQ_Handler (void) {
+	u16 brightness=temp_delete_me;
+	brightness=brightness*brightness;
+	brightness=brightness/256;
 	TIM2->SR1&=~TIM2_SR1_CC1IF;//reset interrupt
-	TIM2->CCR1L = 50;//set wakeup alarm relative to current time
+	TIM2->CCR1L = brightness;//set wakeup alarm relative to current time
+	GPIO_Init(GPIOA, GPIO_PIN_3, GPIO_MODE_OUT_PP_LOW_SLOW);
 }
 
 void flush_leds(u8 led_count)
@@ -332,112 +280,90 @@ void set_debug(u8 brightness)
 
 void set_matrix_high_z()
 {
-	if(hw_revision==1)
-	{
-		GPIO_Init(GPIOC, GPIO_PIN_7 | GPIO_PIN_6 | GPIO_PIN_5 | GPIO_PIN_4 | GPIO_PIN_3, GPIO_MODE_IN_FL_NO_IT);//2, 3, 4, 5, 6
-		GPIO_Init(GPIOD, GPIO_PIN_3 | GPIO_PIN_2, GPIO_MODE_IN_FL_NO_IT);
-		GPIO_Init(GPIOA, GPIO_PIN_3 , GPIO_MODE_IN_FL_NO_IT);
-	}else{
-		
-	}
-}
-
-//PRECON: this method assumes a fixed-rate sampling so that "ADC1_GetFlagStatus(ADC1_FLAG_EOC) == FALSE" does not need to be queried
-u8 get_audio_sample()
-{
-	if(hw_revision==2)
-	{
-		//return reading here, queue up next reading
-		
-	}
-	return 0;//revision 1 hw misrouted this connection, made it un-readable
-}
-
-//turn ON the relevant LED
-void set_led(u8 led_index)
-{
-	//0-(10*3-1) is RGB
-	//(10*3) is debug
-	//(10*3+1) to (10*3+1+12) is white LEDs
-	const u8 led_lookup[LED_COUNT][2]={//[0] is HIGH mat, [1] is LOW mat
-		{0,1},{0,2},{1,2},//LED7  RGB
-		{1,0},{2,0},{2,1},//LED3  RGB
-		{5,0},{5,1},{5,2},//LED1  RGB
-		{6,0},{6,1},{6,2},//LED20 RGB
-		{6,5},{6,4},{5,4},//LED22 RGB
-		{4,3},{5,3},{6,3},//LED23 RGB
-		{3,4},{3,5},{3,6},//LED21 RGB
-		{0,5},{0,6},{1,6},//LED19 RGB
-		{0,4},{1,4},{2,4},//LED18 RGB
-		{0,3},{1,3},{2,3},//LED2  RGB
-		{7,7},//debug; GND is tied low, no charlieplexing involved
-		{3,0},//LED6
-		{3,1},//LED4
-		{3,2},//LED5
-		{4,0},//LED14
-		{1,5},//LED8
-		{2,5},//LED9
-		{4,1},//LED10
-		{4,2},//LED16
-		{2,6},//LED17
-		{4,6},//LED12
-		{4,5},//LED13
-		{5,6} //LED11
-	};
-	bool is_high=0;
-	do{
-		GPIO_TypeDef* GPIOx;
-		GPIO_Pin_TypeDef PortPin;
-		switch(led_lookup[led_index][!is_high])
-		{
-			case 0:{
-				GPIOx=GPIOD;
-				PortPin=GPIO_PIN_3;
-			}break;
-			case 1:{
-				GPIOx=GPIOD;
-				PortPin=GPIO_PIN_2;
-			}break;
-			case 2:{
-				GPIOx=GPIOC;
-				PortPin=GPIO_PIN_7;
-			}break;
-			case 3:{
-				GPIOx=GPIOC;
-				PortPin=GPIO_PIN_6;
-			}break;
-			case 4:{
-				GPIOx=GPIOC;
-				PortPin=GPIO_PIN_5;
-			}break;
-			case 5:{
-				GPIOx=GPIOC;
-				PortPin=GPIO_PIN_4;
-			}break;
-			case 6:{
-				GPIOx=GPIOC;
-				PortPin=GPIO_PIN_3;
-			}break;
-			case 7:{
-				GPIOx=GPIOA;
-				PortPin=GPIO_PIN_3;
-			}break;
-			default:{
-				
-			}break;
-		}
-		GPIO_Init(GPIOx, PortPin, is_high?GPIO_MODE_OUT_PP_HIGH_SLOW:GPIO_MODE_OUT_PP_LOW_SLOW);
-		is_high=!is_high;
-	}while(is_high);
-}
-
-//true for Space Bits R Us SAOs, false for Pony SAOs
-bool is_space_sao()
-{
-	return 1;//TODO: implement EEPROM read
+	GPIO_Init(GPIOC, GPIO_PIN_7 | GPIO_PIN_6 | GPIO_PIN_5 | GPIO_PIN_4 | GPIO_PIN_3, GPIO_MODE_IN_FL_NO_IT);//2, 3, 4, 5, 6
+	GPIO_Init(GPIOD, GPIO_PIN_3 | GPIO_PIN_2, GPIO_MODE_IN_FL_NO_IT);
+	GPIO_Init(GPIOA, GPIO_PIN_3 , GPIO_MODE_IN_FL_NO_IT);
 }
 
 u8 get_eeprom_byte(u16 eeprom_address)
 {
 	return (*(PointerAttr uint8_t *) (0x4000+eeprom_address));
+}
+
+const GPIO_TypeDef* GPIOx_buffer[LED_COUNT][2]={//[0] is HIGH mat, [1] is LOW mat
+	{GPIOC,GPIOC},{GPIOC,GPIOC},{GPIOC,GPIOD},//LED1 RGB
+	{GPIOC,GPIOC},{GPIOC,GPIOC},{GPIOC,GPIOD},//LED2 RGB
+	{GPIOC,GPIOC},{GPIOC,GPIOC},{GPIOC,GPIOD},//LED3 RGB
+	{GPIOC,GPIOC},{GPIOC,GPIOC},{GPIOC,GPIOC},//LED4 RGB
+	{GPIOC,GPIOC},{GPIOC,GPIOC},{GPIOC,GPIOC},//LED5 RGB
+	{GPIOD,GPIOC},{GPIOD,GPIOC},{GPIOD,GPIOC},//LED6 RGB
+	{GPIOA,GPIOA},//DEBUG LED19, negative terminal unused
+	{GPIOC,GPIOC},//LED7
+	{GPIOC,GPIOC},//LED8
+	{GPIOC,GPIOC},//LED9
+	{GPIOC,GPIOC},//LED10
+	{GPIOC,GPIOC},//LED11
+	{GPIOC,GPIOC},//LED12
+	{GPIOC,GPIOC},//LED13
+	{GPIOD,GPIOC},//LED14
+	{GPIOC,GPIOC},//LED15
+	{GPIOD,GPIOC},//LED16
+	{GPIOC,GPIOD},//LED17
+	{GPIOC,GPIOD}//LED18
+};
+
+const GPIO_Pin_TypeDef PortPin_buffer[LED_COUNT][2]={
+	{GPIO_PIN_3,GPIO_PIN_6},{GPIO_PIN_3,GPIO_PIN_7},{GPIO_PIN_3,GPIO_PIN_2},//LED1 RGB
+	{GPIO_PIN_4,GPIO_PIN_6},{GPIO_PIN_4,GPIO_PIN_7},{GPIO_PIN_4,GPIO_PIN_2},//LED2 RGB
+	{GPIO_PIN_5,GPIO_PIN_6},{GPIO_PIN_5,GPIO_PIN_7},{GPIO_PIN_5,GPIO_PIN_2},//LED3 RGB
+	{GPIO_PIN_6,GPIO_PIN_3},{GPIO_PIN_6,GPIO_PIN_4},{GPIO_PIN_6,GPIO_PIN_5},//LED4 RGB
+	{GPIO_PIN_7,GPIO_PIN_3},{GPIO_PIN_7,GPIO_PIN_4},{GPIO_PIN_7,GPIO_PIN_5},//LED5 RGB
+	{GPIO_PIN_2,GPIO_PIN_3},{GPIO_PIN_2,GPIO_PIN_4},{GPIO_PIN_2,GPIO_PIN_5},//LED6 RGB
+	{GPIO_PIN_3,GPIO_PIN_3},//DEBUG 
+	{GPIO_PIN_4,GPIO_PIN_3},//LED7
+	{GPIO_PIN_5,GPIO_PIN_3},//LED8
+	{GPIO_PIN_3,GPIO_PIN_4},//LED9
+	{GPIO_PIN_5,GPIO_PIN_4},//LED10
+	{GPIO_PIN_3,GPIO_PIN_5},//LED11
+	{GPIO_PIN_4,GPIO_PIN_5},//LED12
+	{GPIO_PIN_7,GPIO_PIN_6},//LED13
+	{GPIO_PIN_2,GPIO_PIN_6},//LED14
+	{GPIO_PIN_6,GPIO_PIN_7},//LED15
+	{GPIO_PIN_2,GPIO_PIN_7},//LED16
+	{GPIO_PIN_6,GPIO_PIN_2},//LED17
+	{GPIO_PIN_7,GPIO_PIN_2}//LED18
+};
+const u8 DEBUG_LED_INDEX=6;
+
+@far @interrupt void TIM2_UPD_OVF_IRQHandler (void) {
+	bool buffer_index=pwm_state&0x01;//primary vs redundant side to pull data from
+	TIM2->SR1&=~TIM2_SR1_UIF;//reset interrupt
+	api_counter++;//millisecond-ish counter
+	set_next_led();//enables DC power output to one LED
+	if(pwm_led_index>=pwm_led_count[buffer_index])
+	{//if reached end of LED list...
+		pwm_led_index=0;//restart to showing the first LED
+		if(pwm_state&0x02) pwm_state^=0x03;//if flag to swap A/B is set, then clear the flag and swap sides
+	}
+}
+
+@far @interrupt void TIM2_CapComp_IRQ_Handler (void) {
+	TIM2->SR1&=~TIM2_SR1_CC1IF;//reset interrupt
+	set_matrix_high_z();//clear display ( display is OFF for (PWM_MAX_PERIOD-brightness) milliseconds )
+}
+
+void set_next_led()
+{
+	bool buffer_index=pwm_state&0x01;//primary vs redundant side to pull data from
+	u8 visible_index=visible_index_buffer[pwm_led_index][buffer_index];//pwm_led_index ranges from 0 to pwm_led_count[buffer_index]-1 (a variable number), whereas visible_index is 0 to LED_COUNT-1 (constant).  This step translates between the variable leds to display, and the fixed memory of where the LEDs are
+	GPIO_TypeDef* GPIOx_high=GPIOx_buffer[visible_index][0];
+	GPIO_Pin_TypeDef PortPin_high=PortPin_buffer[visible_index][0];
+	GPIO_TypeDef* GPIOx_low=GPIOx_buffer[visible_index][1];
+	GPIO_Pin_TypeDef PortPin_low=PortPin_buffer[visible_index][1];
+	if(visible_index==255)
+		return//if OFF/invalid LED command, skip
+	TIM2->CCR1L = pwm_brightness_buffer[visible_index];//set the brightness (how long LED is ON for)
+	GPIO_Init(GPIOx_high, PortPin_high, GPIO_MODE_OUT_PP_HIGH_SLOW);
+	if(pwm_led_index!=DEBUG_LED_INDEX) GPIO_Init(GPIOx_low,  PortPin_low,  GPIO_MODE_OUT_PP_LOW_SLOW);
+	pwm_led_index++;
 }
