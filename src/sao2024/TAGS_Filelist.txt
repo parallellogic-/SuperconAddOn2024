@@ -1,6 +1,6 @@
-stm8s_clk.c
 stm8s_i2c.c
 stm8s103_serial.c
+stm8s_clk.c
 stm8s_uart1.c
 stm8s_gpio.c
 api.c
@@ -8,9 +8,9 @@ developer.c
 application.c
 main.c
 stm8_interrupt_vector.c
-stm8s_clk.h
 stm8s_i2c.h
 stm8s103_serial.h
+stm8s_clk.h
 stm8s_uart1.h
 stm8s_gpio.h
 api.h

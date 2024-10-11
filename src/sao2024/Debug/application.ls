@@ -116,11 +116,11 @@
  273  0089 2008          	jra	L75
  274  008b               L32:
  275                     ; 36 				case 1:{ show_cyclone(); }break;
- 277  008b cd01e8        	call	_show_cyclone
+ 277  008b cd01b9        	call	_show_cyclone
  281  008e 2003          	jra	L75
  282  0090               L52:
  283                     ; 37 				case 2:{ show_puzzle(); }break;
- 285  0090 cd01ef        	call	_show_puzzle
+ 285  0090 cd01c0        	call	_show_puzzle
  289  0093               L301:
  290  0093               L75:
  291                     ; 23 	while(is_application_valid())
@@ -148,282 +148,250 @@
  367  00b0 4f            	clr	a
  368  00b1               L41:
  371  00b1 81            	ret
- 424                     ; 48 void show_screen_savers()
- 424                     ; 49 {
- 425                     	switch	.text
- 426  00b2               _show_screen_savers:
- 428  00b2 89            	pushw	x
- 429       00000002      OFST:	set	2
- 432                     ; 50 	bool is_auto_cycle=1;//automatically cycle through screen savers as a function of millis() (sync millis across multiple SAOs through terminal to get multiple badges sync'd)
- 434  00b3 a601          	ld	a,#1
- 435  00b5 6b01          	ld	(OFST-1,sp),a
- 437                     ; 51 	u8 screen_saver_index=0;
- 439  00b7 0f02          	clr	(OFST+0,sp)
- 442  00b9 2069          	jra	L361
- 443  00bb               L161:
- 444                     ; 54 		if(is_auto_cycle)
- 446  00bb 0d01          	tnz	(OFST-1,sp)
- 447  00bd 2719          	jreq	L761
- 448                     ; 56 			screen_saver_index=millis()/SCREEN_SAVER_DURATION_MS;
- 450  00bf cd0000        	call	_millis
- 452  00c2 a60f          	ld	a,#15
- 453  00c4 cd0000        	call	c_lursh
- 455  00c7 b603          	ld	a,c_lreg+3
- 456  00c9 6b02          	ld	(OFST+0,sp),a
- 458                     ; 57 			if(clear_button_event(1,1)) is_auto_cycle=0;
- 460  00cb ae0101        	ldw	x,#257
- 461  00ce cd0000        	call	_clear_button_event
- 463  00d1 4d            	tnz	a
- 464  00d2 271c          	jreq	L371
- 467  00d4 0f01          	clr	(OFST-1,sp)
- 469  00d6 2018          	jra	L371
- 470  00d8               L761:
- 471                     ; 59 			if(clear_button_event(1,0)) screen_saver_index++;//short right button push to go to next screen saver
- 473  00d8 ae0100        	ldw	x,#256
- 474  00db cd0000        	call	_clear_button_event
- 476  00de 4d            	tnz	a
- 477  00df 2702          	jreq	L571
- 480  00e1 0c02          	inc	(OFST+0,sp)
- 482  00e3               L571:
- 483                     ; 60 			if(clear_button_event(1,1)) is_auto_cycle=1;//long right button push to resume auto-cycling
- 485  00e3 ae0101        	ldw	x,#257
- 486  00e6 cd0000        	call	_clear_button_event
- 488  00e9 4d            	tnz	a
- 489  00ea 2704          	jreq	L371
- 492  00ec a601          	ld	a,#1
- 493  00ee 6b01          	ld	(OFST-1,sp),a
- 495  00f0               L371:
- 496                     ; 62 		screen_saver_index%=SCREEN_SAVER_COUNT_PONY+(is_space_sao()?SCREEN_SAVER_COUNT_SPACE:0);
- 498  00f0 cd0000        	call	_is_space_sao
- 500  00f3 4d            	tnz	a
- 501  00f4 2708          	jreq	L02
- 502  00f6 ae0005        	ldw	x,#5
- 503  00f9 9f            	ld	a,xl
- 504  00fa 5f            	clrw	x
- 505  00fb 97            	ld	xl,a
- 506  00fc 2003          	jra	L22
- 507  00fe               L02:
- 508  00fe ae0003        	ldw	x,#3
- 509  0101               L22:
- 510  0101 7b02          	ld	a,(OFST+0,sp)
- 511  0103 51            	exgw	x,y
- 512  0104 5f            	clrw	x
- 513  0105 97            	ld	xl,a
- 514  0106 65            	divw	x,y
- 515  0107 909f          	ld	a,yl
- 516  0109 6b02          	ld	(OFST+0,sp),a
- 518                     ; 63 		switch(screen_saver_index)
- 520  010b 7b02          	ld	a,(OFST+0,sp)
- 522                     ; 69 			case 4:{  }break;
- 523  010d 4d            	tnz	a
- 524  010e 270e          	jreq	L521
- 525  0110 4a            	dec	a
- 526  0111 270f          	jreq	L721
- 527  0113 4a            	dec	a
- 528  0114 270e          	jreq	L361
- 529  0116 4a            	dec	a
- 530  0117 270b          	jreq	L361
- 531  0119 4a            	dec	a
- 532  011a 2708          	jreq	L361
- 533  011c 2006          	jra	L361
- 534  011e               L521:
- 535                     ; 65 			case 0:{ set_frame_rainbow(); }break;
- 537  011e ad0c          	call	_set_frame_rainbow
- 541  0120 2002          	jra	L361
- 542  0122               L721:
- 543                     ; 66 			case 1:{ set_frame_blink(); }break;
- 545  0122 ad4c          	call	_set_frame_blink
- 549  0124               L302:
- 550  0124               L361:
- 551                     ; 52 	while(is_submenu_valid())
- 553  0124 cd009f        	call	_is_submenu_valid
- 555  0127 4d            	tnz	a
- 556  0128 2691          	jrne	L161
- 557                     ; 72 }
- 560  012a 85            	popw	x
- 561  012b 81            	ret
- 598                     ; 74 void set_frame_rainbow()
- 598                     ; 75 {
- 599                     	switch	.text
- 600  012c               _set_frame_rainbow:
- 602  012c 5205          	subw	sp,#5
- 603       00000005      OFST:	set	5
- 606                     ; 77 	for(iter=0;iter<RGB_LED_COUNT;iter++) set_hue(iter,(u16)(millis()*32+(0xFFFF/10)*iter),255);
- 608  012e 0f05          	clr	(OFST+0,sp)
- 610  0130               L322:
- 613  0130 4bff          	push	#255
- 614  0132 7b06          	ld	a,(OFST+1,sp)
- 615  0134 5f            	clrw	x
- 616  0135 97            	ld	xl,a
- 617  0136 90ae1999      	ldw	y,#6553
- 618  013a cd0000        	call	c_imul
- 620  013d cd0000        	call	c_uitolx
- 622  0140 96            	ldw	x,sp
- 623  0141 1c0002        	addw	x,#OFST-3
- 624  0144 cd0000        	call	c_rtol
- 627  0147 cd0000        	call	_millis
- 629  014a a605          	ld	a,#5
- 630  014c cd0000        	call	c_llsh
- 632  014f 96            	ldw	x,sp
- 633  0150 1c0002        	addw	x,#OFST-3
- 634  0153 cd0000        	call	c_ladd
- 636  0156 be02          	ldw	x,c_lreg+2
- 637  0158 89            	pushw	x
- 638  0159 7b08          	ld	a,(OFST+3,sp)
- 639  015b cd0000        	call	_set_hue
- 641  015e 5b03          	addw	sp,#3
- 644  0160 0c05          	inc	(OFST+0,sp)
- 648  0162 7b05          	ld	a,(OFST+0,sp)
- 649  0164 a10a          	cp	a,#10
- 650  0166 25c8          	jrult	L322
- 651                     ; 78 	flush_leds(2*RGB_LED_COUNT+1);//max 2 colors ON at a time and one led for button pushes
- 653  0168 a615          	ld	a,#21
- 654  016a cd0000        	call	_flush_leds
- 656                     ; 79 }
- 659  016d 5b05          	addw	sp,#5
- 660  016f 81            	ret
- 755                     ; 81 void set_frame_blink()
- 755                     ; 82 {
- 756                     	switch	.text
- 757  0170               _set_frame_blink:
- 759  0170 5209          	subw	sp,#9
- 760       00000009      OFST:	set	9
- 763                     ; 84 	u8 LED_WHITE_COUNT=12;
- 765                     ; 85 	u8 RGB_ELEMENT_COUNT=RGB_LED_COUNT*3;//10*3=30
- 767  0172 a61e          	ld	a,#30
- 768  0174 6b05          	ld	(OFST-4,sp),a
- 770                     ; 86 	u8 MAX_SIMULTANEOUS_LEDS_ON=4;//red and green and blue are each coutned independently
- 772  0176 a604          	ld	a,#4
- 773  0178 6b04          	ld	(OFST-5,sp),a
- 775                     ; 87 	u16 m=RGB_ELEMENT_COUNT+LED_WHITE_COUNT;
- 777  017a ae002a        	ldw	x,#42
- 778  017d 1f02          	ldw	(OFST-7,sp),x
- 780                     ; 88 	u16 x=millis()/128;//divide by the period (in ms) with which to change which LEDs are shown --> 256 is ~4 Hz, 128 is ~8 Hz
- 782  017f cd0000        	call	_millis
- 784  0182 a607          	ld	a,#7
- 785  0184 cd0000        	call	c_lursh
- 787  0187 be02          	ldw	x,c_lreg+2
- 788  0189 1f07          	ldw	(OFST-2,sp),x
- 790                     ; 91 	for(iter=0;iter<MAX_SIMULTANEOUS_LEDS_ON;iter++)
- 792  018b 0f06          	clr	(OFST-3,sp)
- 795  018d 204a          	jra	L303
- 796  018f               L772:
- 797                     ; 93 		x=get_random(x);
- 799  018f 1e07          	ldw	x,(OFST-2,sp)
- 800  0191 cd0000        	call	_get_random
- 802  0194 1f07          	ldw	(OFST-2,sp),x
- 804                     ; 94 		led_index=x%m;
- 806  0196 1e07          	ldw	x,(OFST-2,sp)
- 807  0198 1602          	ldw	y,(OFST-7,sp)
- 808  019a 65            	divw	x,y
- 809  019b 51            	exgw	x,y
- 810  019c 01            	rrwa	x,a
- 811  019d 6b09          	ld	(OFST+0,sp),a
- 812  019f 02            	rlwa	x,a
- 814                     ; 95 		if(led_index>=RGB_ELEMENT_COUNT)
- 816  01a0 7b09          	ld	a,(OFST+0,sp)
- 817  01a2 1105          	cp	a,(OFST-4,sp)
- 818  01a4 2513          	jrult	L703
- 819                     ; 97 			if(is_space_sao()) set_white(led_index-RGB_ELEMENT_COUNT,255);
- 821  01a6 cd0000        	call	_is_space_sao
- 823  01a9 4d            	tnz	a
- 824  01aa 272b          	jreq	L313
- 827  01ac 7b09          	ld	a,(OFST+0,sp)
- 828  01ae 1005          	sub	a,(OFST-4,sp)
- 829  01b0 ae00ff        	ldw	x,#255
- 830  01b3 95            	ld	xh,a
- 831  01b4 cd0000        	call	_set_white
- 833  01b7 201e          	jra	L313
- 834  01b9               L703:
- 835                     ; 99 			set_rgb(led_index/3,led_index%3,255);
- 837  01b9 4bff          	push	#255
- 838  01bb 7b0a          	ld	a,(OFST+1,sp)
- 839  01bd 5f            	clrw	x
- 840  01be 97            	ld	xl,a
- 841  01bf a603          	ld	a,#3
- 842  01c1 62            	div	x,a
- 843  01c2 5f            	clrw	x
- 844  01c3 97            	ld	xl,a
- 845  01c4 9f            	ld	a,xl
- 846  01c5 97            	ld	xl,a
- 847  01c6 7b0a          	ld	a,(OFST+1,sp)
- 848  01c8 905f          	clrw	y
- 849  01ca 9097          	ld	yl,a
- 850  01cc a603          	ld	a,#3
- 851  01ce 9062          	div	y,a
- 852  01d0 909f          	ld	a,yl
- 853  01d2 95            	ld	xh,a
- 854  01d3 cd0000        	call	_set_rgb
- 856  01d6 84            	pop	a
- 857  01d7               L313:
- 858                     ; 91 	for(iter=0;iter<MAX_SIMULTANEOUS_LEDS_ON;iter++)
- 860  01d7 0c06          	inc	(OFST-3,sp)
- 862  01d9               L303:
- 865  01d9 7b06          	ld	a,(OFST-3,sp)
- 866  01db 1104          	cp	a,(OFST-5,sp)
- 867  01dd 25b0          	jrult	L772
- 868                     ; 102 	flush_leds(MAX_SIMULTANEOUS_LEDS_ON+1);
- 870  01df 7b04          	ld	a,(OFST-5,sp)
- 871  01e1 4c            	inc	a
- 872  01e2 cd0000        	call	_flush_leds
- 874                     ; 103 }
- 877  01e5 5b09          	addw	sp,#9
- 878  01e7 81            	ret
- 902                     ; 106 void show_cyclone()
- 902                     ; 107 {
- 903                     	switch	.text
- 904  01e8               _show_cyclone:
- 908  01e8               L723:
- 909                     ; 108 	while(is_submenu_valid())
- 911  01e8 cd009f        	call	_is_submenu_valid
- 913  01eb 4d            	tnz	a
- 914  01ec 26fa          	jrne	L723
- 915                     ; 112 }
- 918  01ee 81            	ret
- 942                     ; 114 void show_puzzle()
- 942                     ; 115 {
- 943                     	switch	.text
- 944  01ef               _show_puzzle:
- 948  01ef               L543:
- 949                     ; 116 	while(is_submenu_valid())
- 951  01ef cd009f        	call	_is_submenu_valid
- 953  01f2 4d            	tnz	a
- 954  01f3 26fa          	jrne	L543
- 955                     ; 120 }
- 958  01f5 81            	ret
-1022                     	xdef	_SCREEN_SAVER_DURATION_MS
-1023                     	xdef	_SCREEN_SAVER_COUNT_SPACE
-1024                     	xdef	_SCREEN_SAVER_COUNT_PONY
-1025                     	xdef	_SUBMENU_TIME_OUT_MS
-1026                     	xdef	_SUBMENU_COUNT
-1027                     	xdef	_set_frame_blink
-1028                     	xdef	_set_frame_rainbow
-1029                     	xdef	_is_submenu_valid
-1030                     	xdef	_show_puzzle
-1031                     	xdef	_show_cyclone
-1032                     	xdef	_show_screen_savers
-1033                     	xdef	_run_application
-1034                     	xdef	_setup_application
-1035                     	xref	_get_random
-1036                     	xref	_is_space_sao
-1037                     	xref	_is_button_down
-1038                     	xref	_clear_button_events
-1039                     	xref	_clear_button_event
-1040                     	xref	_set_hue
-1041                     	xref	_flush_leds
-1042                     	xref	_set_white
-1043                     	xref	_set_rgb
-1044                     	xref	_millis
-1045                     	xref	_is_application_valid
-1046                     	xref	_setup_serial
-1047                     	xref.b	c_lreg
-1048                     	xref.b	c_x
-1067                     	xref	c_ladd
-1068                     	xref	c_uitolx
-1069                     	xref	c_imul
-1070                     	xref	c_llsh
-1071                     	xref	c_lursh
-1072                     	xref	c_lcmp
-1073                     	xref	c_rtol
-1074                     	xref	c_smodx
-1075                     	end
+ 421                     ; 48 void show_screen_savers()
+ 421                     ; 49 {
+ 422                     	switch	.text
+ 423  00b2               _show_screen_savers:
+ 425  00b2 89            	pushw	x
+ 426       00000002      OFST:	set	2
+ 429                     ; 50 	bool is_auto_cycle=1;//automatically cycle through screen savers as a function of millis() (sync millis across multiple SAOs through terminal to get multiple badges sync'd)
+ 431  00b3 a601          	ld	a,#1
+ 432  00b5 6b01          	ld	(OFST-1,sp),a
+ 434                     ; 51 	u8 screen_saver_index=0;
+ 436  00b7 0f02          	clr	(OFST+0,sp)
+ 439  00b9 204e          	jra	L361
+ 440  00bb               L161:
+ 441                     ; 54 		if(is_auto_cycle)
+ 443  00bb 0d01          	tnz	(OFST-1,sp)
+ 444  00bd 2719          	jreq	L761
+ 445                     ; 56 			screen_saver_index=millis()/SCREEN_SAVER_DURATION_MS;
+ 447  00bf cd0000        	call	_millis
+ 449  00c2 a60f          	ld	a,#15
+ 450  00c4 cd0000        	call	c_lursh
+ 452  00c7 b603          	ld	a,c_lreg+3
+ 453  00c9 6b02          	ld	(OFST+0,sp),a
+ 455                     ; 57 			if(clear_button_event(1,1)) is_auto_cycle=0;
+ 457  00cb ae0101        	ldw	x,#257
+ 458  00ce cd0000        	call	_clear_button_event
+ 460  00d1 4d            	tnz	a
+ 461  00d2 271c          	jreq	L371
+ 464  00d4 0f01          	clr	(OFST-1,sp)
+ 466  00d6 2018          	jra	L371
+ 467  00d8               L761:
+ 468                     ; 59 			if(clear_button_event(1,0)) screen_saver_index++;//short right button push to go to next screen saver
+ 470  00d8 ae0100        	ldw	x,#256
+ 471  00db cd0000        	call	_clear_button_event
+ 473  00de 4d            	tnz	a
+ 474  00df 2702          	jreq	L571
+ 477  00e1 0c02          	inc	(OFST+0,sp)
+ 479  00e3               L571:
+ 480                     ; 60 			if(clear_button_event(1,1)) is_auto_cycle=1;//long right button push to resume auto-cycling
+ 482  00e3 ae0101        	ldw	x,#257
+ 483  00e6 cd0000        	call	_clear_button_event
+ 485  00e9 4d            	tnz	a
+ 486  00ea 2704          	jreq	L371
+ 489  00ec a601          	ld	a,#1
+ 490  00ee 6b01          	ld	(OFST-1,sp),a
+ 492  00f0               L371:
+ 493                     ; 63 		switch(screen_saver_index)
+ 495  00f0 7b02          	ld	a,(OFST+0,sp)
+ 497                     ; 69 			case 4:{  }break;
+ 498  00f2 4d            	tnz	a
+ 499  00f3 270e          	jreq	L521
+ 500  00f5 4a            	dec	a
+ 501  00f6 270f          	jreq	L721
+ 502  00f8 4a            	dec	a
+ 503  00f9 270e          	jreq	L361
+ 504  00fb 4a            	dec	a
+ 505  00fc 270b          	jreq	L361
+ 506  00fe 4a            	dec	a
+ 507  00ff 2708          	jreq	L361
+ 508  0101 2006          	jra	L361
+ 509  0103               L521:
+ 510                     ; 65 			case 0:{ set_frame_rainbow(); }break;
+ 512  0103 ad0b          	call	_set_frame_rainbow
+ 516  0105 2002          	jra	L361
+ 517  0107               L721:
+ 518                     ; 66 			case 1:{ set_frame_blink(); }break;
+ 520  0107 ad4b          	call	_set_frame_blink
+ 524  0109               L302:
+ 525  0109               L361:
+ 526                     ; 52 	while(is_submenu_valid())
+ 528  0109 ad94          	call	_is_submenu_valid
+ 530  010b 4d            	tnz	a
+ 531  010c 26ad          	jrne	L161
+ 532                     ; 72 }
+ 535  010e 85            	popw	x
+ 536  010f 81            	ret
+ 573                     ; 74 void set_frame_rainbow()
+ 573                     ; 75 {
+ 574                     	switch	.text
+ 575  0110               _set_frame_rainbow:
+ 577  0110 5205          	subw	sp,#5
+ 578       00000005      OFST:	set	5
+ 581                     ; 77 	for(iter=0;iter<RGB_LED_COUNT;iter++) set_hue(iter,(u16)(millis()*32+(0xFFFF/10)*iter),255);
+ 583  0112 0f05          	clr	(OFST+0,sp)
+ 585  0114               L322:
+ 588  0114 4bff          	push	#255
+ 589  0116 7b06          	ld	a,(OFST+1,sp)
+ 590  0118 5f            	clrw	x
+ 591  0119 97            	ld	xl,a
+ 592  011a 90ae1999      	ldw	y,#6553
+ 593  011e cd0000        	call	c_imul
+ 595  0121 cd0000        	call	c_uitolx
+ 597  0124 96            	ldw	x,sp
+ 598  0125 1c0002        	addw	x,#OFST-3
+ 599  0128 cd0000        	call	c_rtol
+ 602  012b cd0000        	call	_millis
+ 604  012e a605          	ld	a,#5
+ 605  0130 cd0000        	call	c_llsh
+ 607  0133 96            	ldw	x,sp
+ 608  0134 1c0002        	addw	x,#OFST-3
+ 609  0137 cd0000        	call	c_ladd
+ 611  013a be02          	ldw	x,c_lreg+2
+ 612  013c 89            	pushw	x
+ 613  013d 7b08          	ld	a,(OFST+3,sp)
+ 614  013f cd0000        	call	_set_hue
+ 616  0142 5b03          	addw	sp,#3
+ 619  0144 0c05          	inc	(OFST+0,sp)
+ 623  0146 7b05          	ld	a,(OFST+0,sp)
+ 624  0148 a10a          	cp	a,#10
+ 625  014a 25c8          	jrult	L322
+ 626                     ; 78 	flush_leds(2*RGB_LED_COUNT+1);//max 2 colors ON at a time and one led for button pushes
+ 628  014c a615          	ld	a,#21
+ 629  014e cd0000        	call	_flush_leds
+ 631                     ; 79 }
+ 634  0151 5b05          	addw	sp,#5
+ 635  0153 81            	ret
+ 728                     ; 81 void set_frame_blink()
+ 728                     ; 82 {
+ 729                     	switch	.text
+ 730  0154               _set_frame_blink:
+ 732  0154 5209          	subw	sp,#9
+ 733       00000009      OFST:	set	9
+ 736                     ; 84 	u8 LED_WHITE_COUNT=12;
+ 738                     ; 85 	u8 RGB_ELEMENT_COUNT=RGB_LED_COUNT*3;//10*3=30
+ 740  0156 a61e          	ld	a,#30
+ 741  0158 6b02          	ld	(OFST-7,sp),a
+ 743                     ; 86 	u8 MAX_SIMULTANEOUS_LEDS_ON=4;//red and green and blue are each coutned independently
+ 745  015a a604          	ld	a,#4
+ 746  015c 6b05          	ld	(OFST-4,sp),a
+ 748                     ; 87 	u16 m=RGB_ELEMENT_COUNT+LED_WHITE_COUNT;
+ 750  015e ae002a        	ldw	x,#42
+ 751  0161 1f03          	ldw	(OFST-6,sp),x
+ 753                     ; 88 	u16 x=millis()/128;//divide by the period (in ms) with which to change which LEDs are shown --> 256 is ~4 Hz, 128 is ~8 Hz
+ 755  0163 cd0000        	call	_millis
+ 757  0166 a607          	ld	a,#7
+ 758  0168 cd0000        	call	c_lursh
+ 760  016b be02          	ldw	x,c_lreg+2
+ 761  016d 1f07          	ldw	(OFST-2,sp),x
+ 763                     ; 91 	for(iter=0;iter<MAX_SIMULTANEOUS_LEDS_ON;iter++)
+ 765  016f 0f06          	clr	(OFST-3,sp)
+ 768  0171 2037          	jra	L303
+ 769  0173               L772:
+ 770                     ; 93 		x=get_random(x);
+ 772  0173 1e07          	ldw	x,(OFST-2,sp)
+ 773  0175 cd0000        	call	_get_random
+ 775  0178 1f07          	ldw	(OFST-2,sp),x
+ 777                     ; 94 		led_index=x%m;
+ 779  017a 1e07          	ldw	x,(OFST-2,sp)
+ 780  017c 1603          	ldw	y,(OFST-6,sp)
+ 781  017e 65            	divw	x,y
+ 782  017f 51            	exgw	x,y
+ 783  0180 01            	rrwa	x,a
+ 784  0181 6b09          	ld	(OFST+0,sp),a
+ 785  0183 02            	rlwa	x,a
+ 787                     ; 95 		if(led_index>=RGB_ELEMENT_COUNT)
+ 789  0184 7b09          	ld	a,(OFST+0,sp)
+ 790  0186 1102          	cp	a,(OFST-7,sp)
+ 791  0188 241e          	jruge	L113
+ 793                     ; 99 			set_rgb(led_index/3,led_index%3,255);
+ 795  018a 4bff          	push	#255
+ 796  018c 7b0a          	ld	a,(OFST+1,sp)
+ 797  018e 5f            	clrw	x
+ 798  018f 97            	ld	xl,a
+ 799  0190 a603          	ld	a,#3
+ 800  0192 62            	div	x,a
+ 801  0193 5f            	clrw	x
+ 802  0194 97            	ld	xl,a
+ 803  0195 9f            	ld	a,xl
+ 804  0196 97            	ld	xl,a
+ 805  0197 7b0a          	ld	a,(OFST+1,sp)
+ 806  0199 905f          	clrw	y
+ 807  019b 9097          	ld	yl,a
+ 808  019d a603          	ld	a,#3
+ 809  019f 9062          	div	y,a
+ 810  01a1 909f          	ld	a,yl
+ 811  01a3 95            	ld	xh,a
+ 812  01a4 cd0000        	call	_set_rgb
+ 814  01a7 84            	pop	a
+ 815  01a8               L113:
+ 816                     ; 91 	for(iter=0;iter<MAX_SIMULTANEOUS_LEDS_ON;iter++)
+ 818  01a8 0c06          	inc	(OFST-3,sp)
+ 820  01aa               L303:
+ 823  01aa 7b06          	ld	a,(OFST-3,sp)
+ 824  01ac 1105          	cp	a,(OFST-4,sp)
+ 825  01ae 25c3          	jrult	L772
+ 826                     ; 102 	flush_leds(MAX_SIMULTANEOUS_LEDS_ON+1);
+ 828  01b0 7b05          	ld	a,(OFST-4,sp)
+ 829  01b2 4c            	inc	a
+ 830  01b3 cd0000        	call	_flush_leds
+ 832                     ; 103 }
+ 835  01b6 5b09          	addw	sp,#9
+ 836  01b8 81            	ret
+ 860                     ; 106 void show_cyclone()
+ 860                     ; 107 {
+ 861                     	switch	.text
+ 862  01b9               _show_cyclone:
+ 866  01b9               L523:
+ 867                     ; 108 	while(is_submenu_valid())
+ 869  01b9 cd009f        	call	_is_submenu_valid
+ 871  01bc 4d            	tnz	a
+ 872  01bd 26fa          	jrne	L523
+ 873                     ; 112 }
+ 876  01bf 81            	ret
+ 900                     ; 114 void show_puzzle()
+ 900                     ; 115 {
+ 901                     	switch	.text
+ 902  01c0               _show_puzzle:
+ 906  01c0               L343:
+ 907                     ; 116 	while(is_submenu_valid())
+ 909  01c0 cd009f        	call	_is_submenu_valid
+ 911  01c3 4d            	tnz	a
+ 912  01c4 26fa          	jrne	L343
+ 913                     ; 120 }
+ 916  01c6 81            	ret
+ 980                     	xdef	_SCREEN_SAVER_DURATION_MS
+ 981                     	xdef	_SCREEN_SAVER_COUNT_SPACE
+ 982                     	xdef	_SCREEN_SAVER_COUNT_PONY
+ 983                     	xdef	_SUBMENU_TIME_OUT_MS
+ 984                     	xdef	_SUBMENU_COUNT
+ 985                     	xdef	_set_frame_blink
+ 986                     	xdef	_set_frame_rainbow
+ 987                     	xdef	_is_submenu_valid
+ 988                     	xdef	_show_puzzle
+ 989                     	xdef	_show_cyclone
+ 990                     	xdef	_show_screen_savers
+ 991                     	xdef	_run_application
+ 992                     	xdef	_setup_application
+ 993                     	xref	_get_random
+ 994                     	xref	_is_button_down
+ 995                     	xref	_clear_button_events
+ 996                     	xref	_clear_button_event
+ 997                     	xref	_set_hue
+ 998                     	xref	_flush_leds
+ 999                     	xref	_set_rgb
+1000                     	xref	_millis
+1001                     	xref	_is_application_valid
+1002                     	xref	_setup_serial
+1003                     	xref.b	c_lreg
+1004                     	xref.b	c_x
+1023                     	xref	c_ladd
+1024                     	xref	c_uitolx
+1025                     	xref	c_imul
+1026                     	xref	c_llsh
+1027                     	xref	c_lursh
+1028                     	xref	c_lcmp
+1029                     	xref	c_rtol
+1030                     	xref	c_smodx
+1031                     	end

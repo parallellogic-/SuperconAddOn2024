@@ -3,21 +3,16 @@
 #include "stm8s_gpio.h"
 #include "stm8s_uart1.h"
 
-const u8 hw_revision=1;
-
 //time state
 u32 api_counter=0;//increments roughly every millisecond, give-or-take a factor of 2 based on clock divider settings, this is the basis of millis()
 
 //application space settings
-#define LED_COUNT 43 //10 RGB (3 LEDs each) + 12 white + 1 debug
-u8 pwm_brightness_buffer[LED_COUNT]/*={ 0,0,0,0,0,0,0,0,0,0,
-																			0,0,0,0,0,0,0,0,0,0,
-																			0,0,0,0,0,0,0,0,0,0,
-																			0,0,0,0,0,0,0,0,0,0,
-																			0,0,0}*/;//a space for the developer to place the brightness of each LED independent of the pwm volatile display
+#define LED_COUNT 31 //10 RGB (3 LEDs each) + 12 white + 1 debug
+#define DEBUG_LED 6 //index of the debug led
+u8 pwm_brightness_buffer[LED_COUNT];
 
 //LED pwm control state machine
-const u8 PWM_MAX_PERIOD=250;//interrupt counter has max value, so delaying longer requires multiple interrupt triggers
+const u8 PWM_MAX_PERIOD=255;//interrupt counter has max value, so delaying longer requires multiple interrupt triggers
 u8 pwm_brightness[LED_COUNT][2][2];//array index, [led index, led pwm], [A vs B side live]
 u16 pwm_sleep[2];//[A vs B side live], how many LED LSBs to wait with LEDs OFF before putting LEDs back ON
 u8 pwm_led_count[2];//how many LEDs to cycle through
@@ -36,13 +31,19 @@ u8 temp_delete_me=0;
 
 void hello_world()
 {//basic program that blinks the debug LED ON/OFF
+	u16 temp2_delete_me;
 	bool is_high=0;
 	long frame=0;
-	GPIO_Init(GPIOA, GPIO_PIN_3, GPIO_MODE_IN_PU_NO_IT);
+	//GPIO_Init(GPIOA, GPIO_PIN_3, GPIO_MODE_IN_PU_NO_IT);
 	while(1)
 	{
 		frame++;
-		temp_delete_me=(frame/64/256)%2?(-frame/64):(frame/64);
+		//temp_delete_me=(frame/64/256)%2?(~(frame/64)):(frame/64);
+		temp2_delete_me=0x00FF&((frame/256/256)%2?(~(frame/256)):(frame/256));
+		temp2_delete_me=temp2_delete_me*temp2_delete_me;
+		temp2_delete_me=temp2_delete_me/256;
+		temp_delete_me=temp2_delete_me;
+		//temp_delete_me=(frame/256/256)%2?(~(frame/256)):(frame/256);
 	}
 }
 
@@ -96,7 +97,7 @@ void setup_main()
 		
 	//run pwm interrupt at 2.000 kHz period (to allow for >40 Hz frames with all LEDs ON)
 	TIM2->CCR1H=0;//this will always be zero based on application architecutre
-	TIM2->PSCR= 6;// init divider register 16MHz/2^X
+	TIM2->PSCR= 5;// init divider register 16MHz/2^X
 	TIM2->ARRH= 0;// init auto reload register
 	TIM2->ARRL= PWM_MAX_PERIOD;// init auto reload register
 	TIM2->CR1|= TIM2_CR1_ARPE | TIM2_CR1_URS | TIM2_CR1_CEN;// enable timer
@@ -173,24 +174,24 @@ bool is_button_down(u8 index)
 	return 0;
 }
 
-//millisecond interrupt
+//millisecond-ish interrupt and LED OFF to ON
 @far @interrupt void TIM2_UPD_OVF_IRQHandler (void) {
 	TIM2->SR1&=~TIM2_SR1_UIF;//reset interrupt
 	api_counter++;
 	//read buttons (if in application mode), update state
 	
 	//read audio, update state
-	GPIO_Init(GPIOA, GPIO_PIN_3, GPIO_MODE_OUT_PP_HIGH_SLOW);
+	if(api_counter%7==0 && temp_delete_me>0)//simulate other LEDs ON
+		GPIO_Init(GPIOA, GPIO_PIN_3, GPIO_MODE_OUT_PP_HIGH_SLOW);
+	TIM2->CCR1L = temp_delete_me;//set wakeup alarm relative to current time
 }
 
-//LED interrupt
+//LED interrupt (LED ON to OFF)
 @far @interrupt void TIM2_CapComp_IRQ_Handler (void) {
-	u16 brightness=temp_delete_me;
-	brightness=brightness*brightness;
-	brightness=brightness/256;
+	//u16 brightness=temp_delete_me;
+	//if(brightness>=250) brightness=250;
 	TIM2->SR1&=~TIM2_SR1_CC1IF;//reset interrupt
-	TIM2->CCR1L = brightness;//set wakeup alarm relative to current time
-	GPIO_Init(GPIOA, GPIO_PIN_3, GPIO_MODE_OUT_PP_LOW_SLOW);
+	set_matrix_high_z();
 }
 
 void flush_leds(u8 led_count)
@@ -269,20 +270,23 @@ void set_rgb(u8 index,u8 color,u8 brightness)
 
 void set_white(u8 index,u8 brightness)
 {
-	pwm_brightness_buffer[31+index]=brightness;
+	pwm_brightness_buffer[DEBUG_LED+1+index]=brightness;
 }
 
 //debug led status
 void set_debug(u8 brightness)
 {
-	pwm_brightness_buffer[30]=brightness;
+	pwm_brightness_buffer[DEBUG_LED]=brightness;
 }
 
 void set_matrix_high_z()
 {
-	GPIO_Init(GPIOC, GPIO_PIN_7 | GPIO_PIN_6 | GPIO_PIN_5 | GPIO_PIN_4 | GPIO_PIN_3, GPIO_MODE_IN_FL_NO_IT);//2, 3, 4, 5, 6
-	GPIO_Init(GPIOD, GPIO_PIN_3 | GPIO_PIN_2, GPIO_MODE_IN_FL_NO_IT);
-	GPIO_Init(GPIOA, GPIO_PIN_3 , GPIO_MODE_IN_FL_NO_IT);
+	//GPIO_Init(GPIOC, GPIO_PIN_7 | GPIO_PIN_6 | GPIO_PIN_5 | GPIO_PIN_4 | GPIO_PIN_3, GPIO_MODE_IN_FL_NO_IT);//2, 3, 4, 5, 6
+	//GPIO_Init(GPIOD, GPIO_PIN_2, GPIO_MODE_IN_FL_NO_IT);
+	//GPIO_Init(GPIOA, GPIO_PIN_3 , GPIO_MODE_IN_FL_NO_IT);
+	GPIOC->CR1 &= (uint8_t)(~(GPIO_PIN_7 | GPIO_PIN_6 | GPIO_PIN_5 | GPIO_PIN_4 | GPIO_PIN_3));
+	GPIOD->CR1 &= (uint8_t)(~(GPIO_PIN_2));
+	GPIOA->CR1 &= (uint8_t)(~(GPIO_PIN_3));
 }
 
 u8 get_eeprom_byte(u16 eeprom_address)

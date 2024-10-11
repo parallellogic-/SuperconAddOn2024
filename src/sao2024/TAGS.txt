@@ -100,9 +100,9 @@ BRR2	stm8s.h	1977;"	member	struct:UART3_struct
 BRR2	stm8s.h	2069;"	member	struct:UART4_struct
 BTR1	stm8s.h	2297;"	member	struct:__anon36::__anon37::__anon43
 BTR2	stm8s.h	2298;"	member	struct:__anon36::__anon37::__anon43
-BUTTON_COUNT	api.c	31;"	macro	file:
-BUTTON_LONG_PRESS_MS	api.c	34;"	macro	file:
-BUTTON_MINIMUM_PRESS_MS	api.c	35;"	macro	file:
+BUTTON_COUNT	api.c	24;"	macro	file:
+BUTTON_LONG_PRESS_MS	api.c	27;"	macro	file:
+BUTTON_MINIMUM_PRESS_MS	api.c	28;"	macro	file:
 BYTE_0	stm8s.h	2800;"	macro
 BYTE_1	stm8s.h	2801;"	macro
 BYTE_2	stm8s.h	2802;"	macro
@@ -322,17 +322,17 @@ CLK_CKDIVR_HSIDIV	stm8s.h	570;"	macro
 CLK_CKDIVR_RESET_VALUE	stm8s.h	536;"	macro
 CLK_CMSR_CKM	stm8s.h	561;"	macro
 CLK_CMSR_RESET_VALUE	stm8s.h	533;"	macro
-CLK_CSSCONFIG_DISABLE	stm8s_clk.h	64;"	enumerator	enum:__anon3
-CLK_CSSCONFIG_ENABLE	stm8s_clk.h	63;"	enumerator	enum:__anon3
-CLK_CSSCONFIG_ENABLEWITHIT	stm8s_clk.h	62;"	enumerator	enum:__anon3
-CLK_CSSConfig_TypeDef	stm8s_clk.h	65;"	typedef	typeref:enum:__anon3
+CLK_CSSCONFIG_DISABLE	stm8s_clk.h	64;"	enumerator	enum:__anon11
+CLK_CSSCONFIG_ENABLE	stm8s_clk.h	63;"	enumerator	enum:__anon11
+CLK_CSSCONFIG_ENABLEWITHIT	stm8s_clk.h	62;"	enumerator	enum:__anon11
+CLK_CSSConfig_TypeDef	stm8s_clk.h	65;"	typedef	typeref:enum:__anon11
 CLK_CSSR_AUX	stm8s.h	591;"	macro
 CLK_CSSR_CSSD	stm8s.h	589;"	macro
 CLK_CSSR_CSSDIE	stm8s.h	590;"	macro
 CLK_CSSR_CSSEN	stm8s.h	592;"	macro
 CLK_CSSR_RESET_VALUE	stm8s.h	539;"	macro
-CLK_CURRENTCLOCKSTATE_DISABLE	stm8s_clk.h	54;"	enumerator	enum:__anon2
-CLK_CURRENTCLOCKSTATE_ENABLE	stm8s_clk.h	55;"	enumerator	enum:__anon2
+CLK_CURRENTCLOCKSTATE_DISABLE	stm8s_clk.h	54;"	enumerator	enum:__anon10
+CLK_CURRENTCLOCKSTATE_ENABLE	stm8s_clk.h	55;"	enumerator	enum:__anon10
 CLK_ClearITPendingBit	stm8s_clk.c	729;"	function	signature:(CLK_IT_TypeDef CLK_IT)
 CLK_ClearITPendingBit	stm8s_clk.h	374;"	prototype	signature:(CLK_IT_TypeDef CLK_IT)
 CLK_ClockSecuritySystemEnable	stm8s_clk.c	547;"	function	signature:(void)
@@ -341,24 +341,24 @@ CLK_ClockSwitchCmd	stm8s_clk.c	213;"	function	signature:(FunctionalState NewStat
 CLK_ClockSwitchCmd	stm8s_clk.h	357;"	prototype	signature:(FunctionalState NewState)
 CLK_ClockSwitchConfig	stm8s_clk.c	309;"	function	signature:(CLK_SwitchMode_TypeDef CLK_SwitchMode, CLK_Source_TypeDef CLK_NewClock, FunctionalState ITState, CLK_CurrentClockState_TypeDef CLK_CurrentClockState)
 CLK_ClockSwitchConfig	stm8s_clk.h	361;"	prototype	signature:(CLK_SwitchMode_TypeDef CLK_SwitchMode, CLK_Source_TypeDef CLK_NewClock, FunctionalState ITState, CLK_CurrentClockState_TypeDef CLK_CurrentClockState)
-CLK_CurrentClockState_TypeDef	stm8s_clk.h	56;"	typedef	typeref:enum:__anon2
+CLK_CurrentClockState_TypeDef	stm8s_clk.h	56;"	typedef	typeref:enum:__anon10
 CLK_DeInit	stm8s_clk.c	72;"	function	signature:(void)
 CLK_DeInit	stm8s_clk.h	352;"	prototype	signature:(void)
 CLK_ECKR_HSEEN	stm8s.h	559;"	macro
 CLK_ECKR_HSERDY	stm8s.h	558;"	macro
 CLK_ECKR_RESET_VALUE	stm8s.h	532;"	macro
-CLK_FLAG_AUX	stm8s_clk.h	158;"	enumerator	enum:__anon8
-CLK_FLAG_CCOBSY	stm8s_clk.h	159;"	enumerator	enum:__anon8
-CLK_FLAG_CCORDY	stm8s_clk.h	160;"	enumerator	enum:__anon8
-CLK_FLAG_CSSD	stm8s_clk.h	157;"	enumerator	enum:__anon8
-CLK_FLAG_HSERDY	stm8s_clk.h	154;"	enumerator	enum:__anon8
-CLK_FLAG_HSIRDY	stm8s_clk.h	153;"	enumerator	enum:__anon8
-CLK_FLAG_LSIRDY	stm8s_clk.h	152;"	enumerator	enum:__anon8
-CLK_FLAG_SWBSY	stm8s_clk.h	156;"	enumerator	enum:__anon8
-CLK_FLAG_SWIF	stm8s_clk.h	155;"	enumerator	enum:__anon8
+CLK_FLAG_AUX	stm8s_clk.h	158;"	enumerator	enum:__anon16
+CLK_FLAG_CCOBSY	stm8s_clk.h	159;"	enumerator	enum:__anon16
+CLK_FLAG_CCORDY	stm8s_clk.h	160;"	enumerator	enum:__anon16
+CLK_FLAG_CSSD	stm8s_clk.h	157;"	enumerator	enum:__anon16
+CLK_FLAG_HSERDY	stm8s_clk.h	154;"	enumerator	enum:__anon16
+CLK_FLAG_HSIRDY	stm8s_clk.h	153;"	enumerator	enum:__anon16
+CLK_FLAG_LSIRDY	stm8s_clk.h	152;"	enumerator	enum:__anon16
+CLK_FLAG_SWBSY	stm8s_clk.h	156;"	enumerator	enum:__anon16
+CLK_FLAG_SWIF	stm8s_clk.h	155;"	enumerator	enum:__anon16
 CLK_FastHaltWakeUpCmd	stm8s_clk.c	99;"	function	signature:(FunctionalState NewState)
 CLK_FastHaltWakeUpCmd	stm8s_clk.h	358;"	prototype	signature:(FunctionalState NewState)
-CLK_Flag_TypeDef	stm8s_clk.h	161;"	typedef	typeref:enum:__anon8
+CLK_Flag_TypeDef	stm8s_clk.h	161;"	typedef	typeref:enum:__anon16
 CLK_GetClockFreq	stm8s_clk.c	569;"	function	signature:(void)
 CLK_GetClockFreq	stm8s_clk.h	370;"	prototype	signature:(void)
 CLK_GetFlagStatus	stm8s_clk.c	634;"	function	signature:(CLK_Flag_TypeDef CLK_FLAG)
@@ -375,15 +375,15 @@ CLK_HSIPrescalerConfig	stm8s_clk.c	415;"	function	signature:(CLK_Prescaler_TypeD
 CLK_HSIPrescalerConfig	stm8s_clk.h	362;"	prototype	signature:(CLK_Prescaler_TypeDef HSIPrescaler)
 CLK_HSITRIMR_HSITRIM	stm8s.h	599;"	macro
 CLK_HSITRIMR_RESET_VALUE	stm8s.h	541;"	macro
-CLK_HSITRIMVALUE_0	stm8s_clk.h	80;"	enumerator	enum:__anon5
-CLK_HSITRIMVALUE_1	stm8s_clk.h	81;"	enumerator	enum:__anon5
-CLK_HSITRIMVALUE_2	stm8s_clk.h	82;"	enumerator	enum:__anon5
-CLK_HSITRIMVALUE_3	stm8s_clk.h	83;"	enumerator	enum:__anon5
-CLK_HSITRIMVALUE_4	stm8s_clk.h	84;"	enumerator	enum:__anon5
-CLK_HSITRIMVALUE_5	stm8s_clk.h	85;"	enumerator	enum:__anon5
-CLK_HSITRIMVALUE_6	stm8s_clk.h	86;"	enumerator	enum:__anon5
-CLK_HSITRIMVALUE_7	stm8s_clk.h	87;"	enumerator	enum:__anon5
-CLK_HSITrimValue_TypeDef	stm8s_clk.h	88;"	typedef	typeref:enum:__anon5
+CLK_HSITRIMVALUE_0	stm8s_clk.h	80;"	enumerator	enum:__anon13
+CLK_HSITRIMVALUE_1	stm8s_clk.h	81;"	enumerator	enum:__anon13
+CLK_HSITRIMVALUE_2	stm8s_clk.h	82;"	enumerator	enum:__anon13
+CLK_HSITRIMVALUE_3	stm8s_clk.h	83;"	enumerator	enum:__anon13
+CLK_HSITRIMVALUE_4	stm8s_clk.h	84;"	enumerator	enum:__anon13
+CLK_HSITRIMVALUE_5	stm8s_clk.h	85;"	enumerator	enum:__anon13
+CLK_HSITRIMVALUE_6	stm8s_clk.h	86;"	enumerator	enum:__anon13
+CLK_HSITRIMVALUE_7	stm8s_clk.h	87;"	enumerator	enum:__anon13
+CLK_HSITrimValue_TypeDef	stm8s_clk.h	88;"	typedef	typeref:enum:__anon13
 CLK_ICKR_FHWU	stm8s.h	554;"	macro
 CLK_ICKR_HSIEN	stm8s.h	556;"	macro
 CLK_ICKR_HSIRDY	stm8s.h	555;"	macro
@@ -393,25 +393,25 @@ CLK_ICKR_RESET_VALUE	stm8s.h	531;"	macro
 CLK_ICKR_SWUAH	stm8s.h	551;"	macro
 CLK_ITConfig	stm8s_clk.c	459;"	function	signature:(CLK_IT_TypeDef CLK_IT, FunctionalState NewState)
 CLK_ITConfig	stm8s_clk.h	364;"	prototype	signature:(CLK_IT_TypeDef CLK_IT, FunctionalState NewState)
-CLK_IT_CSSD	stm8s_clk.h	167;"	enumerator	enum:__anon9
-CLK_IT_SWIF	stm8s_clk.h	168;"	enumerator	enum:__anon9
-CLK_IT_TypeDef	stm8s_clk.h	169;"	typedef	typeref:enum:__anon9
+CLK_IT_CSSD	stm8s_clk.h	167;"	enumerator	enum:__anon17
+CLK_IT_SWIF	stm8s_clk.h	168;"	enumerator	enum:__anon17
+CLK_IT_TypeDef	stm8s_clk.h	169;"	typedef	typeref:enum:__anon17
 CLK_LSICmd	stm8s_clk.c	166;"	function	signature:(FunctionalState NewState)
 CLK_LSICmd	stm8s_clk.h	355;"	prototype	signature:(FunctionalState NewState)
-CLK_OUTPUT_CPU	stm8s_clk.h	97;"	enumerator	enum:__anon6
-CLK_OUTPUT_CPUDIV16	stm8s_clk.h	101;"	enumerator	enum:__anon6
-CLK_OUTPUT_CPUDIV2	stm8s_clk.h	98;"	enumerator	enum:__anon6
-CLK_OUTPUT_CPUDIV32	stm8s_clk.h	102;"	enumerator	enum:__anon6
-CLK_OUTPUT_CPUDIV4	stm8s_clk.h	99;"	enumerator	enum:__anon6
-CLK_OUTPUT_CPUDIV64	stm8s_clk.h	103;"	enumerator	enum:__anon6
-CLK_OUTPUT_CPUDIV8	stm8s_clk.h	100;"	enumerator	enum:__anon6
-CLK_OUTPUT_HSE	stm8s_clk.h	96;"	enumerator	enum:__anon6
-CLK_OUTPUT_HSI	stm8s_clk.h	94;"	enumerator	enum:__anon6
-CLK_OUTPUT_HSIRC	stm8s_clk.h	104;"	enumerator	enum:__anon6
-CLK_OUTPUT_LSI	stm8s_clk.h	95;"	enumerator	enum:__anon6
-CLK_OUTPUT_MASTER	stm8s_clk.h	105;"	enumerator	enum:__anon6
-CLK_OUTPUT_OTHERS	stm8s_clk.h	106;"	enumerator	enum:__anon6
-CLK_Output_TypeDef	stm8s_clk.h	107;"	typedef	typeref:enum:__anon6
+CLK_OUTPUT_CPU	stm8s_clk.h	97;"	enumerator	enum:__anon14
+CLK_OUTPUT_CPUDIV16	stm8s_clk.h	101;"	enumerator	enum:__anon14
+CLK_OUTPUT_CPUDIV2	stm8s_clk.h	98;"	enumerator	enum:__anon14
+CLK_OUTPUT_CPUDIV32	stm8s_clk.h	102;"	enumerator	enum:__anon14
+CLK_OUTPUT_CPUDIV4	stm8s_clk.h	99;"	enumerator	enum:__anon14
+CLK_OUTPUT_CPUDIV64	stm8s_clk.h	103;"	enumerator	enum:__anon14
+CLK_OUTPUT_CPUDIV8	stm8s_clk.h	100;"	enumerator	enum:__anon14
+CLK_OUTPUT_HSE	stm8s_clk.h	96;"	enumerator	enum:__anon14
+CLK_OUTPUT_HSI	stm8s_clk.h	94;"	enumerator	enum:__anon14
+CLK_OUTPUT_HSIRC	stm8s_clk.h	104;"	enumerator	enum:__anon14
+CLK_OUTPUT_LSI	stm8s_clk.h	95;"	enumerator	enum:__anon14
+CLK_OUTPUT_MASTER	stm8s_clk.h	105;"	enumerator	enum:__anon14
+CLK_OUTPUT_OTHERS	stm8s_clk.h	106;"	enumerator	enum:__anon14
+CLK_Output_TypeDef	stm8s_clk.h	107;"	typedef	typeref:enum:__anon14
 CLK_PCKENR1_I2C	stm8s.h	583;"	macro
 CLK_PCKENR1_RESET_VALUE	stm8s.h	537;"	macro
 CLK_PCKENR1_SPI	stm8s.h	582;"	macro
@@ -428,39 +428,39 @@ CLK_PCKENR2_ADC	stm8s.h	586;"	macro
 CLK_PCKENR2_AWU	stm8s.h	587;"	macro
 CLK_PCKENR2_CAN	stm8s.h	585;"	macro
 CLK_PCKENR2_RESET_VALUE	stm8s.h	538;"	macro
-CLK_PERIPHERAL_ADC	stm8s_clk.h	135;"	enumerator	enum:__anon7
-CLK_PERIPHERAL_AWU	stm8s_clk.h	134;"	enumerator	enum:__anon7
-CLK_PERIPHERAL_CAN	stm8s_clk.h	136;"	enumerator	enum:__anon7
-CLK_PERIPHERAL_I2C	stm8s_clk.h	119;"	enumerator	enum:__anon7
-CLK_PERIPHERAL_SPI	stm8s_clk.h	120;"	enumerator	enum:__anon7
-CLK_PERIPHERAL_TIMER1	stm8s_clk.h	133;"	enumerator	enum:__anon7
-CLK_PERIPHERAL_TIMER2	stm8s_clk.h	131;"	enumerator	enum:__anon7
-CLK_PERIPHERAL_TIMER3	stm8s_clk.h	132;"	enumerator	enum:__anon7
-CLK_PERIPHERAL_TIMER4	stm8s_clk.h	129;"	enumerator	enum:__anon7
-CLK_PERIPHERAL_TIMER5	stm8s_clk.h	130;"	enumerator	enum:__anon7
-CLK_PERIPHERAL_TIMER6	stm8s_clk.h	128;"	enumerator	enum:__anon7
-CLK_PERIPHERAL_UART1	stm8s_clk.h	122;"	enumerator	enum:__anon7
-CLK_PERIPHERAL_UART2	stm8s_clk.h	126;"	enumerator	enum:__anon7
-CLK_PERIPHERAL_UART3	stm8s_clk.h	127;"	enumerator	enum:__anon7
-CLK_PRESCALER_CPUDIV1	stm8s_clk.h	185;"	enumerator	enum:__anon10
-CLK_PRESCALER_CPUDIV128	stm8s_clk.h	192;"	enumerator	enum:__anon10
-CLK_PRESCALER_CPUDIV16	stm8s_clk.h	189;"	enumerator	enum:__anon10
-CLK_PRESCALER_CPUDIV2	stm8s_clk.h	186;"	enumerator	enum:__anon10
-CLK_PRESCALER_CPUDIV32	stm8s_clk.h	190;"	enumerator	enum:__anon10
-CLK_PRESCALER_CPUDIV4	stm8s_clk.h	187;"	enumerator	enum:__anon10
-CLK_PRESCALER_CPUDIV64	stm8s_clk.h	191;"	enumerator	enum:__anon10
-CLK_PRESCALER_CPUDIV8	stm8s_clk.h	188;"	enumerator	enum:__anon10
-CLK_PRESCALER_HSIDIV1	stm8s_clk.h	181;"	enumerator	enum:__anon10
-CLK_PRESCALER_HSIDIV2	stm8s_clk.h	182;"	enumerator	enum:__anon10
-CLK_PRESCALER_HSIDIV4	stm8s_clk.h	183;"	enumerator	enum:__anon10
-CLK_PRESCALER_HSIDIV8	stm8s_clk.h	184;"	enumerator	enum:__anon10
+CLK_PERIPHERAL_ADC	stm8s_clk.h	135;"	enumerator	enum:__anon15
+CLK_PERIPHERAL_AWU	stm8s_clk.h	134;"	enumerator	enum:__anon15
+CLK_PERIPHERAL_CAN	stm8s_clk.h	136;"	enumerator	enum:__anon15
+CLK_PERIPHERAL_I2C	stm8s_clk.h	119;"	enumerator	enum:__anon15
+CLK_PERIPHERAL_SPI	stm8s_clk.h	120;"	enumerator	enum:__anon15
+CLK_PERIPHERAL_TIMER1	stm8s_clk.h	133;"	enumerator	enum:__anon15
+CLK_PERIPHERAL_TIMER2	stm8s_clk.h	131;"	enumerator	enum:__anon15
+CLK_PERIPHERAL_TIMER3	stm8s_clk.h	132;"	enumerator	enum:__anon15
+CLK_PERIPHERAL_TIMER4	stm8s_clk.h	129;"	enumerator	enum:__anon15
+CLK_PERIPHERAL_TIMER5	stm8s_clk.h	130;"	enumerator	enum:__anon15
+CLK_PERIPHERAL_TIMER6	stm8s_clk.h	128;"	enumerator	enum:__anon15
+CLK_PERIPHERAL_UART1	stm8s_clk.h	122;"	enumerator	enum:__anon15
+CLK_PERIPHERAL_UART2	stm8s_clk.h	126;"	enumerator	enum:__anon15
+CLK_PERIPHERAL_UART3	stm8s_clk.h	127;"	enumerator	enum:__anon15
+CLK_PRESCALER_CPUDIV1	stm8s_clk.h	185;"	enumerator	enum:__anon18
+CLK_PRESCALER_CPUDIV128	stm8s_clk.h	192;"	enumerator	enum:__anon18
+CLK_PRESCALER_CPUDIV16	stm8s_clk.h	189;"	enumerator	enum:__anon18
+CLK_PRESCALER_CPUDIV2	stm8s_clk.h	186;"	enumerator	enum:__anon18
+CLK_PRESCALER_CPUDIV32	stm8s_clk.h	190;"	enumerator	enum:__anon18
+CLK_PRESCALER_CPUDIV4	stm8s_clk.h	187;"	enumerator	enum:__anon18
+CLK_PRESCALER_CPUDIV64	stm8s_clk.h	191;"	enumerator	enum:__anon18
+CLK_PRESCALER_CPUDIV8	stm8s_clk.h	188;"	enumerator	enum:__anon18
+CLK_PRESCALER_HSIDIV1	stm8s_clk.h	181;"	enumerator	enum:__anon18
+CLK_PRESCALER_HSIDIV2	stm8s_clk.h	182;"	enumerator	enum:__anon18
+CLK_PRESCALER_HSIDIV4	stm8s_clk.h	183;"	enumerator	enum:__anon18
+CLK_PRESCALER_HSIDIV8	stm8s_clk.h	184;"	enumerator	enum:__anon18
 CLK_PeripheralClockConfig	stm8s_clk.c	263;"	function	signature:(CLK_Peripheral_TypeDef CLK_Peripheral, FunctionalState NewState)
 CLK_PeripheralClockConfig	stm8s_clk.h	360;"	prototype	signature:(CLK_Peripheral_TypeDef CLK_Peripheral, FunctionalState NewState)
-CLK_Peripheral_TypeDef	stm8s_clk.h	137;"	typedef	typeref:enum:__anon7
-CLK_Prescaler_TypeDef	stm8s_clk.h	193;"	typedef	typeref:enum:__anon10
-CLK_SOURCE_HSE	stm8s_clk.h	73;"	enumerator	enum:__anon4
-CLK_SOURCE_HSI	stm8s_clk.h	71;"	enumerator	enum:__anon4
-CLK_SOURCE_LSI	stm8s_clk.h	72;"	enumerator	enum:__anon4
+CLK_Peripheral_TypeDef	stm8s_clk.h	137;"	typedef	typeref:enum:__anon15
+CLK_Prescaler_TypeDef	stm8s_clk.h	193;"	typedef	typeref:enum:__anon18
+CLK_SOURCE_HSE	stm8s_clk.h	73;"	enumerator	enum:__anon12
+CLK_SOURCE_HSI	stm8s_clk.h	71;"	enumerator	enum:__anon12
+CLK_SOURCE_LSI	stm8s_clk.h	72;"	enumerator	enum:__anon12
 CLK_SWCR_RESET_VALUE	stm8s.h	535;"	macro
 CLK_SWCR_SWBSY	stm8s.h	568;"	macro
 CLK_SWCR_SWEN	stm8s.h	567;"	macro
@@ -470,11 +470,11 @@ CLK_SWIMCCR_RESET_VALUE	stm8s.h	542;"	macro
 CLK_SWIMCCR_SWIMDIV	stm8s.h	601;"	macro
 CLK_SWIMConfig	stm8s_clk.c	523;"	function	signature:(CLK_SWIMDivider_TypeDef CLK_SWIMDivider)
 CLK_SWIMConfig	stm8s_clk.h	366;"	prototype	signature:(CLK_SWIMDivider_TypeDef CLK_SWIMDivider)
-CLK_SWIMDIVIDER_2	stm8s_clk.h	199;"	enumerator	enum:__anon11
-CLK_SWIMDIVIDER_OTHER	stm8s_clk.h	200;"	enumerator	enum:__anon11
-CLK_SWIMDivider_TypeDef	stm8s_clk.h	201;"	typedef	typeref:enum:__anon11
-CLK_SWITCHMODE_AUTO	stm8s_clk.h	47;"	enumerator	enum:__anon1
-CLK_SWITCHMODE_MANUAL	stm8s_clk.h	46;"	enumerator	enum:__anon1
+CLK_SWIMDIVIDER_2	stm8s_clk.h	199;"	enumerator	enum:__anon19
+CLK_SWIMDIVIDER_OTHER	stm8s_clk.h	200;"	enumerator	enum:__anon19
+CLK_SWIMDivider_TypeDef	stm8s_clk.h	201;"	typedef	typeref:enum:__anon19
+CLK_SWITCHMODE_AUTO	stm8s_clk.h	47;"	enumerator	enum:__anon9
+CLK_SWITCHMODE_MANUAL	stm8s_clk.h	46;"	enumerator	enum:__anon9
 CLK_SWR_RESET_VALUE	stm8s.h	534;"	macro
 CLK_SWR_SWI	stm8s.h	563;"	macro
 CLK_SYSCLKConfig	stm8s_clk.c	500;"	function	signature:(CLK_Prescaler_TypeDef CLK_Prescaler)
@@ -483,8 +483,8 @@ CLK_SYSCLKEmergencyClear	stm8s_clk.c	622;"	function	signature:(void)
 CLK_SYSCLKEmergencyClear	stm8s_clk.h	368;"	prototype	signature:(void)
 CLK_SlowActiveHaltWakeUpCmd	stm8s_clk.c	238;"	function	signature:(FunctionalState NewState)
 CLK_SlowActiveHaltWakeUpCmd	stm8s_clk.h	359;"	prototype	signature:(FunctionalState NewState)
-CLK_Source_TypeDef	stm8s_clk.h	74;"	typedef	typeref:enum:__anon4
-CLK_SwitchMode_TypeDef	stm8s_clk.h	48;"	typedef	typeref:enum:__anon1
+CLK_Source_TypeDef	stm8s_clk.h	74;"	typedef	typeref:enum:__anon12
+CLK_SwitchMode_TypeDef	stm8s_clk.h	48;"	typedef	typeref:enum:__anon9
 CLK_TIMEOUT	stm8s_clk.h	212;"	macro
 CLK_TypeDef	stm8s.h	525;"	typedef	typeref:struct:CLK_struct
 CLK_struct	stm8s.h	508;"	struct
@@ -580,6 +580,7 @@ DB8RL	stm8s.h	317;"	member	struct:ADC1_struct
 DB9RH	stm8s.h	318;"	member	struct:ADC1_struct
 DB9RL	stm8s.h	319;"	member	struct:ADC1_struct
 DDR	stm8s.h	269;"	member	struct:GPIO_struct
+DEBUG_LED	api.c	11;"	macro	file:
 DGR	stm8s.h	2182;"	member	struct:__anon36
 DISABLE	stm8s.h	235;"	enumerator	enum:__anon34
 DM	stm8s.h	2704;"	macro
@@ -818,15 +819,15 @@ HSI_VALUE	stm8s.h	118;"	macro
 HTRH	stm8s.h	329;"	member	struct:ADC1_struct
 HTRL	stm8s.h	330;"	member	struct:ADC1_struct
 I2C	stm8s.h	2656;"	macro
-I2C_ACK_CURR	stm8s_i2c.h	56;"	enumerator	enum:__anon13
-I2C_ACK_NEXT	stm8s_i2c.h	57;"	enumerator	enum:__anon13
-I2C_ACK_NONE	stm8s_i2c.h	55;"	enumerator	enum:__anon13
-I2C_ADDMODE_10BIT	stm8s_i2c.h	66;"	enumerator	enum:__anon14
-I2C_ADDMODE_7BIT	stm8s_i2c.h	65;"	enumerator	enum:__anon14
-I2C_Ack_TypeDef	stm8s_i2c.h	58;"	typedef	typeref:enum:__anon13
+I2C_ACK_CURR	stm8s_i2c.h	56;"	enumerator	enum:__anon2
+I2C_ACK_NEXT	stm8s_i2c.h	57;"	enumerator	enum:__anon2
+I2C_ACK_NONE	stm8s_i2c.h	55;"	enumerator	enum:__anon2
+I2C_ADDMODE_10BIT	stm8s_i2c.h	66;"	enumerator	enum:__anon3
+I2C_ADDMODE_7BIT	stm8s_i2c.h	65;"	enumerator	enum:__anon3
+I2C_Ack_TypeDef	stm8s_i2c.h	58;"	typedef	typeref:enum:__anon2
 I2C_AcknowledgeConfig	stm8s_i2c.c	345;"	function	signature:(I2C_Ack_TypeDef Ack)
 I2C_AcknowledgeConfig	stm8s_i2c.h	515;"	prototype	signature:(I2C_Ack_TypeDef Ack)
-I2C_AddMode_TypeDef	stm8s_i2c.h	67;"	typedef	typeref:enum:__anon14
+I2C_AddMode_TypeDef	stm8s_i2c.h	67;"	typedef	typeref:enum:__anon3
 I2C_BaseAddress	stm8s.h	2575;"	macro
 I2C_CCRH_CCR	stm8s.h	1422;"	macro
 I2C_CCRH_DUTY	stm8s.h	1421;"	macro
@@ -852,53 +853,53 @@ I2C_ClearITPendingBit	stm8s_i2c.c	871;"	function	signature:(I2C_ITPendingBit_Typ
 I2C_ClearITPendingBit	stm8s_i2c.h	622;"	prototype	signature:(I2C_ITPendingBit_TypeDef I2C_ITPendingBit)
 I2C_Cmd	stm8s_i2c.c	202;"	function	signature:(FunctionalState NewState)
 I2C_Cmd	stm8s_i2c.h	509;"	prototype	signature:(FunctionalState NewState)
-I2C_DIRECTION_RX	stm8s_i2c.h	87;"	enumerator	enum:__anon16
-I2C_DIRECTION_TX	stm8s_i2c.h	86;"	enumerator	enum:__anon16
+I2C_DIRECTION_RX	stm8s_i2c.h	87;"	enumerator	enum:__anon5
+I2C_DIRECTION_TX	stm8s_i2c.h	86;"	enumerator	enum:__anon5
 I2C_DR_DR	stm8s.h	1393;"	macro
 I2C_DR_RESET_VALUE	stm8s.h	1357;"	macro
-I2C_DUTYCYCLE_16_9	stm8s_i2c.h	47;"	enumerator	enum:__anon12
-I2C_DUTYCYCLE_2	stm8s_i2c.h	46;"	enumerator	enum:__anon12
+I2C_DUTYCYCLE_16_9	stm8s_i2c.h	47;"	enumerator	enum:__anon1
+I2C_DUTYCYCLE_2	stm8s_i2c.h	46;"	enumerator	enum:__anon1
 I2C_DeInit	stm8s_i2c.c	67;"	function	signature:(void)
 I2C_DeInit	stm8s_i2c.h	505;"	prototype	signature:(void)
-I2C_Direction_TypeDef	stm8s_i2c.h	88;"	typedef	typeref:enum:__anon16
-I2C_DutyCycle_TypeDef	stm8s_i2c.h	48;"	typedef	typeref:enum:__anon12
-I2C_EVENT_MASTER_BYTE_RECEIVED	stm8s_i2c.h	242;"	enumerator	enum:__anon19
-I2C_EVENT_MASTER_BYTE_TRANSMITTED	stm8s_i2c.h	249;"	enumerator	enum:__anon19
-I2C_EVENT_MASTER_BYTE_TRANSMITTING	stm8s_i2c.h	246;"	enumerator	enum:__anon19
-I2C_EVENT_MASTER_MODE_ADDRESS10	stm8s_i2c.h	210;"	enumerator	enum:__anon19
-I2C_EVENT_MASTER_MODE_SELECT	stm8s_i2c.h	178;"	enumerator	enum:__anon19
-I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED	stm8s_i2c.h	208;"	enumerator	enum:__anon19
-I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED	stm8s_i2c.h	207;"	enumerator	enum:__anon19
-I2C_EVENT_SLAVE_ACK_FAILURE	stm8s_i2c.h	324;"	enumerator	enum:__anon19
-I2C_EVENT_SLAVE_BYTE_RECEIVED	stm8s_i2c.h	315;"	enumerator	enum:__anon19
-I2C_EVENT_SLAVE_BYTE_TRANSMITTED	stm8s_i2c.h	321;"	enumerator	enum:__anon19
-I2C_EVENT_SLAVE_BYTE_TRANSMITTING	stm8s_i2c.h	322;"	enumerator	enum:__anon19
-I2C_EVENT_SLAVE_GENERALCALLADDRESS_MATCHED	stm8s_i2c.h	284;"	enumerator	enum:__anon19
-I2C_EVENT_SLAVE_RECEIVER_ADDRESS_MATCHED	stm8s_i2c.h	280;"	enumerator	enum:__anon19
-I2C_EVENT_SLAVE_STOP_DETECTED	stm8s_i2c.h	317;"	enumerator	enum:__anon19
-I2C_EVENT_SLAVE_TRANSMITTER_ADDRESS_MATCHED	stm8s_i2c.h	281;"	enumerator	enum:__anon19
-I2C_Event_TypeDef	stm8s_i2c.h	325;"	typedef	typeref:enum:__anon19
-I2C_FLAG_ACKNOWLEDGEFAILURE	stm8s_i2c.h	114;"	enumerator	enum:__anon17
-I2C_FLAG_ADDRESSSENTMATCHED	stm8s_i2c.h	108;"	enumerator	enum:__anon17
-I2C_FLAG_ARBITRATIONLOSS	stm8s_i2c.h	115;"	enumerator	enum:__anon17
-I2C_FLAG_BUSBUSY	stm8s_i2c.h	121;"	enumerator	enum:__anon17
-I2C_FLAG_BUSERROR	stm8s_i2c.h	116;"	enumerator	enum:__anon17
-I2C_FLAG_GENERALCALL	stm8s_i2c.h	119;"	enumerator	enum:__anon17
-I2C_FLAG_HEADERSENT	stm8s_i2c.h	106;"	enumerator	enum:__anon17
-I2C_FLAG_MASTERSLAVE	stm8s_i2c.h	122;"	enumerator	enum:__anon17
-I2C_FLAG_OVERRUNUNDERRUN	stm8s_i2c.h	113;"	enumerator	enum:__anon17
-I2C_FLAG_RXNOTEMPTY	stm8s_i2c.h	104;"	enumerator	enum:__anon17
-I2C_FLAG_STARTDETECTION	stm8s_i2c.h	109;"	enumerator	enum:__anon17
-I2C_FLAG_STOPDETECTION	stm8s_i2c.h	105;"	enumerator	enum:__anon17
-I2C_FLAG_TRANSFERFINISHED	stm8s_i2c.h	107;"	enumerator	enum:__anon17
-I2C_FLAG_TRANSMITTERRECEIVER	stm8s_i2c.h	120;"	enumerator	enum:__anon17
-I2C_FLAG_TXEMPTY	stm8s_i2c.h	103;"	enumerator	enum:__anon17
-I2C_FLAG_WAKEUPFROMHALT	stm8s_i2c.h	112;"	enumerator	enum:__anon17
+I2C_Direction_TypeDef	stm8s_i2c.h	88;"	typedef	typeref:enum:__anon5
+I2C_DutyCycle_TypeDef	stm8s_i2c.h	48;"	typedef	typeref:enum:__anon1
+I2C_EVENT_MASTER_BYTE_RECEIVED	stm8s_i2c.h	242;"	enumerator	enum:__anon8
+I2C_EVENT_MASTER_BYTE_TRANSMITTED	stm8s_i2c.h	249;"	enumerator	enum:__anon8
+I2C_EVENT_MASTER_BYTE_TRANSMITTING	stm8s_i2c.h	246;"	enumerator	enum:__anon8
+I2C_EVENT_MASTER_MODE_ADDRESS10	stm8s_i2c.h	210;"	enumerator	enum:__anon8
+I2C_EVENT_MASTER_MODE_SELECT	stm8s_i2c.h	178;"	enumerator	enum:__anon8
+I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED	stm8s_i2c.h	208;"	enumerator	enum:__anon8
+I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED	stm8s_i2c.h	207;"	enumerator	enum:__anon8
+I2C_EVENT_SLAVE_ACK_FAILURE	stm8s_i2c.h	324;"	enumerator	enum:__anon8
+I2C_EVENT_SLAVE_BYTE_RECEIVED	stm8s_i2c.h	315;"	enumerator	enum:__anon8
+I2C_EVENT_SLAVE_BYTE_TRANSMITTED	stm8s_i2c.h	321;"	enumerator	enum:__anon8
+I2C_EVENT_SLAVE_BYTE_TRANSMITTING	stm8s_i2c.h	322;"	enumerator	enum:__anon8
+I2C_EVENT_SLAVE_GENERALCALLADDRESS_MATCHED	stm8s_i2c.h	284;"	enumerator	enum:__anon8
+I2C_EVENT_SLAVE_RECEIVER_ADDRESS_MATCHED	stm8s_i2c.h	280;"	enumerator	enum:__anon8
+I2C_EVENT_SLAVE_STOP_DETECTED	stm8s_i2c.h	317;"	enumerator	enum:__anon8
+I2C_EVENT_SLAVE_TRANSMITTER_ADDRESS_MATCHED	stm8s_i2c.h	281;"	enumerator	enum:__anon8
+I2C_Event_TypeDef	stm8s_i2c.h	325;"	typedef	typeref:enum:__anon8
+I2C_FLAG_ACKNOWLEDGEFAILURE	stm8s_i2c.h	114;"	enumerator	enum:__anon6
+I2C_FLAG_ADDRESSSENTMATCHED	stm8s_i2c.h	108;"	enumerator	enum:__anon6
+I2C_FLAG_ARBITRATIONLOSS	stm8s_i2c.h	115;"	enumerator	enum:__anon6
+I2C_FLAG_BUSBUSY	stm8s_i2c.h	121;"	enumerator	enum:__anon6
+I2C_FLAG_BUSERROR	stm8s_i2c.h	116;"	enumerator	enum:__anon6
+I2C_FLAG_GENERALCALL	stm8s_i2c.h	119;"	enumerator	enum:__anon6
+I2C_FLAG_HEADERSENT	stm8s_i2c.h	106;"	enumerator	enum:__anon6
+I2C_FLAG_MASTERSLAVE	stm8s_i2c.h	122;"	enumerator	enum:__anon6
+I2C_FLAG_OVERRUNUNDERRUN	stm8s_i2c.h	113;"	enumerator	enum:__anon6
+I2C_FLAG_RXNOTEMPTY	stm8s_i2c.h	104;"	enumerator	enum:__anon6
+I2C_FLAG_STARTDETECTION	stm8s_i2c.h	109;"	enumerator	enum:__anon6
+I2C_FLAG_STOPDETECTION	stm8s_i2c.h	105;"	enumerator	enum:__anon6
+I2C_FLAG_TRANSFERFINISHED	stm8s_i2c.h	107;"	enumerator	enum:__anon6
+I2C_FLAG_TRANSMITTERRECEIVER	stm8s_i2c.h	120;"	enumerator	enum:__anon6
+I2C_FLAG_TXEMPTY	stm8s_i2c.h	103;"	enumerator	enum:__anon6
+I2C_FLAG_WAKEUPFROMHALT	stm8s_i2c.h	112;"	enumerator	enum:__anon6
 I2C_FREQR_FREQ	stm8s.h	1384;"	macro
 I2C_FREQR_RESET_VALUE	stm8s.h	1354;"	macro
 I2C_FastModeDutyCycleConfig	stm8s_i2c.c	405;"	function	signature:(I2C_DutyCycle_TypeDef I2C_DutyCycle)
 I2C_FastModeDutyCycleConfig	stm8s_i2c.h	516;"	prototype	signature:(I2C_DutyCycle_TypeDef I2C_DutyCycle)
-I2C_Flag_TypeDef	stm8s_i2c.h	123;"	typedef	typeref:enum:__anon17
+I2C_Flag_TypeDef	stm8s_i2c.h	123;"	typedef	typeref:enum:__anon6
 I2C_GeneralCallCmd	stm8s_i2c.c	225;"	function	signature:(FunctionalState NewState)
 I2C_GeneralCallCmd	stm8s_i2c.h	510;"	prototype	signature:(FunctionalState NewState)
 I2C_GenerateSTART	stm8s_i2c.c	250;"	function	signature:(FunctionalState NewState)
@@ -913,27 +914,27 @@ I2C_GetLastEvent	stm8s_i2c.c	628;"	function	signature:(void)
 I2C_GetLastEvent	stm8s_i2c.h	609;"	prototype	signature:(void)
 I2C_ITConfig	stm8s_i2c.c	381;"	function	signature:(I2C_IT_TypeDef I2C_IT, FunctionalState NewState)
 I2C_ITConfig	stm8s_i2c.h	517;"	prototype	signature:(I2C_IT_TypeDef I2C_IT, FunctionalState NewState)
-I2C_ITPENDINGBIT_ACKNOWLEDGEFAILURE	stm8s_i2c.h	149;"	enumerator	enum:__anon18
-I2C_ITPENDINGBIT_ADDRESSSENTMATCHED	stm8s_i2c.h	143;"	enumerator	enum:__anon18
-I2C_ITPENDINGBIT_ARBITRATIONLOSS	stm8s_i2c.h	150;"	enumerator	enum:__anon18
-I2C_ITPENDINGBIT_BUSERROR	stm8s_i2c.h	151;"	enumerator	enum:__anon18
-I2C_ITPENDINGBIT_HEADERSENT	stm8s_i2c.h	141;"	enumerator	enum:__anon18
-I2C_ITPENDINGBIT_OVERRUNUNDERRUN	stm8s_i2c.h	148;"	enumerator	enum:__anon18
-I2C_ITPENDINGBIT_RXNOTEMPTY	stm8s_i2c.h	139;"	enumerator	enum:__anon18
-I2C_ITPENDINGBIT_STARTDETECTION	stm8s_i2c.h	144;"	enumerator	enum:__anon18
-I2C_ITPENDINGBIT_STOPDETECTION	stm8s_i2c.h	140;"	enumerator	enum:__anon18
-I2C_ITPENDINGBIT_TRANSFERFINISHED	stm8s_i2c.h	142;"	enumerator	enum:__anon18
-I2C_ITPENDINGBIT_TXEMPTY	stm8s_i2c.h	138;"	enumerator	enum:__anon18
-I2C_ITPENDINGBIT_WAKEUPFROMHALT	stm8s_i2c.h	147;"	enumerator	enum:__anon18
-I2C_ITPendingBit_TypeDef	stm8s_i2c.h	152;"	typedef	typeref:enum:__anon18
+I2C_ITPENDINGBIT_ACKNOWLEDGEFAILURE	stm8s_i2c.h	149;"	enumerator	enum:__anon7
+I2C_ITPENDINGBIT_ADDRESSSENTMATCHED	stm8s_i2c.h	143;"	enumerator	enum:__anon7
+I2C_ITPENDINGBIT_ARBITRATIONLOSS	stm8s_i2c.h	150;"	enumerator	enum:__anon7
+I2C_ITPENDINGBIT_BUSERROR	stm8s_i2c.h	151;"	enumerator	enum:__anon7
+I2C_ITPENDINGBIT_HEADERSENT	stm8s_i2c.h	141;"	enumerator	enum:__anon7
+I2C_ITPENDINGBIT_OVERRUNUNDERRUN	stm8s_i2c.h	148;"	enumerator	enum:__anon7
+I2C_ITPENDINGBIT_RXNOTEMPTY	stm8s_i2c.h	139;"	enumerator	enum:__anon7
+I2C_ITPENDINGBIT_STARTDETECTION	stm8s_i2c.h	144;"	enumerator	enum:__anon7
+I2C_ITPENDINGBIT_STOPDETECTION	stm8s_i2c.h	140;"	enumerator	enum:__anon7
+I2C_ITPENDINGBIT_TRANSFERFINISHED	stm8s_i2c.h	142;"	enumerator	enum:__anon7
+I2C_ITPENDINGBIT_TXEMPTY	stm8s_i2c.h	138;"	enumerator	enum:__anon7
+I2C_ITPENDINGBIT_WAKEUPFROMHALT	stm8s_i2c.h	147;"	enumerator	enum:__anon7
+I2C_ITPendingBit_TypeDef	stm8s_i2c.h	152;"	typedef	typeref:enum:__anon7
 I2C_ITR_ITBUFEN	stm8s.h	1414;"	macro
 I2C_ITR_ITERREN	stm8s.h	1416;"	macro
 I2C_ITR_ITEVTEN	stm8s.h	1415;"	macro
 I2C_ITR_RESET_VALUE	stm8s.h	1361;"	macro
-I2C_IT_BUF	stm8s_i2c.h	77;"	enumerator	enum:__anon15
-I2C_IT_ERR	stm8s_i2c.h	75;"	enumerator	enum:__anon15
-I2C_IT_EVT	stm8s_i2c.h	76;"	enumerator	enum:__anon15
-I2C_IT_TypeDef	stm8s_i2c.h	78;"	typedef	typeref:enum:__anon15
+I2C_IT_BUF	stm8s_i2c.h	77;"	enumerator	enum:__anon4
+I2C_IT_ERR	stm8s_i2c.h	75;"	enumerator	enum:__anon4
+I2C_IT_EVT	stm8s_i2c.h	76;"	enumerator	enum:__anon4
+I2C_IT_TypeDef	stm8s_i2c.h	78;"	typedef	typeref:enum:__anon4
 I2C_Init	stm8s_i2c.c	96;"	function	signature:(uint32_t OutputClockFrequencyHz, uint16_t OwnAddress, I2C_DutyCycle_TypeDef I2C_DutyCycle, I2C_Ack_TypeDef Ack, I2C_AddMode_TypeDef AddMode, uint8_t InputClockFrequencyMHz )
 I2C_Init	stm8s_i2c.h	506;"	prototype	signature:(uint32_t OutputClockFrequencyHz, uint16_t OwnAddress, I2C_DutyCycle_TypeDef I2C_DutyCycle, I2C_Ack_TypeDef Ack, I2C_AddMode_TypeDef AddMode, uint8_t InputClockFrequencyMHz )
 I2C_MAX_FAST_FREQ	stm8s_i2c.h	336;"	macro
@@ -1071,7 +1072,7 @@ IWDG_RLR_RESET_VALUE	stm8s.h	1622;"	macro
 IWDG_TypeDef	stm8s.h	1615;"	typedef	typeref:struct:IWDG_struct
 IWDG_struct	stm8s.h	1609;"	struct
 KR	stm8s.h	1611;"	member	struct:IWDG_struct
-LED_COUNT	api.c	14;"	macro	file:
+LED_COUNT	api.c	10;"	macro	file:
 LSI_VALUE	stm8s.h	119;"	macro
 LTRH	stm8s.h	331;"	member	struct:ADC1_struct
 LTRL	stm8s.h	332;"	member	struct:ADC1_struct
@@ -1157,7 +1158,7 @@ PSCRH	stm8s.h	630;"	member	struct:TIM1_struct
 PSCRL	stm8s.h	631;"	member	struct:TIM1_struct
 PSR	stm8s.h	2183;"	member	struct:__anon36
 PUKR	stm8s.h	1524;"	member	struct:FLASH_struct
-PWM_MAX_PERIOD	api.c	22;"	variable
+PWM_MAX_PERIOD	api.c	15;"	variable
 Page	stm8s.h	2327;"	member	struct:__anon36	typeref:union:__anon36::__anon37
 PointerAttr	stm8s.h	156;"	macro
 PointerAttr	stm8s.h	160;"	macro
@@ -1476,7 +1477,7 @@ TIM2_CR1_OPM	stm8s.h	889;"	macro
 TIM2_CR1_RESET_VALUE	stm8s.h	858;"	macro
 TIM2_CR1_UDIS	stm8s.h	891;"	macro
 TIM2_CR1_URS	stm8s.h	890;"	macro
-TIM2_CapComp_IRQ_Handler	api.c	243;"	function	signature:(void)
+TIM2_CapComp_IRQ_Handler	api.c	190;"	function	signature:(void)
 TIM2_CapComp_IRQ_Handler	stm8_interrupt_vector.c	24;"	prototype	file:	signature:(void)
 TIM2_EGR_CC1G	stm8s.h	910;"	macro
 TIM2_EGR_CC2G	stm8s.h	909;"	macro
@@ -1500,7 +1501,7 @@ TIM2_SR2_CC2OF	stm8s.h	905;"	macro
 TIM2_SR2_CC3OF	stm8s.h	904;"	macro
 TIM2_SR2_RESET_VALUE	stm8s.h	861;"	macro
 TIM2_TypeDef	stm8s.h	852;"	typedef	typeref:struct:TIM2_struct
-TIM2_UPD_OVF_IRQHandler	api.c	234;"	function	signature:(void)
+TIM2_UPD_OVF_IRQHandler	api.c	178;"	function	signature:(void)
 TIM2_UPD_OVF_IRQHandler	stm8_interrupt_vector.c	23;"	prototype	file:	signature:(void)
 TIM2_struct	stm8s.h	824;"	struct
 TIM3	stm8s.h	2686;"	macro
@@ -2075,20 +2076,15 @@ __STM8S_STDPERIPH_VERSION_SUB2	stm8s.h	184;"	macro
 __STM8S_UART1_H	stm8s_uart1.h	30;"	macro
 _stext	stm8_interrupt_vector.c	22;"	prototype	file:
 _vectab	stm8_interrupt_vector.c	26;"	variable
-api_counter	api.c	11;"	variable
+api_counter	api.c	7;"	variable
 assert_param	stm8s.h	2836;"	macro
-audio_mean	api.c	39;"	variable
-audio_measurement_count	api.c	38;"	variable
-audio_running_mean	api.c	41;"	variable
-audio_running_std	api.c	42;"	variable
-audio_std	api.c	40;"	variable
 bool	stm8s.h	231;"	typedef	typeref:enum:__anon32
-button_pressed_event	api.c	33;"	variable
-button_start_ms	api.c	32;"	variable
-clear_button_event	api.c	201;"	function	signature:(u8 button_index,bool is_long)
-clear_button_event	api.h	24;"	prototype	signature:(u8 button_index,bool is_long)
-clear_button_events	api.c	208;"	function
-clear_button_events	api.h	25;"	prototype	signature:(void)
+button_pressed_event	api.c	26;"	variable
+button_start_ms	api.c	25;"	variable
+clear_button_event	api.c	148;"	function	signature:(u8 button_index,bool is_long)
+clear_button_event	api.h	22;"	prototype	signature:(u8 button_index,bool is_long)
+clear_button_events	api.c	155;"	function
+clear_button_events	api.h	23;"	prototype	signature:(void)
 disableInterrupts	stm8s.h	2717;"	macro
 disableInterrupts	stm8s.h	2726;"	macro
 disableInterrupts	stm8s.h	2736;"	macro
@@ -2097,26 +2093,21 @@ enableInterrupts	stm8s.h	2725;"	macro
 enableInterrupts	stm8s.h	2735;"	macro
 execute_terminal_command	developer.c	70;"	function	signature:(char command,u32 (*parameters)[MAX_TERMINAL_PARAMETERS],u8 parameter_count)
 execute_terminal_command	developer.h	8;"	prototype	signature:(char command,u32 (*parameters)[MAX_TERMINAL_PARAMETERS],u8 parameter_count)
-flush_leds	api.c	248;"	function	signature:(u8 led_count)
-flush_leds	api.h	16;"	prototype	signature:(u8 led_count)
-get_audio_level	api.c	230;"	function
-get_audio_level	api.h	30;"	prototype	signature:(void)
-get_audio_sample	api.c	346;"	function
-get_audio_sample	api.h	14;"	prototype	signature:(void)
-get_button_event	api.c	197;"	function	signature:(u8 button_index,bool is_long)
-get_button_event	api.h	23;"	prototype	signature:(u8 button_index,bool is_long)
-get_eeprom_byte	api.c	440;"	function	signature:(u16 eeprom_address)
-get_eeprom_byte	api.h	32;"	prototype	signature:(u16 address)
-get_random	api.c	103;"	function	signature:(u16 x)
-get_random	api.h	29;"	prototype	signature:(u16 x)
+flush_leds	api.c	197;"	function	signature:(u8 led_count)
+flush_leds	api.h	14;"	prototype	signature:(u8 led_count)
+get_button_event	api.c	144;"	function	signature:(u8 button_index,bool is_long)
+get_button_event	api.h	21;"	prototype	signature:(u8 button_index,bool is_long)
+get_eeprom_byte	api.c	292;"	function	signature:(u16 eeprom_address)
+get_eeprom_byte	api.h	27;"	prototype	signature:(u16 address)
+get_random	api.c	50;"	function	signature:(u16 x)
+get_random	api.h	25;"	prototype	signature:(u16 x)
 get_terminal_command	developer.c	39;"	function	signature:(char *command,u32 (*parameters)[MAX_TERMINAL_PARAMETERS],u8 *parameter_count)
 get_terminal_command	developer.h	7;"	prototype	signature:(char *command,u32 (*parameters)[MAX_TERMINAL_PARAMETERS],u8 *parameter_count)
 halt	stm8s.h	2723;"	macro
 halt	stm8s.h	2732;"	macro
 halt	stm8s.h	2742;"	macro
-hello_world	api.c	87;"	function
+hello_world	api.c	32;"	function
 hello_world	api.h	5;"	prototype	signature:(void)
-hw_revision	api.c	6;"	variable
 int16_t	stm8s.h	212;"	typedef
 int32_t	stm8s.h	213;"	typedef
 int8_t	stm8s.h	211;"	typedef
@@ -2124,32 +2115,30 @@ interrupt_handler	stm8_interrupt_vector.c	11;"	member	struct:interrupt_vector	fi
 interrupt_handler_t	stm8_interrupt_vector.c	7;"	typedef	file:
 interrupt_instruction	stm8_interrupt_vector.c	10;"	member	struct:interrupt_vector	file:
 interrupt_vector	stm8_interrupt_vector.c	9;"	struct	file:
-is_application_valid	api.c	128;"	function
-is_application_valid	api.h	19;"	prototype	signature:(void)
+is_application_valid	api.c	75;"	function
+is_application_valid	api.h	17;"	prototype	signature:(void)
 is_application_valid	api.h	7;"	prototype	signature:(void)
-is_button_down	api.c	219;"	function	signature:(u8 index)
-is_button_down	api.h	26;"	prototype	signature:(u8 index)
-is_developer_valid	api.c	134;"	function
-is_developer_valid	api.h	20;"	prototype	signature:(void)
-is_sleep_valid	api.c	140;"	function
-is_sleep_valid	api.h	21;"	prototype	signature:(void)
-is_space_sao	api.c	435;"	function
-is_space_sao	api.h	28;"	prototype	signature:(void)
+is_button_down	api.c	166;"	function	signature:(u8 index)
+is_button_down	api.h	24;"	prototype	signature:(u8 index)
+is_developer_valid	api.c	81;"	function
+is_developer_valid	api.h	18;"	prototype	signature:(void)
+is_sleep_valid	api.c	87;"	function
+is_sleep_valid	api.h	19;"	prototype	signature:(void)
 is_submenu_valid	application.c	43;"	function
 is_submenu_valid	application.h	8;"	prototype	signature:(void)
 main	main.c	6;"	function
-millis	api.c	162;"	function
+millis	api.c	109;"	function
 millis	api.h	9;"	prototype	signature:(void)
 nop	stm8s.h	2720;"	macro
 nop	stm8s.h	2729;"	macro
 nop	stm8s.h	2739;"	macro
-pwm_brightness	api.c	23;"	variable
-pwm_brightness_buffer	api.c	15;"	variable
-pwm_led_count	api.c	25;"	variable
-pwm_led_index	api.c	27;"	variable
-pwm_sleep	api.c	24;"	variable
-pwm_sleep_remaining	api.c	26;"	variable
-pwm_state	api.c	28;"	variable
+pwm_brightness	api.c	16;"	variable
+pwm_brightness_buffer	api.c	12;"	variable
+pwm_led_count	api.c	18;"	variable
+pwm_led_index	api.c	20;"	variable
+pwm_sleep	api.c	17;"	variable
+pwm_sleep_remaining	api.c	19;"	variable
+pwm_state	api.c	21;"	variable
 rim	stm8s.h	2718;"	macro
 rim	stm8s.h	2727;"	macro
 rim	stm8s.h	2737;"	macro
@@ -2160,43 +2149,40 @@ run_developer	developer.h	6;"	prototype	signature:(void)
 s16	stm8s.h	223;"	typedef
 s32	stm8s.h	222;"	typedef
 s8	stm8s.h	224;"	typedef
-set_debug	api.c	328;"	function	signature:(u8 brightness)
+set_debug	api.c	277;"	function	signature:(u8 brightness)
 set_debug	api.h	13;"	prototype	signature:(u8 brightness)
-set_frame_audio	application.c	81;"	function
-set_frame_audio	application.h	10;"	prototype	signature:(void)
-set_frame_blink	application.c	106;"	function
-set_frame_blink	application.h	11;"	prototype	signature:(void)
+set_frame_blink	application.c	81;"	function
+set_frame_blink	application.h	10;"	prototype	signature:(void)
 set_frame_rainbow	application.c	74;"	function
 set_frame_rainbow	application.h	9;"	prototype	signature:(void)
-set_hue	api.c	273;"	function	signature:(u8 index,u16 color,u8 brightness)
-set_hue	api.h	18;"	prototype	signature:(u8 index,u16 color,u8 brightness)
-set_led	api.c	357;"	function	signature:(u8 led_index)
-set_led	api.h	15;"	prototype	signature:(u8 index)
-set_matrix_high_z	api.c	333;"	function
+set_hue	api.c	222;"	function	signature:(u8 index,u16 color,u8 brightness)
+set_hue	api.h	16;"	prototype	signature:(u8 index,u16 color,u8 brightness)
+set_matrix_high_z	api.c	282;"	function
 set_matrix_high_z	api.h	10;"	prototype	signature:(void)
-set_millis	api.c	167;"	function	signature:(u32 new_time)
-set_millis	api.h	31;"	prototype	signature:(u32 new_time)
-set_rgb	api.c	317;"	function	signature:(u8 index,u8 color,u8 brightness)
+set_millis	api.c	114;"	function	signature:(u32 new_time)
+set_millis	api.h	26;"	prototype	signature:(u32 new_time)
+set_rgb	api.c	266;"	function	signature:(u8 index,u8 color,u8 brightness)
 set_rgb	api.h	11;"	prototype	signature:(u8 index,u8 color,u8 brightness)
-set_white	api.c	322;"	function	signature:(u8 index,u8 brightness)
+set_white	api.c	271;"	function	signature:(u8 index,u8 brightness)
 set_white	api.h	12;"	prototype	signature:(u8 index,u8 brightness)
 setup_application	application.c	11;"	function
 setup_application	application.h	3;"	prototype	signature:(void)
 setup_developer	developer.c	10;"	function
 setup_developer	developer.h	5;"	prototype	signature:(void)
-setup_main	api.c	145;"	function
+setup_main	api.c	92;"	function
 setup_main	api.h	8;"	prototype	signature:(void)
-setup_serial	api.c	110;"	function	signature:(bool is_enabled,bool is_fast_baud_rate)
+setup_serial	api.c	57;"	function	signature:(bool is_enabled,bool is_fast_baud_rate)
 setup_serial	api.h	6;"	prototype	signature:(bool is_enabled,bool is_fast_baud_rate)
-show_cyclone	application.c	131;"	function
+show_cyclone	application.c	106;"	function
 show_cyclone	application.h	6;"	prototype	signature:(void)
-show_puzzle	application.c	139;"	function
+show_puzzle	application.c	114;"	function
 show_puzzle	application.h	7;"	prototype	signature:(void)
 show_screen_savers	application.c	48;"	function
 show_screen_savers	application.h	5;"	prototype	signature:(void)
 sim	stm8s.h	2719;"	macro
 sim	stm8s.h	2728;"	macro
 sim	stm8s.h	2738;"	macro
+temp_delete_me	api.c	30;"	variable
 trap	stm8s.h	2721;"	macro
 trap	stm8s.h	2730;"	macro
 trap	stm8s.h	2740;"	macro
@@ -2206,9 +2192,8 @@ u8	stm8s.h	228;"	typedef
 uint16_t	stm8s.h	217;"	typedef
 uint32_t	stm8s.h	218;"	typedef
 uint8_t	stm8s.h	216;"	typedef
-update_audio	api.h	27;"	prototype	signature:(void)
-update_buttons	api.c	175;"	function
-update_buttons	api.h	22;"	prototype	signature:(void)
+update_buttons	api.c	122;"	function
+update_buttons	api.h	20;"	prototype	signature:(void)
 wfi	stm8s.h	2722;"	macro
 wfi	stm8s.h	2731;"	macro
 wfi	stm8s.h	2741;"	macro
