@@ -83,8 +83,8 @@ void execute_terminal_command(char command,u32 (*parameters)[MAX_TERMINAL_PARAME
 			is_valid=1;
 		}break;
 		case 't':{ //if parameters>=1, then set time, else print time
-			if(parameter_count) set_millis((*parameters)[0]);
-			else Serial_print_u32(millis());
+			//if(parameter_count) set_millis((*parameters)[0]);
+			//else Serial_print_u32(millis());
 			is_valid=1;
 		}break;
 		case 'e':{ //eeprom interface

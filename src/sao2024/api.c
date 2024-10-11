@@ -4,22 +4,19 @@
 #include "stm8s_uart1.h"
 
 //time state
-u8 visible_index=0;//which led is being displayed this moment
-u16 micros_counter=0;//counting the amount of sleep each led has taken
-u16 millis_counter=0;//increments roughly every millisecond, give-or-take a factor of 2 based on clock divider settings, this is the basis of millis()
-
-//application space settings
-#define LED_COUNT 31 //10 RGB (3 LEDs each) + 12 white + 1 debug
-#define DEBUG_LED 6 //index of the debug led
-u8 pwm_brightness_buffer[LED_COUNT];
+u32 api_counter=0;//counting the amount of sleep each led has taken
 
 //LED pwm control state machine
+#define LED_COUNT 31 //10 RGB (3 LEDs each) + 12 white + 1 debug
+#define DEBUG_LED 6 //index of the debug led
 const u8 PWM_MAX_PERIOD=255;//interrupt counter has max value, so delaying longer requires multiple interrupt triggers
-u8 pwm_brightness[LED_COUNT][2][2];//array index, [led index, led pwm], [A vs B side live]
+u16 pwm_brightness[LED_COUNT][2];//array index, [A vs B side live]
+u8 pwm_brightness_index[LED_COUNT][2];//led index, [A vs B side live]
+u8 pwm_brightness_buffer[LED_COUNT];
 u16 pwm_sleep[2];//[A vs B side live], how many LED LSBs to wait with LEDs OFF before putting LEDs back ON
 u8 pwm_led_count[2];//how many LEDs to cycle through
 u16 pwm_sleep_remaining=0;
-u8 pwm_led_index=0;
+u8 pwm_visible_index=0;//which led is visible this moment in time
 u8 pwm_state=0;//LSB (bit 0) is index of pwm_brightness to pull pwm info from.  bit 1 is a flag the application layer raises for the API layer to clear requesting a switch
 
 //buttons
@@ -91,12 +88,6 @@ bool is_developer_valid()
 	return is_button_down(2) && !get_button_event(0,1);
 }
 
-//exit sleep mode if any button is pushed
-bool is_sleep_valid()
-{
-	return !(get_button_event(0,0) || get_button_event(1,0) || get_button_event(0,1) || get_button_event(1,1));
-}
-
 void setup_main()
 {
 	CLK->CKDIVR &= (u8)~(CLK_CKDIVR_HSIDIV);			// fhsi= fhsirc (HSIDIV= 0), run at 16 MHz
@@ -118,12 +109,7 @@ void setup_main()
 
 u32 millis()
 {
-	return millis_counter;
-}
-
-void set_millis(u32 new_time)
-{
-	millis_counter=new_time;
+	return api_counter>>10;
 }
 
 //log short or long rpess button events for applicatio layer to use as user input
@@ -195,14 +181,14 @@ bool is_button_down(u8 index)
 	GPIOA->CR1 &= (uint8_t)(~(GPIO_PIN_3));
   TIM2->CR1 &= ~TIM2_CR1_CEN;  // Clear the CEN bit to stop the timer
 	TIM2->SR1&=~TIM2_SR1_UIF;//reset interrupt
-	visible_index++;
-	if(visible_index>6) visible_index=0;
+	pwm_visible_index++;
+	if(pwm_visible_index>6) pwm_visible_index=0;
 	
 	
-	if(visible_index==0)//simulate other LEDs ON
+	if(pwm_visible_index==0)//simulate other LEDs ON
 	{
 		is_debug_led=this_sleep>0;
-	}else if(visible_index==1){
+	}else if(pwm_visible_index==1){
 		this_sleep=temp3_delete_me;
 		is_other_led=this_sleep>0;
 	}else{
@@ -217,20 +203,94 @@ bool is_button_down(u8 index)
 	//TIM2->CCR1H = this_sleep>>8;//set wakeup alarm
 	TIM2->ARRH= this_sleep>>8;// init auto reload register
 	TIM2->ARRL= this_sleep&0x00FF;// init auto reload register
-	micros_counter+=this_sleep;
-	millis_counter+=micros_counter>>10;
-	micros_counter&=0x03FF;
+	api_counter+=this_sleep;
 	
 	if(is_debug_led)
 		GPIO_Init(GPIOA, GPIO_PIN_3, GPIO_MODE_OUT_PP_HIGH_SLOW);
 	if(is_other_led)
 	{
-		GPIO_Init(GPIOC, GPIO_PIN_3, GPIO_MODE_OUT_PP_HIGH_SLOW);
-		GPIO_Init(GPIOC, GPIO_PIN_6, GPIO_MODE_OUT_PP_LOW_SLOW);
+		//GPIO_Init(GPIOC, GPIO_PIN_3, GPIO_MODE_OUT_PP_HIGH_SLOW);
+		//GPIO_Init(GPIOC, GPIO_PIN_6, GPIO_MODE_OUT_PP_LOW_SLOW);
+		//GPIOC->ODR |= (uint8_t)GPIO_PIN_3;
+		//GPIOC->DDR |= (uint8_t)GPIO_PIN_3;
+		//GPIOC->CR1 |= (uint8_t)GPIO_PIN_3;
+		//GPIOC->ODR &= (uint8_t)(~(GPIO_PIN_6));
+		//GPIOC->DDR |= (uint8_t)GPIO_PIN_6;
+		//GPIOC->CR1 |= (uint8_t)GPIO_PIN_6;
+		set_led(1);
 	}
 	
   // Re-enable TIM2 after setting the counter value
   TIM2->CR1 |= TIM2_CR1_CEN;   // Set the CEN bit to restart the timer
+}
+
+void set_led(u8 led_index)
+{
+	const u8 led_lookup[LED_COUNT][2]={//[0] is HIGH mat, [1] is LOW mat
+		{0,3},{1,3},{2,3},{3,0},{4,0},{5,0},//reds
+		{0,4},{1,4},{2,4},{3,1},{4,1},{5,1},//greens
+		{0,5},{1,5},{2,5},{3,2},{4,2},{5,2},//blues
+		{6,6},//debug; GND is tied low, no charlieplexing involved
+		{1,0},//LED7
+		{2,0},//LED8
+		{0,1},//LED9
+		{2,1},//LED10
+		{0,2},//LED11
+		{1,2},//LED12
+		{4,3},//LED13
+		{5,3},//LED14
+		{3,4},//LED15
+		{5,4},//LED16
+		{3,5},//LED17
+		{4,5} //LED18
+	};
+	set_mat(led_lookup[led_index][0],1);
+	if(led_index!=DEBUG_LED) set_mat(led_lookup[led_index][1],0);
+}
+
+void set_mat(u8 mat_index,bool is_high)
+{
+	GPIO_TypeDef* GPIOx;
+	GPIO_Pin_TypeDef GPIO_Pin;
+	if(mat_index==0)
+	{
+		GPIOx=GPIOC;
+		GPIO_Pin=GPIO_PIN_3;
+	}
+	if(mat_index==1)
+	{
+		GPIOx=GPIOC;
+		GPIO_Pin=GPIO_PIN_4;
+	}
+	if(mat_index==2)
+	{
+		GPIOx=GPIOC;
+		GPIO_Pin=GPIO_PIN_5;
+	}
+	if(mat_index==3)
+	{
+		GPIOx=GPIOC;
+		GPIO_Pin=GPIO_PIN_6;
+	}
+	if(mat_index==4)
+	{
+		GPIOx=GPIOC;
+		GPIO_Pin=GPIO_PIN_7;
+	}
+	if(mat_index==5)
+	{
+		GPIOx=GPIOD;
+		GPIO_Pin=GPIO_PIN_2;
+	}
+	if(mat_index==6)
+	{
+		GPIOx=GPIOA;
+		GPIO_Pin=GPIO_PIN_3;
+	}
+	if(is_high) GPIOx->ODR |= (uint8_t)GPIO_Pin;
+	else        GPIOx->ODR &= (uint8_t)(~(GPIO_Pin));
+	GPIOx->DDR |= (uint8_t)GPIO_Pin;
+	GPIOx->CR1 |= (uint8_t)GPIO_Pin;
 }
 
 //LED interrupt (LED ON to OFF)
@@ -242,7 +302,7 @@ bool is_button_down(u8 index)
 
 void flush_leds(u8 led_count)
 {
-	u8 led_read_index=0,led_write_index=0;
+	/*u8 led_read_index=0,led_write_index=0;
 	u8 buffer_index;//write to the buffer index that is NOT being used/volatile
 	while(pwm_state&0x02){}//wait for volatile flag to clear (if still raised from the previous call)
 	buffer_index=0x01^(pwm_state&0x01);//need to wait for above flag to be cleared before evaluating this
@@ -263,6 +323,7 @@ void flush_leds(u8 led_count)
 	//note: user may ahve requeted more LEDs to be lit then are actually there, so use as-written LED count, led_write_index,
 	//rather than user-specified value: led_count
 	pwm_state|=0x02;//raise flag that data is ready for volatile pwm process to pick up and use
+	*/
 }
 
 void set_hue(u8 index,u16 color,u8 brightness)
