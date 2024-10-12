@@ -7,14 +7,13 @@
 u32 api_counter=0;//counting the amount of sleep each led has taken
 
 //LED pwm control state machine
-#define LED_COUNT 31 //10 RGB (3 LEDs each) + 12 white + 1 debug
-#define DEBUG_LED 6 //index of the debug led
-const u8 PWM_MAX_PERIOD=255;//interrupt counter has max value, so delaying longer requires multiple interrupt triggers
+#define LED_COUNT 31 //6 RGB (3 LEDs each) + 12 white + 1 debug
+#define DEBUG_LED 18 //index of the debug led
 u16 pwm_brightness[LED_COUNT][2];//array index, [A vs B side live]
 u8 pwm_brightness_index[LED_COUNT][2];//led index, [A vs B side live]
-u8 pwm_brightness_buffer[LED_COUNT];
+u8 pwm_brightness_buffer[LED_COUNT];//hold LED values before flushing
 u16 pwm_sleep[2];//[A vs B side live], how many LED LSBs to wait with LEDs OFF before putting LEDs back ON
-u8 pwm_led_count[2];//how many LEDs to cycle through
+u8 pwm_led_count[2];//how many visible LEDs to cycle through
 u16 pwm_sleep_remaining=0;
 u8 pwm_visible_index=0;//which led is visible this moment in time
 u8 pwm_state=0;//LSB (bit 0) is index of pwm_brightness to pull pwm info from.  bit 1 is a flag the application layer raises for the API layer to clear requesting a switch
@@ -39,16 +38,20 @@ void hello_world()
 	while(1)
 	{
 		frame++;
-		//temp_delete_me=(frame/64/256)%2?(~(frame/64)):(frame/64);
-		temp2_delete_me=0x00FF&((frame/256/256)%2?(~(frame/256)):(frame/256));
-		temp2_delete_me=temp2_delete_me*temp2_delete_me;
-		temp2_delete_me=temp2_delete_me>>6;
-		temp_delete_me=temp2_delete_me;
-		temp4_delete_me=0x00FF&((frame/256/256)%2?((frame/256)):(~frame/256));
-		temp4_delete_me=temp4_delete_me*temp4_delete_me;
-		temp4_delete_me=temp4_delete_me>>6;
-		temp3_delete_me=(temp4_delete_me%2)<<9;
-		//temp_delete_me=(frame/256/256)%2?(~(frame/256)):(frame/256);
+		if(frame%256==0)
+		{
+			//temp_delete_me=(frame/64/256)%2?(~(frame/64)):(frame/64);
+			temp2_delete_me=0x00FF&((frame/256/256)%2?(~(frame/256)):(frame/256));
+			temp2_delete_me=temp2_delete_me*temp2_delete_me;
+			temp2_delete_me=temp2_delete_me>>6;
+			temp_delete_me=temp2_delete_me;
+			temp4_delete_me=0x00FF&((frame/256/256)%2?((frame/256)):(~frame/256));
+			temp4_delete_me=temp4_delete_me*temp4_delete_me;
+			temp4_delete_me=temp4_delete_me>>6;
+			temp3_delete_me=(temp4_delete_me%2)<<9;
+			//temp_delete_me=(frame/256/256)%2?(~(frame/256)):(frame/256);
+			flush_leds(7);
+		}
 	}
 }
 
@@ -184,7 +187,6 @@ bool is_button_down(u8 index)
 	pwm_visible_index++;
 	if(pwm_visible_index>6) pwm_visible_index=0;
 	
-	
 	if(pwm_visible_index==0)//simulate other LEDs ON
 	{
 		is_debug_led=this_sleep>0;
@@ -199,24 +201,15 @@ bool is_button_down(u8 index)
 	
   TIM2->CNTRH = 0;// Set the high byte of the counter
   TIM2->CNTRL = 0;// Set the low byte of the counter
-	//TIM2->CCR1L = this_sleep&0x00FF;//set wakeup alarm
-	//TIM2->CCR1H = this_sleep>>8;//set wakeup alarm
 	TIM2->ARRH= this_sleep>>8;// init auto reload register
 	TIM2->ARRL= this_sleep&0x00FF;// init auto reload register
 	api_counter+=this_sleep;
 	
 	if(is_debug_led)
-		GPIO_Init(GPIOA, GPIO_PIN_3, GPIO_MODE_OUT_PP_HIGH_SLOW);
+		//GPIO_Init(GPIOA, GPIO_PIN_3, GPIO_MODE_OUT_PP_HIGH_SLOW);
+		set_led(DEBUG_LED);
 	if(is_other_led)
 	{
-		//GPIO_Init(GPIOC, GPIO_PIN_3, GPIO_MODE_OUT_PP_HIGH_SLOW);
-		//GPIO_Init(GPIOC, GPIO_PIN_6, GPIO_MODE_OUT_PP_LOW_SLOW);
-		//GPIOC->ODR |= (uint8_t)GPIO_PIN_3;
-		//GPIOC->DDR |= (uint8_t)GPIO_PIN_3;
-		//GPIOC->CR1 |= (uint8_t)GPIO_PIN_3;
-		//GPIOC->ODR &= (uint8_t)(~(GPIO_PIN_6));
-		//GPIOC->DDR |= (uint8_t)GPIO_PIN_6;
-		//GPIOC->CR1 |= (uint8_t)GPIO_PIN_6;
 		set_led(1);
 	}
 	
@@ -224,6 +217,7 @@ bool is_button_down(u8 index)
   TIM2->CR1 |= TIM2_CR1_CEN;   // Set the CEN bit to restart the timer
 }
 
+//enable 1 led to be visible: emit light
 void set_led(u8 led_index)
 {
 	const u8 led_lookup[LED_COUNT][2]={//[0] is HIGH mat, [1] is LOW mat
@@ -248,6 +242,7 @@ void set_led(u8 led_index)
 	if(led_index!=DEBUG_LED) set_mat(led_lookup[led_index][1],0);
 }
 
+//enable high or low side of an LED to form a complete circuit
 void set_mat(u8 mat_index,bool is_high)
 {
 	GPIO_TypeDef* GPIOx;
@@ -302,6 +297,7 @@ void set_mat(u8 mat_index,bool is_high)
 
 void flush_leds(u8 led_count)
 {
+	
 	/*u8 led_read_index=0,led_write_index=0;
 	u8 buffer_index;//write to the buffer index that is NOT being used/volatile
 	while(pwm_state&0x02){}//wait for volatile flag to clear (if still raised from the previous call)
@@ -326,42 +322,44 @@ void flush_leds(u8 led_count)
 	*/
 }
 
-void set_hue(u8 index,u16 color,u8 brightness)
+//assumes max brightness
+void set_hue_max(u8 index,u16 color)
 {
+	const u8 brightness=255;
 	u8 red=0,green=0,blue=0;
-	u16 residual=color%(0x2AAB);
-	residual=(u8)(residual*brightness/0x2AAB);
-	switch(color/(0x2AAB))//0xFFFF/6
+	u16 residual_16=color%(0x2AAB);
+	u8 residual_8=(residual_16<<8)/0x2AAB;
+	switch(color/(0x2AAB))
 	{
 		case 0:{
 			red=brightness;
-			green=residual;
+			green=residual_8;
 			blue=0;
 			break;
 		}case 1:{
-			red=brightness-residual;
+			red=brightness-residual_8;
 			green=brightness;
 			blue=0;
 			break;
 		}case 2:{
 			red=0;
 			green=brightness;
-			blue=residual;
+			blue=residual_8;
 			break;
 		}case 3:{
 			red=0;
-			green=brightness-residual;
+			green=brightness-residual_8;
 			blue=brightness;
 			break;
 		}case 4:{
-			red=residual;
+			red=residual_8;
 			green=0;
 			blue=brightness;
 			break;
 		}case 5:{
 			red=brightness;
 			green=0;
-			blue=brightness-residual;
+			blue=brightness-residual_8;
 			break;
 		}default:{}
 	}
@@ -388,9 +386,6 @@ void set_debug(u8 brightness)
 
 void set_matrix_high_z()
 {
-	//GPIO_Init(GPIOC, GPIO_PIN_7 | GPIO_PIN_6 | GPIO_PIN_5 | GPIO_PIN_4 | GPIO_PIN_3, GPIO_MODE_IN_FL_NO_IT);//2, 3, 4, 5, 6
-	//GPIO_Init(GPIOD, GPIO_PIN_2, GPIO_MODE_IN_FL_NO_IT);
-	//GPIO_Init(GPIOA, GPIO_PIN_3 , GPIO_MODE_IN_FL_NO_IT);
 	GPIOC->CR1 &= (uint8_t)(~(GPIO_PIN_7 | GPIO_PIN_6 | GPIO_PIN_5 | GPIO_PIN_4 | GPIO_PIN_3));
 	GPIOD->CR1 &= (uint8_t)(~(GPIO_PIN_2));
 	GPIOA->CR1 &= (uint8_t)(~(GPIO_PIN_3));

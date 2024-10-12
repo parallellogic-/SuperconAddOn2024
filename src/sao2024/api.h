@@ -13,7 +13,7 @@ void set_white(u8 index,u8 brightness);
 void set_debug(u8 brightness);
 void flush_leds(u8 led_count);
 //u16 get_val(u8 index);
-void set_hue(u8 index,u16 color,u8 brightness);
+void set_hue_max(u8 index,u16 color);
 bool is_application_valid(void);
 bool is_developer_valid(void);
 void update_buttons(void);

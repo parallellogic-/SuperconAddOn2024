@@ -26,7 +26,7 @@ void run_application()
 		if(is_button_down(0)) show_top_menu_since_ms=millis();
 		if((show_top_menu_since_ms+SUBMENU_TIME_OUT_MS)>millis())
 		{//if the coutndown timeout expiration is in the future (because button is currently down or within 2 seconds of timeout), show top menu
-			for(iter=0;iter<RGB_LED_COUNT;iter++) set_hue(iter,submenu_index<<13,255);//set all LEDs to the same color
+			//for(iter=0;iter<RGB_LED_COUNT;iter++) set_hue(iter,submenu_index<<13,255);//set all LEDs to the same color
 			flush_leds(RGB_LED_COUNT+1);//10 RGB LEDs and the status LED to give feedback about the button push to the user
 		}else{
 			show_top_menu_since_ms=0;
@@ -74,7 +74,7 @@ void show_screen_savers()
 void set_frame_rainbow()
 {
 	u8 iter;
-	for(iter=0;iter<RGB_LED_COUNT;iter++) set_hue(iter,(u16)(millis()*32+(0xFFFF/10)*iter),255);
+	//for(iter=0;iter<RGB_LED_COUNT;iter++) set_hue(iter,(u16)(millis()*32+(0xFFFF/10)*iter),255);
 	flush_leds(2*RGB_LED_COUNT+1);//max 2 colors ON at a time and one led for button pushes
 }
 
