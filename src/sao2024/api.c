@@ -50,6 +50,8 @@ void hello_world()
 			temp4_delete_me=temp4_delete_me>>6;
 			temp3_delete_me=(temp4_delete_me%2)<<9;
 			//temp_delete_me=(frame/256/256)%2?(~(frame/256)):(frame/256);
+			set_debug(temp_delete_me);
+			set_white(0,temp3_delete_me);
 			flush_leds(7);
 		}
 	}
@@ -205,6 +207,8 @@ bool is_button_down(u8 index)
 	TIM2->ARRL= this_sleep&0x00FF;// init auto reload register
 	api_counter+=this_sleep;
 	
+	pwm_state&=0xFD;//DELETE ME TEMP, clear buffer flag
+	
 	if(is_debug_led)
 		//GPIO_Init(GPIOA, GPIO_PIN_3, GPIO_MODE_OUT_PP_HIGH_SLOW);
 		set_led(DEBUG_LED);
@@ -295,31 +299,32 @@ void set_mat(u8 mat_index,bool is_high)
 	TIM2->SR1&=~TIM2_SR1_CC1IF;//reset interrupt
 }*/
 
+//led_count is the effective number of LEDs that are visible (ex. red at 128 + blue at 128  = 1 led_count)
 void flush_leds(u8 led_count)
 {
-	
-	/*u8 led_read_index=0,led_write_index=0;
+	u8 led_read_index=0,led_write_index=0;
 	u8 buffer_index;//write to the buffer index that is NOT being used/volatile
 	while(pwm_state&0x02){}//wait for volatile flag to clear (if still raised from the previous call)
 	buffer_index=0x01^(pwm_state&0x01);//need to wait for above flag to be cleared before evaluating this
-	pwm_sleep[buffer_index]=led_count<<8;//prepare the max value of sleep, and subtract from it for each LED illuminated
+	
+	pwm_sleep[buffer_index]=((uint16_t)led_count)<<10;//prepare the max value of sleep, and subtract from it for each LED illuminated based on brightness (time illuminated)
 	//write application layer data (brightness values) into the pwm volatile memory
 	for(led_read_index=0;(led_read_index<LED_COUNT && led_write_index<led_count);led_read_index++)
 	{
-		if(pwm_brightness_buffer[led_read_index]>4)//min brightness, below this value instaiblity occurs magic number to avoid interrupt timing error
+		if(pwm_brightness_buffer[led_read_index]!=0)//min brightness, below this value instaiblity occurs magic number to avoid interrupt timing error
 		{//if these is an led with a non-zero brightness to be shown, then add it to the relevant list
-			pwm_brightness[led_write_index][0][buffer_index]=led_read_index;
-			pwm_brightness[led_write_index][1][buffer_index]=pwm_brightness_buffer[led_read_index];
+			pwm_brightness_index[led_write_index][buffer_index]=led_read_index;
+			pwm_brightness[led_write_index][buffer_index]=(pwm_brightness_buffer[led_read_index]*pwm_brightness_buffer[led_read_index])>>6;//square 8-bit brightness and then clip to 10 bits
+			pwm_brightness[led_write_index][buffer_index]++;//values <8 are rounded to 0, so round that up to avoid zero-length display states
+			pwm_sleep[buffer_index]-=pwm_brightness[led_write_index][buffer_index];
 			led_write_index++;
-			pwm_sleep[buffer_index]-=pwm_brightness_buffer[led_read_index];
 		}
 		pwm_brightness_buffer[led_read_index]=0;//clean up for next use
 	}
-	pwm_led_count[buffer_index]=led_write_index;//save the led count for the volatile pwm rutine state machine.
-	//note: user may ahve requeted more LEDs to be lit then are actually there, so use as-written LED count, led_write_index,
-	//rather than user-specified value: led_count
+	pwm_led_count[buffer_index]=led_write_index;//save the led count for the volatile pwm routine state machine.
+	//note: user may have requeted more LEDs to be lit then are actually there, so use the found LED count (leds>0 brightness), led_write_index,
+	//rather than user-specified value: led_count (effective time to be ON for each frame)
 	pwm_state|=0x02;//raise flag that data is ready for volatile pwm process to pick up and use
-	*/
 }
 
 //assumes max brightness
