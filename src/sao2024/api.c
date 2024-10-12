@@ -159,14 +159,14 @@ bool is_button_down(u8 index)
 	{
 		//case 0:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_3); break; }//left button //DEBUG_BROKEN
 		//case 1:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_4); break; }//right button
-		case 0:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_5); break; }//left button
-		case 1:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_6); break; }//right button
-		case 2:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_1); break; }//SWIM IO input
+		case 0:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_5); }//left button
+		case 1:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_6); }//right button
+		case 2:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_1); }//SWIM IO input
 	}
 	return 0;
 }
 
-//millisecond-ish interrupt and LED OFF to ON
+//millisecond-ish interrupt to select which LED is ON
 @far @interrupt void TIM2_UPD_OVF_IRQHandler (void) {
 	bool buffer_index=pwm_state&0x01;//primary vs redundant side to pull data from
 	u16 sleep_counts=1;
@@ -214,7 +214,7 @@ bool is_button_down(u8 index)
   TIM2->CR1 |= TIM2_CR1_CEN;   // Set the CEN bit to restart the timer
 }
 
-//enable 1 led to be visible: emit light
+//enable one led to be visible: physically emit light
 void set_led_on(u8 led_index)
 {
 	/*const u8 led_lookup[LED_COUNT][2]={//[0] is HIGH mat, [1] is LOW mat
@@ -277,7 +277,9 @@ void set_led_on(u8 led_index)
 	//set_mat(led_lookup[led_index][1],0);
 }
 
-//enable high or low side of an LED to form a complete circuit
+//enable the high or low side of an LED
+//both ends needed to enable charliplexed LED
+//except for single-sided debug led
 void set_mat(u8 mat_index,bool is_high)
 {
 	GPIO_TypeDef* GPIOx;
@@ -389,7 +391,7 @@ void flush_leds(u8 led_count)
 	}
 	if(pwm_sleep[buffer_index]>(LED_COUNT<<10)||pwm_sleep[buffer_index]==0) pwm_sleep[buffer_index]=1;//leds are trying to be brighter than max, causing a negative sleep time to equalize brightness
 	if(led_write_index==0)
-	{//no non-zero LEDs, so fill in default values
+	{//no non-zero LEDs found, so fill in default values
 		led_write_index=1;
 		pwm_sleep[buffer_index]=6<<10;
 		pwm_brightness_index[0][buffer_index]=DEBUG_LED_INDEX;
@@ -406,7 +408,7 @@ void set_hue_max(u8 index,u16 color)
 {
 	//const u8 MAX_BRIGHTNESS=255;//for >1 LED ON fully at a time
 	//const u8 BRIGHTNESS_STEP=43;//CEIL(0x2AAB/MAX_BRIGHTNESS)
-	const u8 MAX_BRIGHTNESS=180;//180**2+180**2 < 255**2
+	const u8 MAX_BRIGHTNESS=180;//180**2+180**2 < 255**2  --> effectively just 1 LED ON regardless of color
 	const u8 BRIGHTNESS_STEP=61;//CEIL(0x2AAB/MAX_BRIGHTNESS)
 	u8 red=0,green=0,blue=0;
 	u8 residual=0;
@@ -431,23 +433,16 @@ void set_hue_max(u8 index,u16 color)
 	set_rgb(index,2,blue);
 }
 
+//set the brightness of individual LEDs
+//  to be made visible in the next frame after calling flush_leds()
 void set_rgb(u8 index,u8 color,u8 brightness)
-{
-	pwm_brightness_buffer[index+color*RGB_LED_COUNT]=brightness;
-}
-
+{ pwm_brightness_buffer[index+color*RGB_LED_COUNT]=brightness; }
 void set_white(u8 index,u8 brightness)
-{
-	pwm_brightness_buffer[DEBUG_LED_INDEX+1+index]=brightness;
-}
-
-//debug led status
+{ pwm_brightness_buffer[DEBUG_LED_INDEX+1+index]=brightness; }
 void set_debug(u8 brightness)
-{
-	pwm_brightness_buffer[DEBUG_LED_INDEX]=brightness;
-}
+{ pwm_brightness_buffer[DEBUG_LED_INDEX]=brightness; }
 
-void set_matrix_high_z()
+/*void set_matrix_high_z()
 {
 	GPIOC->CR1 &= (uint8_t)(~(GPIO_PIN_7 | GPIO_PIN_6 | GPIO_PIN_5 | GPIO_PIN_4 | GPIO_PIN_3));
 	GPIOD->CR1 &= (uint8_t)(~(GPIO_PIN_2));
@@ -455,9 +450,4 @@ void set_matrix_high_z()
 	
 	
 	GPIOD->CR1 &= (uint8_t)(~(GPIO_PIN_3));//DEBUG_BROKEN
-}
-
-u8 get_eeprom_byte(u16 eeprom_address)
-{
-	return (*(PointerAttr uint8_t *) (0x4000+eeprom_address));
-}
+}*/

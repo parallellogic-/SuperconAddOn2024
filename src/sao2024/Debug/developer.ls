@@ -32,7 +32,7 @@
  152  001c 2030          	jra	L15
  153  001e               L74:
  154                     ; 27 		Serial_print_string("> ");
- 156  001e ae001f        	ldw	x,#L55
+ 156  001e ae001b        	ldw	x,#L55
  157  0021 cd0000        	call	_Serial_print_string
  159                     ; 28 		get_terminal_command(&command,&parameters,&parameter_count);
  161  0024 96            	ldw	x,sp
@@ -215,251 +215,224 @@
  504                     ; 68 }
  507  0136 5b09          	addw	sp,#9
  508  0138 81            	ret
- 590                     .const:	section	.text
- 591  0000               L22:
- 592  0000 00000080      	dc.l	128
- 593  0004               L42:
- 594  0004 00000006      	dc.l	6
- 595  0008               L62:
- 596  0008 00000003      	dc.l	3
- 597  000c               L03:
- 598  000c 000000ff      	dc.l	255
- 599  0010               L23:
- 600  0010 0000000c      	dc.l	12
- 601                     ; 70 void execute_terminal_command(char command,u32 (*parameters)[MAX_TERMINAL_PARAMETERS],u8 parameter_count)
- 601                     ; 71 {
- 602                     	switch	.text
- 603  0139               _execute_terminal_command:
- 605  0139 88            	push	a
- 606  013a 88            	push	a
- 607       00000001      OFST:	set	1
- 610                     ; 73 	bool is_valid=0;
- 612  013b 0f01          	clr	(OFST+0,sp)
- 614                     ; 74 	switch(command)
- 617                     ; 130 		}break;
- 618  013d a065          	sub	a,#101
- 619  013f 2756          	jreq	L171
- 620  0141 a007          	sub	a,#7
- 621  0143 2603          	jrne	L43
- 622  0145 cc01ce        	jp	L371
- 623  0148               L43:
- 624  0148 a004          	sub	a,#4
- 625  014a 270f          	jreq	L561
- 626  014c a004          	sub	a,#4
- 627  014e 273f          	jreq	L761
- 628  0150 a003          	sub	a,#3
- 629  0152 2603          	jrne	L63
- 630  0154 cc022c        	jp	L571
- 631  0157               L63:
- 632  0157 ac700270      	jpf	L732
- 633  015b               L561:
- 634                     ; 77 			Serial_print_char(command);
- 636  015b 7b02          	ld	a,(OFST+1,sp)
- 637  015d cd0000        	call	_Serial_print_char
- 639                     ; 78 			for(iter=0;iter<parameter_count;iter++)
- 641  0160 0f01          	clr	(OFST+0,sp)
- 644  0162 201d          	jra	L542
- 645  0164               L142:
- 646                     ; 80 				Serial_print_char(' ');
- 648  0164 a620          	ld	a,#32
- 649  0166 cd0000        	call	_Serial_print_char
- 651                     ; 81 				Serial_print_u32((*parameters)[iter]);
- 653  0169 7b01          	ld	a,(OFST+0,sp)
- 654  016b 97            	ld	xl,a
- 655  016c a604          	ld	a,#4
- 656  016e 42            	mul	x,a
- 657  016f 72fb05        	addw	x,(OFST+4,sp)
- 658  0172 9093          	ldw	y,x
- 659  0174 ee02          	ldw	x,(2,x)
- 660  0176 89            	pushw	x
- 661  0177 93            	ldw	x,y
- 662  0178 fe            	ldw	x,(x)
- 663  0179 89            	pushw	x
- 664  017a cd0000        	call	_Serial_print_u32
- 666  017d 5b04          	addw	sp,#4
- 667                     ; 78 			for(iter=0;iter<parameter_count;iter++)
- 669  017f 0c01          	inc	(OFST+0,sp)
- 671  0181               L542:
- 674  0181 7b01          	ld	a,(OFST+0,sp)
- 675  0183 1107          	cp	a,(OFST+6,sp)
- 676  0185 25dd          	jrult	L142
- 677                     ; 83 			is_valid=1;
- 679  0187 a601          	ld	a,#1
- 680  0189 6b01          	ld	(OFST+0,sp),a
- 682                     ; 84 		}break;
- 684  018b ac700270      	jpf	L732
- 685  018f               L761:
- 686                     ; 88 			is_valid=1;
- 688  018f a601          	ld	a,#1
- 689  0191 6b01          	ld	(OFST+0,sp),a
- 691                     ; 89 		}break;
- 693  0193 ac700270      	jpf	L732
- 694  0197               L171:
- 695                     ; 91 			if(parameter_count==1)
- 697  0197 7b07          	ld	a,(OFST+6,sp)
- 698  0199 a101          	cp	a,#1
- 699  019b 2703          	jreq	L04
- 700  019d cc0270        	jp	L732
- 701  01a0               L04:
- 702                     ; 93 				if((*parameters)[0]<128)
- 704  01a0 1e05          	ldw	x,(OFST+4,sp)
- 705  01a2 cd0000        	call	c_ltor
- 707  01a5 ae0000        	ldw	x,#L22
- 708  01a8 cd0000        	call	c_lcmp
- 710  01ab 2503          	jrult	L24
- 711  01ad cc0270        	jp	L732
- 712  01b0               L24:
- 713                     ; 95 					Serial_print_u32(get_eeprom_byte((*parameters)[0]));
- 715  01b0 1e05          	ldw	x,(OFST+4,sp)
- 716  01b2 ee02          	ldw	x,(2,x)
- 717  01b4 cd0000        	call	_get_eeprom_byte
- 719  01b7 b703          	ld	c_lreg+3,a
- 720  01b9 3f02          	clr	c_lreg+2
- 721  01bb 3f01          	clr	c_lreg+1
- 722  01bd 3f00          	clr	c_lreg
- 723  01bf be02          	ldw	x,c_lreg+2
- 724  01c1 89            	pushw	x
- 725  01c2 be00          	ldw	x,c_lreg
- 726  01c4 89            	pushw	x
- 727  01c5 cd0000        	call	_Serial_print_u32
- 729  01c8 5b04          	addw	sp,#4
- 730  01ca ac700270      	jpf	L732
- 731  01ce               L371:
- 732                     ; 109 			is_valid=1;
- 734  01ce a601          	ld	a,#1
- 735  01d0 6b01          	ld	(OFST+0,sp),a
- 737                     ; 110 			if(parameter_count<3) is_valid=0;
- 739  01d2 7b07          	ld	a,(OFST+6,sp)
- 740  01d4 a103          	cp	a,#3
- 741  01d6 2402          	jruge	L552
- 744  01d8 0f01          	clr	(OFST+0,sp)
- 746  01da               L552:
- 747                     ; 111 			if((*parameters)[0]>=RGB_LED_COUNT) is_valid=0;
- 749  01da 1e05          	ldw	x,(OFST+4,sp)
- 750  01dc cd0000        	call	c_ltor
- 752  01df ae0004        	ldw	x,#L42
- 753  01e2 cd0000        	call	c_lcmp
- 755  01e5 2502          	jrult	L752
- 758  01e7 0f01          	clr	(OFST+0,sp)
- 760  01e9               L752:
- 761                     ; 112 			if((*parameters)[1]>=3) is_valid=0;
- 763  01e9 1e05          	ldw	x,(OFST+4,sp)
- 764  01eb 1c0004        	addw	x,#4
- 765  01ee cd0000        	call	c_ltor
- 767  01f1 ae0008        	ldw	x,#L62
- 768  01f4 cd0000        	call	c_lcmp
- 770  01f7 2502          	jrult	L162
- 773  01f9 0f01          	clr	(OFST+0,sp)
- 775  01fb               L162:
- 776                     ; 113 			if((*parameters)[2]>=255) is_valid=0;
- 778  01fb 1e05          	ldw	x,(OFST+4,sp)
- 779  01fd 1c0008        	addw	x,#8
- 780  0200 cd0000        	call	c_ltor
- 782  0203 ae000c        	ldw	x,#L03
- 783  0206 cd0000        	call	c_lcmp
- 785  0209 2502          	jrult	L362
- 788  020b 0f01          	clr	(OFST+0,sp)
- 790  020d               L362:
- 791                     ; 114 			if(is_valid)
- 793  020d 0d01          	tnz	(OFST+0,sp)
- 794  020f 275f          	jreq	L732
- 795                     ; 116 				set_rgb((*parameters)[0],(*parameters)[1],(*parameters)[2]);
- 797  0211 1e05          	ldw	x,(OFST+4,sp)
- 798  0213 e60b          	ld	a,(11,x)
- 799  0215 88            	push	a
- 800  0216 1e06          	ldw	x,(OFST+5,sp)
- 801  0218 e607          	ld	a,(7,x)
- 802  021a 97            	ld	xl,a
- 803  021b 1606          	ldw	y,(OFST+5,sp)
- 804  021d 90e603        	ld	a,(3,y)
- 805  0220 95            	ld	xh,a
- 806  0221 cd0000        	call	_set_rgb
- 808  0224 84            	pop	a
- 809                     ; 117 				flush_leds(2);//1 RGB led element and 1 for status led
- 811  0225 a602          	ld	a,#2
- 812  0227 cd0000        	call	_flush_leds
- 814  022a 2044          	jra	L732
- 815  022c               L571:
- 816                     ; 121 			is_valid=1;
- 818  022c a601          	ld	a,#1
- 819  022e 6b01          	ld	(OFST+0,sp),a
- 821                     ; 122 			if(parameter_count<2) is_valid=0;
- 823  0230 7b07          	ld	a,(OFST+6,sp)
- 824  0232 a102          	cp	a,#2
- 825  0234 2402          	jruge	L762
- 828  0236 0f01          	clr	(OFST+0,sp)
- 830  0238               L762:
- 831                     ; 123 			if((*parameters)[0]>=WHITE_LED_COUNT) is_valid=0;
- 833  0238 1e05          	ldw	x,(OFST+4,sp)
- 834  023a cd0000        	call	c_ltor
- 836  023d ae0010        	ldw	x,#L23
- 837  0240 cd0000        	call	c_lcmp
- 839  0243 2502          	jrult	L172
- 842  0245 0f01          	clr	(OFST+0,sp)
- 844  0247               L172:
- 845                     ; 124 			if((*parameters)[1]>=255) is_valid=0;
- 847  0247 1e05          	ldw	x,(OFST+4,sp)
- 848  0249 1c0004        	addw	x,#4
- 849  024c cd0000        	call	c_ltor
- 851  024f ae000c        	ldw	x,#L03
- 852  0252 cd0000        	call	c_lcmp
- 854  0255 2502          	jrult	L372
- 857  0257 0f01          	clr	(OFST+0,sp)
- 859  0259               L372:
- 860                     ; 125 			if(is_valid)
- 862  0259 0d01          	tnz	(OFST+0,sp)
- 863  025b 2713          	jreq	L732
- 864                     ; 127 				set_white((*parameters)[0],(*parameters)[1]);
- 866  025d 1e05          	ldw	x,(OFST+4,sp)
- 867  025f e607          	ld	a,(7,x)
- 868  0261 97            	ld	xl,a
- 869  0262 1605          	ldw	y,(OFST+4,sp)
- 870  0264 90e603        	ld	a,(3,y)
- 871  0267 95            	ld	xh,a
- 872  0268 cd0000        	call	_set_white
- 874                     ; 128 				flush_leds(2);//1 RGB led element and 1 for status led
- 876  026b a602          	ld	a,#2
- 877  026d cd0000        	call	_flush_leds
- 879  0270               L732:
- 880                     ; 132 	if(!is_valid) Serial_print_string("Invalid. h");
- 882  0270 0d01          	tnz	(OFST+0,sp)
- 883  0272 2606          	jrne	L772
- 886  0274 ae0014        	ldw	x,#L103
- 887  0277 cd0000        	call	_Serial_print_string
- 889  027a               L772:
- 890                     ; 133 	Serial_newline();
- 892  027a cd0000        	call	_Serial_newline
- 894                     ; 134 }
- 897  027d 85            	popw	x
- 898  027e 81            	ret
- 911                     	xref	_Serial_print_u32
- 912                     	xref	_Serial_read_char
- 913                     	xref	_Serial_available
- 914                     	xref	_Serial_newline
- 915                     	xref	_Serial_print_string
- 916                     	xref	_Serial_print_char
- 917                     	xdef	_execute_terminal_command
- 918                     	xdef	_get_terminal_command
- 919                     	xdef	_run_developer
- 920                     	xdef	_setup_developer
- 921                     	xref	_get_eeprom_byte
- 922                     	xref	_clear_button_events
- 923                     	xref	_is_developer_valid
- 924                     	xref	_flush_leds
- 925                     	xref	_set_debug
- 926                     	xref	_set_white
- 927                     	xref	_set_rgb
- 928                     	xref	_setup_serial
- 929                     	switch	.const
- 930  0014               L103:
- 931  0014 496e76616c69  	dc.b	"Invalid. h",0
- 932  001f               L55:
- 933  001f 3e2000        	dc.b	"> ",0
- 934                     	xref.b	c_lreg
- 954                     	xref	c_lcmp
- 955                     	xref	c_ladd
- 956                     	xref	c_rtol
- 957                     	xref	c_itolx
- 958                     	xref	c_llsh
- 959                     	xref	c_ltor
- 960                     	end
+ 589                     .const:	section	.text
+ 590  0000               L22:
+ 591  0000 00000006      	dc.l	6
+ 592  0004               L42:
+ 593  0004 00000003      	dc.l	3
+ 594  0008               L62:
+ 595  0008 000000ff      	dc.l	255
+ 596  000c               L03:
+ 597  000c 0000000c      	dc.l	12
+ 598                     ; 70 void execute_terminal_command(char command,u32 (*parameters)[MAX_TERMINAL_PARAMETERS],u8 parameter_count)
+ 598                     ; 71 {
+ 599                     	switch	.text
+ 600  0139               _execute_terminal_command:
+ 602  0139 88            	push	a
+ 603  013a 88            	push	a
+ 604       00000001      OFST:	set	1
+ 607                     ; 73 	bool is_valid=0;
+ 609  013b 0f01          	clr	(OFST+0,sp)
+ 611                     ; 74 	switch(command)
+ 614                     ; 130 		}break;
+ 615  013d a065          	sub	a,#101
+ 616  013f 2753          	jreq	L171
+ 617  0141 a007          	sub	a,#7
+ 618  0143 275c          	jreq	L371
+ 619  0145 a004          	sub	a,#4
+ 620  0147 270f          	jreq	L561
+ 621  0149 a004          	sub	a,#4
+ 622  014b 273f          	jreq	L761
+ 623  014d a003          	sub	a,#3
+ 624  014f 2603          	jrne	L23
+ 625  0151 cc01ff        	jp	L571
+ 626  0154               L23:
+ 627  0154 ac430243      	jpf	L732
+ 628  0158               L561:
+ 629                     ; 77 			Serial_print_char(command);
+ 631  0158 7b02          	ld	a,(OFST+1,sp)
+ 632  015a cd0000        	call	_Serial_print_char
+ 634                     ; 78 			for(iter=0;iter<parameter_count;iter++)
+ 636  015d 0f01          	clr	(OFST+0,sp)
+ 639  015f 201d          	jra	L542
+ 640  0161               L142:
+ 641                     ; 80 				Serial_print_char(' ');
+ 643  0161 a620          	ld	a,#32
+ 644  0163 cd0000        	call	_Serial_print_char
+ 646                     ; 81 				Serial_print_u32((*parameters)[iter]);
+ 648  0166 7b01          	ld	a,(OFST+0,sp)
+ 649  0168 97            	ld	xl,a
+ 650  0169 a604          	ld	a,#4
+ 651  016b 42            	mul	x,a
+ 652  016c 72fb05        	addw	x,(OFST+4,sp)
+ 653  016f 9093          	ldw	y,x
+ 654  0171 ee02          	ldw	x,(2,x)
+ 655  0173 89            	pushw	x
+ 656  0174 93            	ldw	x,y
+ 657  0175 fe            	ldw	x,(x)
+ 658  0176 89            	pushw	x
+ 659  0177 cd0000        	call	_Serial_print_u32
+ 661  017a 5b04          	addw	sp,#4
+ 662                     ; 78 			for(iter=0;iter<parameter_count;iter++)
+ 664  017c 0c01          	inc	(OFST+0,sp)
+ 666  017e               L542:
+ 669  017e 7b01          	ld	a,(OFST+0,sp)
+ 670  0180 1107          	cp	a,(OFST+6,sp)
+ 671  0182 25dd          	jrult	L142
+ 672                     ; 83 			is_valid=1;
+ 674  0184 a601          	ld	a,#1
+ 675  0186 6b01          	ld	(OFST+0,sp),a
+ 677                     ; 84 		}break;
+ 679  0188 ac430243      	jpf	L732
+ 680  018c               L761:
+ 681                     ; 88 			is_valid=1;
+ 683  018c a601          	ld	a,#1
+ 684  018e 6b01          	ld	(OFST+0,sp),a
+ 686                     ; 89 		}break;
+ 688  0190 ac430243      	jpf	L732
+ 689  0194               L171:
+ 690                     ; 91 			if(parameter_count==1)
+ 692  0194 7b07          	ld	a,(OFST+6,sp)
+ 693  0196 a101          	cp	a,#1
+ 694  0198 2703          	jreq	L43
+ 695  019a cc0243        	jp	L732
+ 696  019d               L43:
+ 697  019d ac430243      	jpf	L732
+ 698  01a1               L371:
+ 699                     ; 109 			is_valid=1;
+ 701  01a1 a601          	ld	a,#1
+ 702  01a3 6b01          	ld	(OFST+0,sp),a
+ 704                     ; 110 			if(parameter_count<3) is_valid=0;
+ 706  01a5 7b07          	ld	a,(OFST+6,sp)
+ 707  01a7 a103          	cp	a,#3
+ 708  01a9 2402          	jruge	L352
+ 711  01ab 0f01          	clr	(OFST+0,sp)
+ 713  01ad               L352:
+ 714                     ; 111 			if((*parameters)[0]>=RGB_LED_COUNT) is_valid=0;
+ 716  01ad 1e05          	ldw	x,(OFST+4,sp)
+ 717  01af cd0000        	call	c_ltor
+ 719  01b2 ae0000        	ldw	x,#L22
+ 720  01b5 cd0000        	call	c_lcmp
+ 722  01b8 2502          	jrult	L552
+ 725  01ba 0f01          	clr	(OFST+0,sp)
+ 727  01bc               L552:
+ 728                     ; 112 			if((*parameters)[1]>=3) is_valid=0;
+ 730  01bc 1e05          	ldw	x,(OFST+4,sp)
+ 731  01be 1c0004        	addw	x,#4
+ 732  01c1 cd0000        	call	c_ltor
+ 734  01c4 ae0004        	ldw	x,#L42
+ 735  01c7 cd0000        	call	c_lcmp
+ 737  01ca 2502          	jrult	L752
+ 740  01cc 0f01          	clr	(OFST+0,sp)
+ 742  01ce               L752:
+ 743                     ; 113 			if((*parameters)[2]>=255) is_valid=0;
+ 745  01ce 1e05          	ldw	x,(OFST+4,sp)
+ 746  01d0 1c0008        	addw	x,#8
+ 747  01d3 cd0000        	call	c_ltor
+ 749  01d6 ae0008        	ldw	x,#L62
+ 750  01d9 cd0000        	call	c_lcmp
+ 752  01dc 2502          	jrult	L162
+ 755  01de 0f01          	clr	(OFST+0,sp)
+ 757  01e0               L162:
+ 758                     ; 114 			if(is_valid)
+ 760  01e0 0d01          	tnz	(OFST+0,sp)
+ 761  01e2 275f          	jreq	L732
+ 762                     ; 116 				set_rgb((*parameters)[0],(*parameters)[1],(*parameters)[2]);
+ 764  01e4 1e05          	ldw	x,(OFST+4,sp)
+ 765  01e6 e60b          	ld	a,(11,x)
+ 766  01e8 88            	push	a
+ 767  01e9 1e06          	ldw	x,(OFST+5,sp)
+ 768  01eb e607          	ld	a,(7,x)
+ 769  01ed 97            	ld	xl,a
+ 770  01ee 1606          	ldw	y,(OFST+5,sp)
+ 771  01f0 90e603        	ld	a,(3,y)
+ 772  01f3 95            	ld	xh,a
+ 773  01f4 cd0000        	call	_set_rgb
+ 775  01f7 84            	pop	a
+ 776                     ; 117 				flush_leds(2);//1 RGB led element and 1 for status led
+ 778  01f8 a602          	ld	a,#2
+ 779  01fa cd0000        	call	_flush_leds
+ 781  01fd 2044          	jra	L732
+ 782  01ff               L571:
+ 783                     ; 121 			is_valid=1;
+ 785  01ff a601          	ld	a,#1
+ 786  0201 6b01          	ld	(OFST+0,sp),a
+ 788                     ; 122 			if(parameter_count<2) is_valid=0;
+ 790  0203 7b07          	ld	a,(OFST+6,sp)
+ 791  0205 a102          	cp	a,#2
+ 792  0207 2402          	jruge	L562
+ 795  0209 0f01          	clr	(OFST+0,sp)
+ 797  020b               L562:
+ 798                     ; 123 			if((*parameters)[0]>=WHITE_LED_COUNT) is_valid=0;
+ 800  020b 1e05          	ldw	x,(OFST+4,sp)
+ 801  020d cd0000        	call	c_ltor
+ 803  0210 ae000c        	ldw	x,#L03
+ 804  0213 cd0000        	call	c_lcmp
+ 806  0216 2502          	jrult	L762
+ 809  0218 0f01          	clr	(OFST+0,sp)
+ 811  021a               L762:
+ 812                     ; 124 			if((*parameters)[1]>=255) is_valid=0;
+ 814  021a 1e05          	ldw	x,(OFST+4,sp)
+ 815  021c 1c0004        	addw	x,#4
+ 816  021f cd0000        	call	c_ltor
+ 818  0222 ae0008        	ldw	x,#L62
+ 819  0225 cd0000        	call	c_lcmp
+ 821  0228 2502          	jrult	L172
+ 824  022a 0f01          	clr	(OFST+0,sp)
+ 826  022c               L172:
+ 827                     ; 125 			if(is_valid)
+ 829  022c 0d01          	tnz	(OFST+0,sp)
+ 830  022e 2713          	jreq	L732
+ 831                     ; 127 				set_white((*parameters)[0],(*parameters)[1]);
+ 833  0230 1e05          	ldw	x,(OFST+4,sp)
+ 834  0232 e607          	ld	a,(7,x)
+ 835  0234 97            	ld	xl,a
+ 836  0235 1605          	ldw	y,(OFST+4,sp)
+ 837  0237 90e603        	ld	a,(3,y)
+ 838  023a 95            	ld	xh,a
+ 839  023b cd0000        	call	_set_white
+ 841                     ; 128 				flush_leds(2);//1 RGB led element and 1 for status led
+ 843  023e a602          	ld	a,#2
+ 844  0240 cd0000        	call	_flush_leds
+ 846  0243               L732:
+ 847                     ; 132 	if(!is_valid) Serial_print_string("Invalid. h");
+ 849  0243 0d01          	tnz	(OFST+0,sp)
+ 850  0245 2606          	jrne	L572
+ 853  0247 ae0010        	ldw	x,#L772
+ 854  024a cd0000        	call	_Serial_print_string
+ 856  024d               L572:
+ 857                     ; 133 	Serial_newline();
+ 859  024d cd0000        	call	_Serial_newline
+ 861                     ; 134 }
+ 864  0250 85            	popw	x
+ 865  0251 81            	ret
+ 878                     	xref	_Serial_print_u32
+ 879                     	xref	_Serial_read_char
+ 880                     	xref	_Serial_available
+ 881                     	xref	_Serial_newline
+ 882                     	xref	_Serial_print_string
+ 883                     	xref	_Serial_print_char
+ 884                     	xdef	_execute_terminal_command
+ 885                     	xdef	_get_terminal_command
+ 886                     	xdef	_run_developer
+ 887                     	xdef	_setup_developer
+ 888                     	xref	_clear_button_events
+ 889                     	xref	_is_developer_valid
+ 890                     	xref	_flush_leds
+ 891                     	xref	_set_debug
+ 892                     	xref	_set_white
+ 893                     	xref	_set_rgb
+ 894                     	xref	_setup_serial
+ 895                     	switch	.const
+ 896  0010               L772:
+ 897  0010 496e76616c69  	dc.b	"Invalid. h",0
+ 898  001b               L55:
+ 899  001b 3e2000        	dc.b	"> ",0
+ 900                     	xref.b	c_lreg
+ 920                     	xref	c_lcmp
+ 921                     	xref	c_ladd
+ 922                     	xref	c_rtol
+ 923                     	xref	c_itolx
+ 924                     	xref	c_llsh
+ 925                     	xref	c_ltor
+ 926                     	end

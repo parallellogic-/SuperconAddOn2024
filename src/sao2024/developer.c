@@ -90,9 +90,9 @@ void execute_terminal_command(char command,u32 (*parameters)[MAX_TERMINAL_PARAME
 		case 'e':{ //eeprom interface
 			if(parameter_count==1)
 			{//read, 0-127
-				if((*parameters)[0]<128)
+				//if((*parameters)[0]<128)
 					//Serial_print_u32(FLASH_ReadByte(eeprom_address));
-					Serial_print_u32(get_eeprom_byte((*parameters)[0]));
+					//Serial_print_u32(get_eeprom_byte((*parameters)[0]));
 			}/*else if(parameter_count==2)
 			{//write
 				if((*parameters)[1]<256)

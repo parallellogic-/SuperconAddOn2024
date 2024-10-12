@@ -511,913 +511,882 @@
 1201                     	switch	.text
 1202  0274               _is_button_down:
 1206                     ; 158 	switch(index)
-1209                     ; 164 		case 2:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_1); break; }//SWIM IO input
-1211  0274 4d            	tnz	a
-1212  0275 2708          	jreq	L143
-1213  0277 4a            	dec	a
-1214  0278 2718          	jreq	L343
-1215  027a 4a            	dec	a
-1216  027b 2728          	jreq	L543
-1217  027d 2039          	jra	L763
-1218  027f               L143:
-1219                     ; 162 		case 0:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_5); break; }//left button
-1221  027f 4b20          	push	#32
-1222  0281 ae500f        	ldw	x,#20495
-1223  0284 cd0000        	call	_GPIO_ReadInputPin
-1225  0287 5b01          	addw	sp,#1
-1226  0289 4d            	tnz	a
-1227  028a 2604          	jrne	L421
-1228  028c a601          	ld	a,#1
-1229  028e 2001          	jra	L621
-1230  0290               L421:
-1231  0290 4f            	clr	a
-1232  0291               L621:
-1235  0291 81            	ret
-1236  0292               L343:
-1237                     ; 163 		case 1:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_6); break; }//right button
-1240  0292 4b40          	push	#64
-1241  0294 ae500f        	ldw	x,#20495
-1242  0297 cd0000        	call	_GPIO_ReadInputPin
-1244  029a 5b01          	addw	sp,#1
-1245  029c 4d            	tnz	a
-1246  029d 2604          	jrne	L031
-1247  029f a601          	ld	a,#1
-1248  02a1 2001          	jra	L231
-1249  02a3               L031:
-1250  02a3 4f            	clr	a
-1251  02a4               L231:
-1254  02a4 81            	ret
-1255  02a5               L543:
-1256                     ; 164 		case 2:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_1); break; }//SWIM IO input
-1259  02a5 4b02          	push	#2
-1260  02a7 ae500f        	ldw	x,#20495
-1261  02aa cd0000        	call	_GPIO_ReadInputPin
-1263  02ad 5b01          	addw	sp,#1
-1264  02af 4d            	tnz	a
-1265  02b0 2604          	jrne	L431
-1266  02b2 a601          	ld	a,#1
-1267  02b4 2001          	jra	L631
-1268  02b6               L431:
-1269  02b6 4f            	clr	a
-1270  02b7               L631:
-1273  02b7 81            	ret
-1274  02b8               L763:
-1275                     ; 166 	return 0;
-1277  02b8 4f            	clr	a
-1280  02b9 81            	ret
-1335                     ; 170 @far @interrupt void TIM2_UPD_OVF_IRQHandler (void) {
-1337                     	switch	.text
-1338  02ba               f_TIM2_UPD_OVF_IRQHandler:
-1340  02ba 8a            	push	cc
-1341  02bb 84            	pop	a
-1342  02bc a4bf          	and	a,#191
-1343  02be 88            	push	a
-1344  02bf 86            	pop	cc
-1345       00000005      OFST:	set	5
-1346  02c0 3b0002        	push	c_x+2
-1347  02c3 be00          	ldw	x,c_x
-1348  02c5 89            	pushw	x
-1349  02c6 3b0002        	push	c_y+2
-1350  02c9 be00          	ldw	x,c_y
-1351  02cb 89            	pushw	x
-1352  02cc be02          	ldw	x,c_lreg+2
-1353  02ce 89            	pushw	x
-1354  02cf be00          	ldw	x,c_lreg
-1355  02d1 89            	pushw	x
-1356  02d2 5205          	subw	sp,#5
-1359                     ; 171 	bool buffer_index=pwm_state&0x01;//primary vs redundant side to pull data from
-1361  02d4 b689          	ld	a,_pwm_state
-1362  02d6 a401          	and	a,#1
-1363  02d8 6b05          	ld	(OFST+0,sp),a
-1365                     ; 172 	u16 sleep_counts=1;
-1367  02da ae0001        	ldw	x,#1
-1368  02dd 1f03          	ldw	(OFST-2,sp),x
-1370                     ; 174 	GPIOC->DDR &= (uint8_t)(~(GPIO_PIN_7 | GPIO_PIN_6 | GPIO_PIN_5 | GPIO_PIN_4 | GPIO_PIN_3));
-1372  02df c6500c        	ld	a,20492
-1373  02e2 a407          	and	a,#7
-1374  02e4 c7500c        	ld	20492,a
-1375                     ; 175 	GPIOD->DDR &= (uint8_t)(~(GPIO_PIN_2));
-1377  02e7 72155011      	bres	20497,#2
-1378                     ; 176 	GPIOA->DDR &= (uint8_t)(~(GPIO_PIN_3));
-1380  02eb 72175002      	bres	20482,#3
-1381                     ; 177 	GPIOC->CR1 &= (uint8_t)(~(GPIO_PIN_7 | GPIO_PIN_6 | GPIO_PIN_5 | GPIO_PIN_4 | GPIO_PIN_3));//float
-1383  02ef c6500d        	ld	a,20493
-1384  02f2 a407          	and	a,#7
-1385  02f4 c7500d        	ld	20493,a
-1386                     ; 178 	GPIOD->CR1 &= (uint8_t)(~(GPIO_PIN_2));
-1388  02f7 72155012      	bres	20498,#2
-1389                     ; 179 	GPIOA->CR1 &= (uint8_t)(~(GPIO_PIN_3));
-1391  02fb 72175003      	bres	20483,#3
-1392                     ; 181 	GPIOD->DDR &= (uint8_t)(~(GPIO_PIN_4));
-1394  02ff 72195011      	bres	20497,#4
-1395                     ; 182 	GPIOD->CR1 &= (uint8_t)(~(GPIO_PIN_4));//DEBUG_BROKEN
-1397  0303 72195012      	bres	20498,#4
-1398                     ; 184   TIM2->CR1 &= ~TIM2_CR1_CEN;  // Clear the CEN bit to stop the timer
-1400  0307 72115300      	bres	21248,#0
-1401                     ; 185 	if(pwm_visible_index==pwm_led_count[buffer_index])//hold all LEDs OFF at end of frame to stabalize the display brightness, regardless of how long the displayed LEDs are ON for
-1403  030b 7b05          	ld	a,(OFST+0,sp)
-1404  030d 5f            	clrw	x
-1405  030e 97            	ld	xl,a
-1406  030f e686          	ld	a,(_pwm_led_count,x)
-1407  0311 b188          	cp	a,_pwm_visible_index
-1408  0313 2609          	jrne	L314
-1409                     ; 187 		sleep_counts=pwm_sleep[buffer_index];
-1411  0315 7b05          	ld	a,(OFST+0,sp)
-1412  0317 5f            	clrw	x
-1413  0318 97            	ld	xl,a
-1414  0319 58            	sllw	x
-1415  031a ee82          	ldw	x,(_pwm_sleep,x)
-1416  031c 1f03          	ldw	(OFST-2,sp),x
-1418  031e               L314:
-1419                     ; 189 	if(pwm_visible_index>pwm_led_count[buffer_index])
-1421  031e 7b05          	ld	a,(OFST+0,sp)
-1422  0320 5f            	clrw	x
-1423  0321 97            	ld	xl,a
-1424  0322 e686          	ld	a,(_pwm_led_count,x)
-1425  0324 b188          	cp	a,_pwm_visible_index
-1426  0326 241e          	jruge	L514
-1427                     ; 191 		frame_counter++;
-1429  0328 be00          	ldw	x,_frame_counter
-1430  032a 1c0001        	addw	x,#1
-1431  032d bf00          	ldw	_frame_counter,x
-1432                     ; 192 		pwm_visible_index=0;//formally start new frame
-1434  032f 3f88          	clr	_pwm_visible_index
-1435                     ; 193 		update_buttons();
-1437  0331 cd019c        	call	_update_buttons
-1439                     ; 194 		if(pwm_state&0x02)
-1441  0334 b689          	ld	a,_pwm_state
-1442  0336 a502          	bcp	a,#2
-1443  0338 270c          	jreq	L514
-1444                     ; 196 			pwm_state^=0x03;//if flag to swap A/B is set, then clear the flag and swap sides
-1446  033a b689          	ld	a,_pwm_state
-1447  033c a803          	xor	a,#3
-1448  033e b789          	ld	_pwm_state,a
-1449                     ; 197 			buffer_index=pwm_state&0x01;//recompute primary vs redundant side to pull data from if on a new frame
-1451  0340 b689          	ld	a,_pwm_state
-1452  0342 a401          	and	a,#1
-1453  0344 6b05          	ld	(OFST+0,sp),a
-1455  0346               L514:
-1456                     ; 200 	if(pwm_visible_index<pwm_led_count[buffer_index])
-1458  0346 7b05          	ld	a,(OFST+0,sp)
-1459  0348 5f            	clrw	x
-1460  0349 97            	ld	xl,a
-1461  034a e686          	ld	a,(_pwm_led_count,x)
-1462  034c b188          	cp	a,_pwm_visible_index
-1463  034e 2324          	jrule	L124
-1464                     ; 202 		sleep_counts=pwm_brightness[pwm_visible_index][buffer_index];//how long to keep it ON
-1466  0350 7b05          	ld	a,(OFST+0,sp)
-1467  0352 5f            	clrw	x
-1468  0353 97            	ld	xl,a
-1469  0354 58            	sllw	x
-1470  0355 1f01          	ldw	(OFST-4,sp),x
-1472  0357 b688          	ld	a,_pwm_visible_index
-1473  0359 97            	ld	xl,a
-1474  035a a604          	ld	a,#4
-1475  035c 42            	mul	x,a
-1476  035d 72fb01        	addw	x,(OFST-4,sp)
-1477  0360 ee06          	ldw	x,(_pwm_brightness,x)
-1478  0362 1f03          	ldw	(OFST-2,sp),x
-1480                     ; 203 		set_led_on(pwm_brightness_index[pwm_visible_index][buffer_index]);//turn ON this LED
-1482  0364 b688          	ld	a,_pwm_visible_index
-1483  0366 5f            	clrw	x
-1484  0367 97            	ld	xl,a
-1485  0368 58            	sllw	x
-1486  0369 01            	rrwa	x,a
-1487  036a 1b05          	add	a,(OFST+0,sp)
-1488  036c 2401          	jrnc	L241
-1489  036e 5c            	incw	x
-1490  036f               L241:
-1491  036f 02            	rlwa	x,a
-1492  0370 e627          	ld	a,(_pwm_brightness_index,x)
-1493  0372 ad3e          	call	_set_led_on
-1495  0374               L124:
-1496                     ; 205 	pwm_visible_index++;
-1498  0374 3c88          	inc	_pwm_visible_index
-1499                     ; 206 	atomic_counter+=sleep_counts;
-1501  0376 1e03          	ldw	x,(OFST-2,sp)
-1502  0378 cd0000        	call	c_uitolx
-1504  037b ae0002        	ldw	x,#_atomic_counter
-1505  037e cd0000        	call	c_lgadd
-1507                     ; 208   TIM2->CNTRH = 0;// Set the high byte of the counter
-1509  0381 725f530c      	clr	21260
-1510                     ; 209   TIM2->CNTRL = 0;// Set the low byte of the counter
-1512  0385 725f530d      	clr	21261
-1513                     ; 210 	TIM2->ARRH= sleep_counts>>8;// init auto reload register
-1515  0389 7b03          	ld	a,(OFST-2,sp)
-1516  038b c7530f        	ld	21263,a
-1517                     ; 211 	TIM2->ARRL= sleep_counts&0x00FF;// init auto reload register
-1519  038e 7b04          	ld	a,(OFST-1,sp)
-1520  0390 a4ff          	and	a,#255
-1521  0392 c75310        	ld	21264,a
-1522                     ; 213 	TIM2->SR1&=~TIM2_SR1_UIF;//reset interrupt
-1524  0395 72115304      	bres	21252,#0
-1525                     ; 214   TIM2->CR1 |= TIM2_CR1_CEN;   // Set the CEN bit to restart the timer
-1527  0399 72105300      	bset	21248,#0
-1528                     ; 215 }
-1531  039d 5b05          	addw	sp,#5
-1532  039f 85            	popw	x
-1533  03a0 bf00          	ldw	c_lreg,x
-1534  03a2 85            	popw	x
-1535  03a3 bf02          	ldw	c_lreg+2,x
-1536  03a5 85            	popw	x
-1537  03a6 bf00          	ldw	c_y,x
-1538  03a8 320002        	pop	c_y+2
-1539  03ab 85            	popw	x
-1540  03ac bf00          	ldw	c_x,x
-1541  03ae 320002        	pop	c_x+2
-1542  03b1 80            	iret
-1544                     	switch	.const
-1545  0004               L324_led_lookup:
-1546  0004 04            	dc.b	4
-1547  0005 03            	dc.b	3
-1548  0006 03            	dc.b	3
-1549  0007 04            	dc.b	4
-1550  0008 00            	dc.b	0
-1551  0009 05            	dc.b	5
-1552  000a 00            	dc.b	0
-1553  000b 04            	dc.b	4
-1554  000c 00            	dc.b	0
-1555  000d 03            	dc.b	3
-1556  000e 00            	dc.b	0
-1557  000f 01            	dc.b	1
-1558  0010 05            	dc.b	5
-1559  0011 03            	dc.b	3
-1560  0012 03            	dc.b	3
-1561  0013 05            	dc.b	5
-1562  0014 00            	dc.b	0
-1563  0015 06            	dc.b	6
-1564  0016 01            	dc.b	1
-1565  0017 04            	dc.b	4
-1566  0018 01            	dc.b	1
-1567  0019 03            	dc.b	3
-1568  001a 00            	dc.b	0
-1569  001b 02            	dc.b	2
-1570  001c 06            	dc.b	6
-1571  001d 03            	dc.b	3
-1572  001e 03            	dc.b	3
-1573  001f 06            	dc.b	6
-1574  0020 01            	dc.b	1
-1575  0021 06            	dc.b	6
-1576  0022 02            	dc.b	2
-1577  0023 04            	dc.b	4
-1578  0024 02            	dc.b	2
-1579  0025 03            	dc.b	3
-1580  0026 01            	dc.b	1
-1581  0027 02            	dc.b	2
-1582  0028 07            	dc.b	7
-1583  0029 07            	dc.b	7
-1584  002a 03            	dc.b	3
-1585  002b 00            	dc.b	0
-1586  002c 03            	dc.b	3
-1587  002d 01            	dc.b	1
-1588  002e 03            	dc.b	3
-1589  002f 02            	dc.b	2
-1590  0030 04            	dc.b	4
-1591  0031 00            	dc.b	0
-1592  0032 01            	dc.b	1
-1593  0033 05            	dc.b	5
-1594  0034 02            	dc.b	2
-1595  0035 05            	dc.b	5
-1596  0036 04            	dc.b	4
-1597  0037 01            	dc.b	1
-1598  0038 04            	dc.b	4
-1599  0039 02            	dc.b	2
-1600  003a 02            	dc.b	2
-1601  003b 06            	dc.b	6
-1602  003c 04            	dc.b	4
-1603  003d 06            	dc.b	6
-1604  003e 04            	dc.b	4
-1605  003f 05            	dc.b	5
-1606  0040 05            	dc.b	5
-1607  0041 06            	dc.b	6
-1651                     ; 218 void set_led_on(u8 led_index)
-1651                     ; 219 {
-1653                     	switch	.text
-1654  03b2               _set_led_on:
-1656  03b2 88            	push	a
-1657  03b3 5240          	subw	sp,#64
-1658       00000040      OFST:	set	64
-1661                     ; 256 	const u8 led_lookup[LED_COUNT][2]={//[0] is HIGH mat, [1] is LOW mat ////DEBUG_BROKEN
-1661                     ; 257 		{4,3},{3,4},{0,5},{0,4},{0,3},{0,1},//reds
-1661                     ; 258 		{5,3},{3,5},{0,6},{1,4},{1,3},{0,2},//greens
-1661                     ; 259 		{6,3},{3,6},{1,6},{2,4},{2,3},{1,2},//blues
-1661                     ; 260 		{7,7},//debug; GND is tied low, no charlieplexing involved
-1661                     ; 261 		{3,0},//LED6
-1661                     ; 262 		{3,1},//LED4
-1661                     ; 263 		{3,2},//LED5
-1661                     ; 264 		{4,0},//LED14
-1661                     ; 265 		{1,5},//LED8
-1661                     ; 266 		{2,5},//LED9
-1661                     ; 267 		{4,1},//LED10
-1661                     ; 268 		{4,2},//LED16
-1661                     ; 269 		{2,6},//LED17
-1661                     ; 270 		{4,6},//LED12
-1661                     ; 271 		{4,5},//LED13
-1661                     ; 272 		{5,6} //LED11
-1661                     ; 273 	};
-1663  03b5 96            	ldw	x,sp
-1664  03b6 1c0003        	addw	x,#OFST-61
-1665  03b9 90ae0004      	ldw	y,#L324_led_lookup
-1666  03bd a63e          	ld	a,#62
-1667  03bf cd0000        	call	c_xymov
-1669                     ; 274 	set_mat(led_lookup[led_index][0],1);
-1671  03c2 96            	ldw	x,sp
-1672  03c3 1c0003        	addw	x,#OFST-61
-1673  03c6 1f01          	ldw	(OFST-63,sp),x
-1675  03c8 7b41          	ld	a,(OFST+1,sp)
-1676  03ca 5f            	clrw	x
-1677  03cb 97            	ld	xl,a
-1678  03cc 58            	sllw	x
-1679  03cd 72fb01        	addw	x,(OFST-63,sp)
-1680  03d0 f6            	ld	a,(x)
-1681  03d1 ae0001        	ldw	x,#1
-1682  03d4 95            	ld	xh,a
-1683  03d5 ad1c          	call	_set_mat
-1685                     ; 276 	if(led_index!=DEBUG_LED_INDEX) set_mat(led_lookup[led_index][1],0); //DEBUG_BROKEN
-1687  03d7 7b41          	ld	a,(OFST+1,sp)
-1688  03d9 a112          	cp	a,#18
-1689  03db 2713          	jreq	L744
-1692  03dd 96            	ldw	x,sp
-1693  03de 1c0004        	addw	x,#OFST-60
-1694  03e1 1f01          	ldw	(OFST-63,sp),x
-1696  03e3 7b41          	ld	a,(OFST+1,sp)
-1697  03e5 5f            	clrw	x
-1698  03e6 97            	ld	xl,a
-1699  03e7 58            	sllw	x
-1700  03e8 72fb01        	addw	x,(OFST-63,sp)
-1701  03eb f6            	ld	a,(x)
-1702  03ec 5f            	clrw	x
-1703  03ed 95            	ld	xh,a
-1704  03ee ad03          	call	_set_mat
-1706  03f0               L744:
-1707                     ; 278 }
-1710  03f0 5b41          	addw	sp,#65
-1711  03f2 81            	ret
-1912                     ; 281 void set_mat(u8 mat_index,bool is_high)
-1912                     ; 282 {
-1913                     	switch	.text
-1914  03f3               _set_mat:
-1916  03f3 89            	pushw	x
-1917  03f4 5203          	subw	sp,#3
-1918       00000003      OFST:	set	3
-1921                     ; 320 	if(mat_index==0)//DEBUG_BROKEN
-1923  03f6 9e            	ld	a,xh
-1924  03f7 4d            	tnz	a
-1925  03f8 2609          	jrne	L765
-1926                     ; 322 		GPIOx=GPIOD;
-1928  03fa ae500f        	ldw	x,#20495
-1929  03fd 1f01          	ldw	(OFST-2,sp),x
-1931                     ; 323 		GPIO_Pin=GPIO_PIN_4;
-1933  03ff a610          	ld	a,#16
-1934  0401 6b03          	ld	(OFST+0,sp),a
-1936  0403               L765:
-1937                     ; 325 	if(mat_index==1)
-1939  0403 7b04          	ld	a,(OFST+1,sp)
-1940  0405 a101          	cp	a,#1
-1941  0407 2609          	jrne	L175
-1942                     ; 327 		GPIOx=GPIOD;
-1944  0409 ae500f        	ldw	x,#20495
-1945  040c 1f01          	ldw	(OFST-2,sp),x
-1947                     ; 328 		GPIO_Pin=GPIO_PIN_2;
-1949  040e a604          	ld	a,#4
-1950  0410 6b03          	ld	(OFST+0,sp),a
-1952  0412               L175:
-1953                     ; 330 	if(mat_index==2)
-1955  0412 7b04          	ld	a,(OFST+1,sp)
-1956  0414 a102          	cp	a,#2
-1957  0416 2609          	jrne	L375
-1958                     ; 332 		GPIOx=GPIOC;
-1960  0418 ae500a        	ldw	x,#20490
-1961  041b 1f01          	ldw	(OFST-2,sp),x
-1963                     ; 333 		GPIO_Pin=GPIO_PIN_7;
-1965  041d a680          	ld	a,#128
-1966  041f 6b03          	ld	(OFST+0,sp),a
-1968  0421               L375:
-1969                     ; 335 	if(mat_index==3)
-1971  0421 7b04          	ld	a,(OFST+1,sp)
-1972  0423 a103          	cp	a,#3
-1973  0425 2609          	jrne	L575
-1974                     ; 337 		GPIOx=GPIOC;
-1976  0427 ae500a        	ldw	x,#20490
-1977  042a 1f01          	ldw	(OFST-2,sp),x
-1979                     ; 338 		GPIO_Pin=GPIO_PIN_6;
-1981  042c a640          	ld	a,#64
-1982  042e 6b03          	ld	(OFST+0,sp),a
-1984  0430               L575:
-1985                     ; 340 	if(mat_index==4)
-1987  0430 7b04          	ld	a,(OFST+1,sp)
-1988  0432 a104          	cp	a,#4
-1989  0434 2609          	jrne	L775
-1990                     ; 342 		GPIOx=GPIOC;
-1992  0436 ae500a        	ldw	x,#20490
-1993  0439 1f01          	ldw	(OFST-2,sp),x
-1995                     ; 343 		GPIO_Pin=GPIO_PIN_5;
-1997  043b a620          	ld	a,#32
-1998  043d 6b03          	ld	(OFST+0,sp),a
-2000  043f               L775:
-2001                     ; 345 	if(mat_index==5)
-2003  043f 7b04          	ld	a,(OFST+1,sp)
-2004  0441 a105          	cp	a,#5
-2005  0443 2609          	jrne	L106
-2006                     ; 347 		GPIOx=GPIOC;
-2008  0445 ae500a        	ldw	x,#20490
-2009  0448 1f01          	ldw	(OFST-2,sp),x
-2011                     ; 348 		GPIO_Pin=GPIO_PIN_4;
-2013  044a a610          	ld	a,#16
-2014  044c 6b03          	ld	(OFST+0,sp),a
-2016  044e               L106:
-2017                     ; 350 	if(mat_index==6)
-2019  044e 7b04          	ld	a,(OFST+1,sp)
-2020  0450 a106          	cp	a,#6
-2021  0452 2609          	jrne	L306
-2022                     ; 352 		GPIOx=GPIOC;
-2024  0454 ae500a        	ldw	x,#20490
-2025  0457 1f01          	ldw	(OFST-2,sp),x
-2027                     ; 353 		GPIO_Pin=GPIO_PIN_3;
-2029  0459 a608          	ld	a,#8
-2030  045b 6b03          	ld	(OFST+0,sp),a
-2032  045d               L306:
-2033                     ; 355 	if(mat_index==7)
-2035  045d 7b04          	ld	a,(OFST+1,sp)
-2036  045f a107          	cp	a,#7
-2037  0461 2609          	jrne	L506
-2038                     ; 357 		GPIOx=GPIOA;
-2040  0463 ae5000        	ldw	x,#20480
-2041  0466 1f01          	ldw	(OFST-2,sp),x
-2043                     ; 358 		GPIO_Pin=GPIO_PIN_3;
-2045  0468 a608          	ld	a,#8
-2046  046a 6b03          	ld	(OFST+0,sp),a
-2048  046c               L506:
-2049                     ; 360 	if(is_high) GPIOx->ODR |= (uint8_t)GPIO_Pin;
-2051  046c 0d05          	tnz	(OFST+2,sp)
-2052  046e 2708          	jreq	L706
-2055  0470 1e01          	ldw	x,(OFST-2,sp)
-2056  0472 f6            	ld	a,(x)
-2057  0473 1a03          	or	a,(OFST+0,sp)
-2058  0475 f7            	ld	(x),a
-2060  0476 2007          	jra	L116
-2061  0478               L706:
-2062                     ; 361 	else        GPIOx->ODR &= (uint8_t)(~(GPIO_Pin));
-2064  0478 1e01          	ldw	x,(OFST-2,sp)
-2065  047a 7b03          	ld	a,(OFST+0,sp)
-2066  047c 43            	cpl	a
-2067  047d f4            	and	a,(x)
-2068  047e f7            	ld	(x),a
-2069  047f               L116:
-2070                     ; 362 	GPIOx->DDR |= (uint8_t)GPIO_Pin;
-2072  047f 1e01          	ldw	x,(OFST-2,sp)
-2073  0481 e602          	ld	a,(2,x)
-2074  0483 1a03          	or	a,(OFST+0,sp)
-2075  0485 e702          	ld	(2,x),a
-2076                     ; 363 	GPIOx->CR1 |= (uint8_t)GPIO_Pin;
-2078  0487 1e01          	ldw	x,(OFST-2,sp)
-2079  0489 e603          	ld	a,(3,x)
-2080  048b 1a03          	or	a,(OFST+0,sp)
-2081  048d e703          	ld	(3,x),a
-2082                     ; 364 }
-2085  048f 5b05          	addw	sp,#5
-2086  0491 81            	ret
-2162                     ; 367 void flush_leds(u8 led_count)
-2162                     ; 368 {
-2163                     	switch	.text
-2164  0492               _flush_leds:
-2166  0492 88            	push	a
-2167  0493 5207          	subw	sp,#7
-2168       00000007      OFST:	set	7
-2171                     ; 369 	u8 led_read_index=0,led_write_index=0;
-2175  0495 0f05          	clr	(OFST-2,sp)
-2178  0497               L556:
-2179                     ; 372 	while(pwm_state&0x02){}//wait for volatile flag to clear (if still raised from the previous call)
-2181  0497 b689          	ld	a,_pwm_state
-2182  0499 a502          	bcp	a,#2
-2183  049b 26fa          	jrne	L556
-2184                     ; 373 	buffer_index=0x01^(pwm_state&0x01);//need to wait for above flag to be cleared before evaluating this
-2186  049d b689          	ld	a,_pwm_state
-2187  049f a401          	and	a,#1
-2188  04a1 a801          	xor	a,#1
-2189  04a3 6b07          	ld	(OFST+0,sp),a
-2191                     ; 375 	if(led_count==0) led_count=1;//min value
-2193  04a5 0d08          	tnz	(OFST+1,sp)
-2194  04a7 2604          	jrne	L166
-2197  04a9 a601          	ld	a,#1
-2198  04ab 6b08          	ld	(OFST+1,sp),a
-2199  04ad               L166:
-2200                     ; 376 	pwm_sleep[buffer_index]=((uint16_t)led_count)<<10;//prepare the max value of sleep, and subtract from it for each LED illuminated based on brightness (time illuminated)
-2202  04ad 7b08          	ld	a,(OFST+1,sp)
-2203  04af 5f            	clrw	x
-2204  04b0 97            	ld	xl,a
-2205  04b1 4f            	clr	a
-2206  04b2 02            	rlwa	x,a
-2207  04b3 58            	sllw	x
-2208  04b4 58            	sllw	x
-2209  04b5 7b07          	ld	a,(OFST+0,sp)
-2210  04b7 905f          	clrw	y
-2211  04b9 9097          	ld	yl,a
-2212  04bb 9058          	sllw	y
-2213  04bd 90ef82        	ldw	(_pwm_sleep,y),x
-2214                     ; 378 	for(led_read_index=0;led_read_index<LED_COUNT;led_read_index++)
-2216  04c0 0f06          	clr	(OFST-1,sp)
-2218  04c2               L366:
-2219                     ; 380 		read_brightness=pwm_brightness_buffer[led_read_index];
-2221  04c2 7b06          	ld	a,(OFST-1,sp)
-2222  04c4 5f            	clrw	x
-2223  04c5 97            	ld	xl,a
-2224  04c6 e608          	ld	a,(_pwm_brightness_buffer,x)
-2225  04c8 5f            	clrw	x
-2226  04c9 97            	ld	xl,a
-2227  04ca 1f03          	ldw	(OFST-4,sp),x
-2229                     ; 381 		if(read_brightness!=0)//min brightness, below this value instaiblity occurs magic number to avoid interrupt timing error
-2231  04cc 1e03          	ldw	x,(OFST-4,sp)
-2232  04ce 2767          	jreq	L176
-2233                     ; 383 			pwm_brightness_index[led_write_index][buffer_index]=led_read_index;
-2235  04d0 7b05          	ld	a,(OFST-2,sp)
-2236  04d2 5f            	clrw	x
-2237  04d3 97            	ld	xl,a
-2238  04d4 58            	sllw	x
-2239  04d5 01            	rrwa	x,a
-2240  04d6 1b07          	add	a,(OFST+0,sp)
-2241  04d8 2401          	jrnc	L251
-2242  04da 5c            	incw	x
-2243  04db               L251:
-2244  04db 02            	rlwa	x,a
-2245  04dc 7b06          	ld	a,(OFST-1,sp)
-2246  04de e727          	ld	(_pwm_brightness_index,x),a
-2247                     ; 384 			pwm_brightness[led_write_index][buffer_index]=((read_brightness*read_brightness)>>6)+1;//square 8-bit brightness and then clip 16 bit result down to 10 bits.  Values <8 are rounded to 0, so round that up to avoid zero-length display states
-2249  04e0 1e03          	ldw	x,(OFST-4,sp)
-2250  04e2 1603          	ldw	y,(OFST-4,sp)
-2251  04e4 cd0000        	call	c_imul
-2253  04e7 a606          	ld	a,#6
-2254  04e9               L451:
-2255  04e9 54            	srlw	x
-2256  04ea 4a            	dec	a
-2257  04eb 26fc          	jrne	L451
-2258  04ed 5c            	incw	x
-2259  04ee 7b07          	ld	a,(OFST+0,sp)
-2260  04f0 905f          	clrw	y
-2261  04f2 9097          	ld	yl,a
-2262  04f4 9058          	sllw	y
-2263  04f6 1701          	ldw	(OFST-6,sp),y
-2265  04f8 7b05          	ld	a,(OFST-2,sp)
-2266  04fa 905f          	clrw	y
-2267  04fc 9097          	ld	yl,a
-2268  04fe 9058          	sllw	y
-2269  0500 9058          	sllw	y
-2270  0502 72f901        	addw	y,(OFST-6,sp)
-2271  0505 90ef06        	ldw	(_pwm_brightness,y),x
-2272                     ; 385 			pwm_sleep[buffer_index]-=pwm_brightness[led_write_index][buffer_index];
-2274  0508 7b07          	ld	a,(OFST+0,sp)
-2275  050a 5f            	clrw	x
-2276  050b 97            	ld	xl,a
-2277  050c 58            	sllw	x
-2278  050d 7b07          	ld	a,(OFST+0,sp)
-2279  050f 905f          	clrw	y
-2280  0511 9097          	ld	yl,a
-2281  0513 9058          	sllw	y
-2282  0515 1701          	ldw	(OFST-6,sp),y
-2284  0517 7b05          	ld	a,(OFST-2,sp)
-2285  0519 905f          	clrw	y
-2286  051b 9097          	ld	yl,a
-2287  051d 9058          	sllw	y
-2288  051f 9058          	sllw	y
-2289  0521 72f901        	addw	y,(OFST-6,sp)
-2290  0524 90ee06        	ldw	y,(_pwm_brightness,y)
-2291  0527 9001          	rrwa	y,a
-2292  0529 e083          	sub	a,(_pwm_sleep+1,x)
-2293  052b 9001          	rrwa	y,a
-2294  052d e282          	sbc	a,(_pwm_sleep,x)
-2295  052f 9001          	rrwa	y,a
-2296  0531 9050          	negw	y
-2297  0533 ef82          	ldw	(_pwm_sleep,x),y
-2298                     ; 386 			led_write_index++;
-2300  0535 0c05          	inc	(OFST-2,sp)
-2302  0537               L176:
-2303                     ; 388 		pwm_brightness_buffer[led_read_index]=0;//clean up for next use
-2305  0537 7b06          	ld	a,(OFST-1,sp)
-2306  0539 5f            	clrw	x
-2307  053a 97            	ld	xl,a
-2308  053b 6f08          	clr	(_pwm_brightness_buffer,x)
-2309                     ; 378 	for(led_read_index=0;led_read_index<LED_COUNT;led_read_index++)
-2311  053d 0c06          	inc	(OFST-1,sp)
-2315  053f 7b06          	ld	a,(OFST-1,sp)
-2316  0541 a11f          	cp	a,#31
-2317  0543 2403cc04c2    	jrult	L366
-2318                     ; 390 	if(pwm_sleep[buffer_index]>(LED_COUNT<<10)||pwm_sleep[buffer_index]==0) pwm_sleep[buffer_index]=1;//leds are trying to be brighter than max, causing a negative sleep time to equalize brightness
-2320  0548 7b07          	ld	a,(OFST+0,sp)
-2321  054a 5f            	clrw	x
-2322  054b 97            	ld	xl,a
-2323  054c 58            	sllw	x
-2324  054d 9093          	ldw	y,x
-2325  054f 90ee82        	ldw	y,(_pwm_sleep,y)
-2326  0552 90a37c01      	cpw	y,#31745
-2327  0556 240b          	jruge	L576
-2329  0558 7b07          	ld	a,(OFST+0,sp)
-2330  055a 5f            	clrw	x
-2331  055b 97            	ld	xl,a
-2332  055c 58            	sllw	x
-2333  055d e683          	ld	a,(_pwm_sleep+1,x)
-2334  055f ea82          	or	a,(_pwm_sleep,x)
-2335  0561 260b          	jrne	L376
-2336  0563               L576:
-2339  0563 7b07          	ld	a,(OFST+0,sp)
-2340  0565 5f            	clrw	x
-2341  0566 97            	ld	xl,a
-2342  0567 58            	sllw	x
-2343  0568 90ae0001      	ldw	y,#1
-2344  056c ef82          	ldw	(_pwm_sleep,x),y
-2345  056e               L376:
-2346                     ; 391 	if(led_write_index==0)
-2348  056e 0d05          	tnz	(OFST-2,sp)
-2349  0570 2622          	jrne	L776
-2350                     ; 393 		led_write_index=1;
-2352  0572 a601          	ld	a,#1
-2353  0574 6b05          	ld	(OFST-2,sp),a
-2355                     ; 394 		pwm_sleep[buffer_index]=6<<10;
-2357  0576 7b07          	ld	a,(OFST+0,sp)
-2358  0578 5f            	clrw	x
-2359  0579 97            	ld	xl,a
-2360  057a 58            	sllw	x
-2361  057b 90ae1800      	ldw	y,#6144
-2362  057f ef82          	ldw	(_pwm_sleep,x),y
-2363                     ; 395 		pwm_brightness_index[0][buffer_index]=DEBUG_LED_INDEX;
-2365  0581 7b07          	ld	a,(OFST+0,sp)
-2366  0583 5f            	clrw	x
-2367  0584 97            	ld	xl,a
-2368  0585 a612          	ld	a,#18
-2369  0587 e727          	ld	(_pwm_brightness_index,x),a
-2370                     ; 396 		pwm_brightness[0][buffer_index]=1;
-2372  0589 7b07          	ld	a,(OFST+0,sp)
-2373  058b 5f            	clrw	x
-2374  058c 97            	ld	xl,a
-2375  058d 58            	sllw	x
-2376  058e 90ae0001      	ldw	y,#1
-2377  0592 ef06          	ldw	(_pwm_brightness,x),y
-2378  0594               L776:
-2379                     ; 398 	pwm_led_count[buffer_index]=led_write_index;//save the led count for the volatile pwm routine state machine.
-2381  0594 7b07          	ld	a,(OFST+0,sp)
-2382  0596 5f            	clrw	x
-2383  0597 97            	ld	xl,a
-2384  0598 7b05          	ld	a,(OFST-2,sp)
-2385  059a e786          	ld	(_pwm_led_count,x),a
-2386                     ; 401 	pwm_state|=0x02;//raise flag that data is ready for volatile pwm process to pick up and use
-2388  059c 72120089      	bset	_pwm_state,#1
-2389                     ; 402 }
-2392  05a0 5b08          	addw	sp,#8
-2393  05a2 81            	ret
-2500                     ; 405 void set_hue_max(u8 index,u16 color)
-2500                     ; 406 {
-2501                     	switch	.text
-2502  05a3               _set_hue_max:
-2504  05a3 88            	push	a
-2505  05a4 5207          	subw	sp,#7
-2506       00000007      OFST:	set	7
-2509                     ; 409 	const u8 MAX_BRIGHTNESS=180;//180**2+180**2 < 255**2
-2511  05a6 a6b4          	ld	a,#180
-2512  05a8 6b05          	ld	(OFST-2,sp),a
-2514                     ; 410 	const u8 BRIGHTNESS_STEP=61;//CEIL(0x2AAB/MAX_BRIGHTNESS)
-2516  05aa a63d          	ld	a,#61
-2517  05ac 6b01          	ld	(OFST-6,sp),a
-2519                     ; 411 	u8 red=0,green=0,blue=0;
-2521  05ae 0f02          	clr	(OFST-5,sp)
-2525  05b0 0f03          	clr	(OFST-4,sp)
-2529  05b2 0f04          	clr	(OFST-3,sp)
-2531                     ; 412 	u8 residual=0;
-2533  05b4 0f06          	clr	(OFST-1,sp)
-2535                     ; 414 	for(iter=0;iter<6;iter++)
-2537  05b6 0f07          	clr	(OFST+0,sp)
-2539  05b8               L757:
-2540                     ; 416 		if(color<0x2AAB)
-2542  05b8 1e0b          	ldw	x,(OFST+4,sp)
-2543  05ba a32aab        	cpw	x,#10923
-2544  05bd 240b          	jruge	L567
-2545                     ; 418 			residual=color/BRIGHTNESS_STEP;
-2547  05bf 1e0b          	ldw	x,(OFST+4,sp)
-2548  05c1 7b01          	ld	a,(OFST-6,sp)
-2549  05c3 62            	div	x,a
-2550  05c4 01            	rrwa	x,a
-2551  05c5 6b06          	ld	(OFST-1,sp),a
-2552  05c7 02            	rlwa	x,a
-2554                     ; 419 			break;
-2556  05c8 200f          	jra	L367
-2557  05ca               L567:
-2558                     ; 421 		color-=0x2AAB;
-2560  05ca 1e0b          	ldw	x,(OFST+4,sp)
-2561  05cc 1d2aab        	subw	x,#10923
-2562  05cf 1f0b          	ldw	(OFST+4,sp),x
-2563                     ; 414 	for(iter=0;iter<6;iter++)
-2565  05d1 0c07          	inc	(OFST+0,sp)
-2569  05d3 7b07          	ld	a,(OFST+0,sp)
-2570  05d5 a106          	cp	a,#6
-2571  05d7 25df          	jrult	L757
-2572  05d9               L367:
-2573                     ; 423 	if(iter==0){ red=MAX_BRIGHTNESS; green=residual; }
-2575  05d9 0d07          	tnz	(OFST+0,sp)
-2576  05db 2608          	jrne	L767
-2579  05dd 7b05          	ld	a,(OFST-2,sp)
-2580  05df 6b02          	ld	(OFST-5,sp),a
-2584  05e1 7b06          	ld	a,(OFST-1,sp)
-2585  05e3 6b03          	ld	(OFST-4,sp),a
-2587  05e5               L767:
-2588                     ; 424 	if(iter==1){ green=MAX_BRIGHTNESS; red=MAX_BRIGHTNESS-residual; }
-2590  05e5 7b07          	ld	a,(OFST+0,sp)
-2591  05e7 a101          	cp	a,#1
-2592  05e9 260a          	jrne	L177
-2595  05eb 7b05          	ld	a,(OFST-2,sp)
-2596  05ed 6b03          	ld	(OFST-4,sp),a
-2600  05ef 7b05          	ld	a,(OFST-2,sp)
-2601  05f1 1006          	sub	a,(OFST-1,sp)
-2602  05f3 6b02          	ld	(OFST-5,sp),a
-2604  05f5               L177:
-2605                     ; 425 	if(iter==2){ green=MAX_BRIGHTNESS; blue=residual; }
-2607  05f5 7b07          	ld	a,(OFST+0,sp)
-2608  05f7 a102          	cp	a,#2
-2609  05f9 2608          	jrne	L377
-2612  05fb 7b05          	ld	a,(OFST-2,sp)
-2613  05fd 6b03          	ld	(OFST-4,sp),a
-2617  05ff 7b06          	ld	a,(OFST-1,sp)
-2618  0601 6b04          	ld	(OFST-3,sp),a
-2620  0603               L377:
-2621                     ; 426 	if(iter==3){ blue=MAX_BRIGHTNESS; green=MAX_BRIGHTNESS-residual; }
-2623  0603 7b07          	ld	a,(OFST+0,sp)
-2624  0605 a103          	cp	a,#3
-2625  0607 260a          	jrne	L577
-2628  0609 7b05          	ld	a,(OFST-2,sp)
-2629  060b 6b04          	ld	(OFST-3,sp),a
-2633  060d 7b05          	ld	a,(OFST-2,sp)
-2634  060f 1006          	sub	a,(OFST-1,sp)
-2635  0611 6b03          	ld	(OFST-4,sp),a
-2637  0613               L577:
-2638                     ; 427 	if(iter==4){ blue=MAX_BRIGHTNESS; red=residual; }
-2640  0613 7b07          	ld	a,(OFST+0,sp)
-2641  0615 a104          	cp	a,#4
-2642  0617 2608          	jrne	L777
-2645  0619 7b05          	ld	a,(OFST-2,sp)
-2646  061b 6b04          	ld	(OFST-3,sp),a
-2650  061d 7b06          	ld	a,(OFST-1,sp)
-2651  061f 6b02          	ld	(OFST-5,sp),a
-2653  0621               L777:
-2654                     ; 428 	if(iter==5){ red=MAX_BRIGHTNESS; blue=MAX_BRIGHTNESS-residual; }
-2656  0621 7b07          	ld	a,(OFST+0,sp)
-2657  0623 a105          	cp	a,#5
-2658  0625 260a          	jrne	L1001
-2661  0627 7b05          	ld	a,(OFST-2,sp)
-2662  0629 6b02          	ld	(OFST-5,sp),a
-2666  062b 7b05          	ld	a,(OFST-2,sp)
-2667  062d 1006          	sub	a,(OFST-1,sp)
-2668  062f 6b04          	ld	(OFST-3,sp),a
-2670  0631               L1001:
-2671                     ; 429 	set_rgb(index,0,red);
-2673  0631 7b02          	ld	a,(OFST-5,sp)
-2674  0633 88            	push	a
-2675  0634 7b09          	ld	a,(OFST+2,sp)
-2676  0636 5f            	clrw	x
-2677  0637 95            	ld	xh,a
-2678  0638 ad1c          	call	_set_rgb
-2680  063a 84            	pop	a
-2681                     ; 430 	set_rgb(index,1,green);
-2683  063b 7b03          	ld	a,(OFST-4,sp)
-2684  063d 88            	push	a
-2685  063e 7b09          	ld	a,(OFST+2,sp)
-2686  0640 ae0001        	ldw	x,#1
-2687  0643 95            	ld	xh,a
-2688  0644 ad10          	call	_set_rgb
-2690  0646 84            	pop	a
-2691                     ; 431 	set_rgb(index,2,blue);
-2693  0647 7b04          	ld	a,(OFST-3,sp)
-2694  0649 88            	push	a
-2695  064a 7b09          	ld	a,(OFST+2,sp)
-2696  064c ae0002        	ldw	x,#2
-2697  064f 95            	ld	xh,a
-2698  0650 ad04          	call	_set_rgb
-2700  0652 84            	pop	a
-2701                     ; 432 }
-2704  0653 5b08          	addw	sp,#8
-2705  0655 81            	ret
-2758                     ; 434 void set_rgb(u8 index,u8 color,u8 brightness)
-2758                     ; 435 {
-2759                     	switch	.text
-2760  0656               _set_rgb:
-2762  0656 89            	pushw	x
-2763       00000000      OFST:	set	0
-2766                     ; 436 	pwm_brightness_buffer[index+color*RGB_LED_COUNT]=brightness;
-2768  0657 9f            	ld	a,xl
-2769  0658 97            	ld	xl,a
-2770  0659 a606          	ld	a,#6
-2771  065b 42            	mul	x,a
-2772  065c 01            	rrwa	x,a
-2773  065d 1b01          	add	a,(OFST+1,sp)
-2774  065f 2401          	jrnc	L261
-2775  0661 5c            	incw	x
-2776  0662               L261:
-2777  0662 02            	rlwa	x,a
-2778  0663 7b05          	ld	a,(OFST+5,sp)
-2779  0665 e708          	ld	(_pwm_brightness_buffer,x),a
-2780                     ; 437 }
-2783  0667 85            	popw	x
-2784  0668 81            	ret
-2828                     ; 439 void set_white(u8 index,u8 brightness)
-2828                     ; 440 {
-2829                     	switch	.text
-2830  0669               _set_white:
-2832  0669 89            	pushw	x
-2833       00000000      OFST:	set	0
-2836                     ; 441 	pwm_brightness_buffer[DEBUG_LED_INDEX+1+index]=brightness;
-2838  066a 9e            	ld	a,xh
-2839  066b 5f            	clrw	x
-2840  066c 97            	ld	xl,a
-2841  066d 7b02          	ld	a,(OFST+2,sp)
-2842  066f e71b          	ld	(_pwm_brightness_buffer+19,x),a
-2843                     ; 442 }
-2846  0671 85            	popw	x
-2847  0672 81            	ret
-2882                     ; 445 void set_debug(u8 brightness)
-2882                     ; 446 {
-2883                     	switch	.text
-2884  0673               _set_debug:
-2888                     ; 447 	pwm_brightness_buffer[DEBUG_LED_INDEX]=brightness;
-2890  0673 b71a          	ld	_pwm_brightness_buffer+18,a
-2891                     ; 448 }
-2894  0675 81            	ret
-2917                     ; 450 void set_matrix_high_z()
-2917                     ; 451 {
-2918                     	switch	.text
-2919  0676               _set_matrix_high_z:
-2923                     ; 452 	GPIOC->CR1 &= (uint8_t)(~(GPIO_PIN_7 | GPIO_PIN_6 | GPIO_PIN_5 | GPIO_PIN_4 | GPIO_PIN_3));
-2925  0676 c6500d        	ld	a,20493
-2926  0679 a407          	and	a,#7
-2927  067b c7500d        	ld	20493,a
-2928                     ; 453 	GPIOD->CR1 &= (uint8_t)(~(GPIO_PIN_2));
-2930  067e 72155012      	bres	20498,#2
-2931                     ; 454 	GPIOA->CR1 &= (uint8_t)(~(GPIO_PIN_3));
-2933  0682 72175003      	bres	20483,#3
-2934                     ; 457 	GPIOD->CR1 &= (uint8_t)(~(GPIO_PIN_3));//DEBUG_BROKEN
-2936  0686 72175012      	bres	20498,#3
-2937                     ; 458 }
-2940  068a 81            	ret
-2974                     ; 460 u8 get_eeprom_byte(u16 eeprom_address)
-2974                     ; 461 {
-2975                     	switch	.text
-2976  068b               _get_eeprom_byte:
-2980                     ; 462 	return (*(PointerAttr uint8_t *) (0x4000+eeprom_address));
-2982  068b d64000        	ld	a,(16384,x)
-2985  068e 81            	ret
-3113                     	xdef	f_TIM2_UPD_OVF_IRQHandler
-3114                     	switch	.ubsct
-3115  0000               _button_pressed_event:
-3116  0000 00000000      	ds.b	4
-3117                     	xdef	_button_pressed_event
-3118  0004               _button_start_ms:
-3119  0004 00000000      	ds.b	4
-3120                     	xdef	_button_start_ms
-3121                     	xdef	_pwm_state
-3122                     	xdef	_pwm_visible_index
-3123                     	xdef	_pwm_led_count
-3124                     	xdef	_pwm_sleep
-3125  0008               _pwm_brightness_buffer:
-3126  0008 000000000000  	ds.b	31
-3127                     	xdef	_pwm_brightness_buffer
-3128  0027               _pwm_brightness_index:
-3129  0027 000000000000  	ds.b	62
-3130                     	xdef	_pwm_brightness_index
-3131                     	xdef	_pwm_brightness
-3132                     	xdef	_atomic_counter
-3133                     	xdef	_frame_counter
-3134                     	xref	_UART1_Cmd
-3135                     	xref	_UART1_Init
-3136                     	xref	_UART1_DeInit
-3137                     	xref	_GPIO_ReadInputPin
-3138                     	xref	_GPIO_Init
-3139                     	xdef	_set_led_on
-3140                     	xdef	_set_mat
-3141                     	xdef	_get_eeprom_byte
-3142                     	xdef	_get_random
-3143                     	xdef	_is_button_down
-3144                     	xdef	_clear_button_events
-3145                     	xdef	_clear_button_event
-3146                     	xdef	_get_button_event
-3147                     	xdef	_update_buttons
-3148                     	xdef	_is_developer_valid
-3149                     	xdef	_set_hue_max
-3150                     	xdef	_flush_leds
-3151                     	xdef	_set_debug
-3152                     	xdef	_set_white
-3153                     	xdef	_set_rgb
-3154                     	xdef	_set_matrix_high_z
-3155                     	xdef	_millis
-3156                     	xdef	_setup_main
-3157                     	xdef	_is_application_valid
-3158                     	xdef	_setup_serial
-3159                     	xdef	_hello_world
-3160                     	xref.b	c_lreg
-3161                     	xref.b	c_x
-3162                     	xref.b	c_y
-3182                     	xref	c_xymov
-3183                     	xref	c_lgadd
-3184                     	xref	c_lzmp
-3185                     	xref	c_lsub
-3186                     	xref	c_rtol
-3187                     	xref	c_uitolx
-3188                     	xref	c_lursh
-3189                     	xref	c_itolx
-3190                     	xref	c_ltor
-3191                     	xref	c_imul
-3192                     	end
+1209                     ; 164 		case 2:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_1); }//SWIM IO input
+1210  0274 4d            	tnz	a
+1211  0275 2708          	jreq	L143
+1212  0277 4a            	dec	a
+1213  0278 2718          	jreq	L343
+1214  027a 4a            	dec	a
+1215  027b 2728          	jreq	L543
+1216  027d 2039          	jra	L763
+1217  027f               L143:
+1218                     ; 162 		case 0:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_5); }//left button
+1220  027f 4b20          	push	#32
+1221  0281 ae500f        	ldw	x,#20495
+1222  0284 cd0000        	call	_GPIO_ReadInputPin
+1224  0287 5b01          	addw	sp,#1
+1225  0289 4d            	tnz	a
+1226  028a 2604          	jrne	L421
+1227  028c a601          	ld	a,#1
+1228  028e 2001          	jra	L621
+1229  0290               L421:
+1230  0290 4f            	clr	a
+1231  0291               L621:
+1234  0291 81            	ret
+1235  0292               L343:
+1236                     ; 163 		case 1:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_6); }//right button
+1238  0292 4b40          	push	#64
+1239  0294 ae500f        	ldw	x,#20495
+1240  0297 cd0000        	call	_GPIO_ReadInputPin
+1242  029a 5b01          	addw	sp,#1
+1243  029c 4d            	tnz	a
+1244  029d 2604          	jrne	L031
+1245  029f a601          	ld	a,#1
+1246  02a1 2001          	jra	L231
+1247  02a3               L031:
+1248  02a3 4f            	clr	a
+1249  02a4               L231:
+1252  02a4 81            	ret
+1253  02a5               L543:
+1254                     ; 164 		case 2:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_1); }//SWIM IO input
+1256  02a5 4b02          	push	#2
+1257  02a7 ae500f        	ldw	x,#20495
+1258  02aa cd0000        	call	_GPIO_ReadInputPin
+1260  02ad 5b01          	addw	sp,#1
+1261  02af 4d            	tnz	a
+1262  02b0 2604          	jrne	L431
+1263  02b2 a601          	ld	a,#1
+1264  02b4 2001          	jra	L631
+1265  02b6               L431:
+1266  02b6 4f            	clr	a
+1267  02b7               L631:
+1270  02b7 81            	ret
+1271  02b8               L763:
+1272                     ; 166 	return 0;
+1274  02b8 4f            	clr	a
+1277  02b9 81            	ret
+1332                     ; 170 @far @interrupt void TIM2_UPD_OVF_IRQHandler (void) {
+1334                     	switch	.text
+1335  02ba               f_TIM2_UPD_OVF_IRQHandler:
+1337  02ba 8a            	push	cc
+1338  02bb 84            	pop	a
+1339  02bc a4bf          	and	a,#191
+1340  02be 88            	push	a
+1341  02bf 86            	pop	cc
+1342       00000005      OFST:	set	5
+1343  02c0 3b0002        	push	c_x+2
+1344  02c3 be00          	ldw	x,c_x
+1345  02c5 89            	pushw	x
+1346  02c6 3b0002        	push	c_y+2
+1347  02c9 be00          	ldw	x,c_y
+1348  02cb 89            	pushw	x
+1349  02cc be02          	ldw	x,c_lreg+2
+1350  02ce 89            	pushw	x
+1351  02cf be00          	ldw	x,c_lreg
+1352  02d1 89            	pushw	x
+1353  02d2 5205          	subw	sp,#5
+1356                     ; 171 	bool buffer_index=pwm_state&0x01;//primary vs redundant side to pull data from
+1358  02d4 b689          	ld	a,_pwm_state
+1359  02d6 a401          	and	a,#1
+1360  02d8 6b05          	ld	(OFST+0,sp),a
+1362                     ; 172 	u16 sleep_counts=1;
+1364  02da ae0001        	ldw	x,#1
+1365  02dd 1f03          	ldw	(OFST-2,sp),x
+1367                     ; 174 	GPIOC->DDR &= (uint8_t)(~(GPIO_PIN_7 | GPIO_PIN_6 | GPIO_PIN_5 | GPIO_PIN_4 | GPIO_PIN_3));
+1369  02df c6500c        	ld	a,20492
+1370  02e2 a407          	and	a,#7
+1371  02e4 c7500c        	ld	20492,a
+1372                     ; 175 	GPIOD->DDR &= (uint8_t)(~(GPIO_PIN_2));
+1374  02e7 72155011      	bres	20497,#2
+1375                     ; 176 	GPIOA->DDR &= (uint8_t)(~(GPIO_PIN_3));
+1377  02eb 72175002      	bres	20482,#3
+1378                     ; 177 	GPIOC->CR1 &= (uint8_t)(~(GPIO_PIN_7 | GPIO_PIN_6 | GPIO_PIN_5 | GPIO_PIN_4 | GPIO_PIN_3));//float
+1380  02ef c6500d        	ld	a,20493
+1381  02f2 a407          	and	a,#7
+1382  02f4 c7500d        	ld	20493,a
+1383                     ; 178 	GPIOD->CR1 &= (uint8_t)(~(GPIO_PIN_2));
+1385  02f7 72155012      	bres	20498,#2
+1386                     ; 179 	GPIOA->CR1 &= (uint8_t)(~(GPIO_PIN_3));
+1388  02fb 72175003      	bres	20483,#3
+1389                     ; 181 	GPIOD->DDR &= (uint8_t)(~(GPIO_PIN_4));
+1391  02ff 72195011      	bres	20497,#4
+1392                     ; 182 	GPIOD->CR1 &= (uint8_t)(~(GPIO_PIN_4));//DEBUG_BROKEN
+1394  0303 72195012      	bres	20498,#4
+1395                     ; 184   TIM2->CR1 &= ~TIM2_CR1_CEN;  // Clear the CEN bit to stop the timer
+1397  0307 72115300      	bres	21248,#0
+1398                     ; 185 	if(pwm_visible_index==pwm_led_count[buffer_index])//hold all LEDs OFF at end of frame to stabalize the display brightness, regardless of how long the displayed LEDs are ON for
+1400  030b 7b05          	ld	a,(OFST+0,sp)
+1401  030d 5f            	clrw	x
+1402  030e 97            	ld	xl,a
+1403  030f e686          	ld	a,(_pwm_led_count,x)
+1404  0311 b188          	cp	a,_pwm_visible_index
+1405  0313 2609          	jrne	L314
+1406                     ; 187 		sleep_counts=pwm_sleep[buffer_index];
+1408  0315 7b05          	ld	a,(OFST+0,sp)
+1409  0317 5f            	clrw	x
+1410  0318 97            	ld	xl,a
+1411  0319 58            	sllw	x
+1412  031a ee82          	ldw	x,(_pwm_sleep,x)
+1413  031c 1f03          	ldw	(OFST-2,sp),x
+1415  031e               L314:
+1416                     ; 189 	if(pwm_visible_index>pwm_led_count[buffer_index])
+1418  031e 7b05          	ld	a,(OFST+0,sp)
+1419  0320 5f            	clrw	x
+1420  0321 97            	ld	xl,a
+1421  0322 e686          	ld	a,(_pwm_led_count,x)
+1422  0324 b188          	cp	a,_pwm_visible_index
+1423  0326 241e          	jruge	L514
+1424                     ; 191 		frame_counter++;
+1426  0328 be00          	ldw	x,_frame_counter
+1427  032a 1c0001        	addw	x,#1
+1428  032d bf00          	ldw	_frame_counter,x
+1429                     ; 192 		pwm_visible_index=0;//formally start new frame
+1431  032f 3f88          	clr	_pwm_visible_index
+1432                     ; 193 		update_buttons();
+1434  0331 cd019c        	call	_update_buttons
+1436                     ; 194 		if(pwm_state&0x02)
+1438  0334 b689          	ld	a,_pwm_state
+1439  0336 a502          	bcp	a,#2
+1440  0338 270c          	jreq	L514
+1441                     ; 196 			pwm_state^=0x03;//if flag to swap A/B is set, then clear the flag and swap sides
+1443  033a b689          	ld	a,_pwm_state
+1444  033c a803          	xor	a,#3
+1445  033e b789          	ld	_pwm_state,a
+1446                     ; 197 			buffer_index=pwm_state&0x01;//recompute primary vs redundant side to pull data from if on a new frame
+1448  0340 b689          	ld	a,_pwm_state
+1449  0342 a401          	and	a,#1
+1450  0344 6b05          	ld	(OFST+0,sp),a
+1452  0346               L514:
+1453                     ; 200 	if(pwm_visible_index<pwm_led_count[buffer_index])
+1455  0346 7b05          	ld	a,(OFST+0,sp)
+1456  0348 5f            	clrw	x
+1457  0349 97            	ld	xl,a
+1458  034a e686          	ld	a,(_pwm_led_count,x)
+1459  034c b188          	cp	a,_pwm_visible_index
+1460  034e 2324          	jrule	L124
+1461                     ; 202 		sleep_counts=pwm_brightness[pwm_visible_index][buffer_index];//how long to keep it ON
+1463  0350 7b05          	ld	a,(OFST+0,sp)
+1464  0352 5f            	clrw	x
+1465  0353 97            	ld	xl,a
+1466  0354 58            	sllw	x
+1467  0355 1f01          	ldw	(OFST-4,sp),x
+1469  0357 b688          	ld	a,_pwm_visible_index
+1470  0359 97            	ld	xl,a
+1471  035a a604          	ld	a,#4
+1472  035c 42            	mul	x,a
+1473  035d 72fb01        	addw	x,(OFST-4,sp)
+1474  0360 ee06          	ldw	x,(_pwm_brightness,x)
+1475  0362 1f03          	ldw	(OFST-2,sp),x
+1477                     ; 203 		set_led_on(pwm_brightness_index[pwm_visible_index][buffer_index]);//turn ON this LED
+1479  0364 b688          	ld	a,_pwm_visible_index
+1480  0366 5f            	clrw	x
+1481  0367 97            	ld	xl,a
+1482  0368 58            	sllw	x
+1483  0369 01            	rrwa	x,a
+1484  036a 1b05          	add	a,(OFST+0,sp)
+1485  036c 2401          	jrnc	L241
+1486  036e 5c            	incw	x
+1487  036f               L241:
+1488  036f 02            	rlwa	x,a
+1489  0370 e627          	ld	a,(_pwm_brightness_index,x)
+1490  0372 ad3e          	call	_set_led_on
+1492  0374               L124:
+1493                     ; 205 	pwm_visible_index++;
+1495  0374 3c88          	inc	_pwm_visible_index
+1496                     ; 206 	atomic_counter+=sleep_counts;
+1498  0376 1e03          	ldw	x,(OFST-2,sp)
+1499  0378 cd0000        	call	c_uitolx
+1501  037b ae0002        	ldw	x,#_atomic_counter
+1502  037e cd0000        	call	c_lgadd
+1504                     ; 208   TIM2->CNTRH = 0;// Set the high byte of the counter
+1506  0381 725f530c      	clr	21260
+1507                     ; 209   TIM2->CNTRL = 0;// Set the low byte of the counter
+1509  0385 725f530d      	clr	21261
+1510                     ; 210 	TIM2->ARRH= sleep_counts>>8;// init auto reload register
+1512  0389 7b03          	ld	a,(OFST-2,sp)
+1513  038b c7530f        	ld	21263,a
+1514                     ; 211 	TIM2->ARRL= sleep_counts&0x00FF;// init auto reload register
+1516  038e 7b04          	ld	a,(OFST-1,sp)
+1517  0390 a4ff          	and	a,#255
+1518  0392 c75310        	ld	21264,a
+1519                     ; 213 	TIM2->SR1&=~TIM2_SR1_UIF;//reset interrupt
+1521  0395 72115304      	bres	21252,#0
+1522                     ; 214   TIM2->CR1 |= TIM2_CR1_CEN;   // Set the CEN bit to restart the timer
+1524  0399 72105300      	bset	21248,#0
+1525                     ; 215 }
+1528  039d 5b05          	addw	sp,#5
+1529  039f 85            	popw	x
+1530  03a0 bf00          	ldw	c_lreg,x
+1531  03a2 85            	popw	x
+1532  03a3 bf02          	ldw	c_lreg+2,x
+1533  03a5 85            	popw	x
+1534  03a6 bf00          	ldw	c_y,x
+1535  03a8 320002        	pop	c_y+2
+1536  03ab 85            	popw	x
+1537  03ac bf00          	ldw	c_x,x
+1538  03ae 320002        	pop	c_x+2
+1539  03b1 80            	iret
+1541                     	switch	.const
+1542  0004               L324_led_lookup:
+1543  0004 04            	dc.b	4
+1544  0005 03            	dc.b	3
+1545  0006 03            	dc.b	3
+1546  0007 04            	dc.b	4
+1547  0008 00            	dc.b	0
+1548  0009 05            	dc.b	5
+1549  000a 00            	dc.b	0
+1550  000b 04            	dc.b	4
+1551  000c 00            	dc.b	0
+1552  000d 03            	dc.b	3
+1553  000e 00            	dc.b	0
+1554  000f 01            	dc.b	1
+1555  0010 05            	dc.b	5
+1556  0011 03            	dc.b	3
+1557  0012 03            	dc.b	3
+1558  0013 05            	dc.b	5
+1559  0014 00            	dc.b	0
+1560  0015 06            	dc.b	6
+1561  0016 01            	dc.b	1
+1562  0017 04            	dc.b	4
+1563  0018 01            	dc.b	1
+1564  0019 03            	dc.b	3
+1565  001a 00            	dc.b	0
+1566  001b 02            	dc.b	2
+1567  001c 06            	dc.b	6
+1568  001d 03            	dc.b	3
+1569  001e 03            	dc.b	3
+1570  001f 06            	dc.b	6
+1571  0020 01            	dc.b	1
+1572  0021 06            	dc.b	6
+1573  0022 02            	dc.b	2
+1574  0023 04            	dc.b	4
+1575  0024 02            	dc.b	2
+1576  0025 03            	dc.b	3
+1577  0026 01            	dc.b	1
+1578  0027 02            	dc.b	2
+1579  0028 07            	dc.b	7
+1580  0029 07            	dc.b	7
+1581  002a 03            	dc.b	3
+1582  002b 00            	dc.b	0
+1583  002c 03            	dc.b	3
+1584  002d 01            	dc.b	1
+1585  002e 03            	dc.b	3
+1586  002f 02            	dc.b	2
+1587  0030 04            	dc.b	4
+1588  0031 00            	dc.b	0
+1589  0032 01            	dc.b	1
+1590  0033 05            	dc.b	5
+1591  0034 02            	dc.b	2
+1592  0035 05            	dc.b	5
+1593  0036 04            	dc.b	4
+1594  0037 01            	dc.b	1
+1595  0038 04            	dc.b	4
+1596  0039 02            	dc.b	2
+1597  003a 02            	dc.b	2
+1598  003b 06            	dc.b	6
+1599  003c 04            	dc.b	4
+1600  003d 06            	dc.b	6
+1601  003e 04            	dc.b	4
+1602  003f 05            	dc.b	5
+1603  0040 05            	dc.b	5
+1604  0041 06            	dc.b	6
+1648                     ; 218 void set_led_on(u8 led_index)
+1648                     ; 219 {
+1650                     	switch	.text
+1651  03b2               _set_led_on:
+1653  03b2 88            	push	a
+1654  03b3 5240          	subw	sp,#64
+1655       00000040      OFST:	set	64
+1658                     ; 256 	const u8 led_lookup[LED_COUNT][2]={//[0] is HIGH mat, [1] is LOW mat ////DEBUG_BROKEN
+1658                     ; 257 		{4,3},{3,4},{0,5},{0,4},{0,3},{0,1},//reds
+1658                     ; 258 		{5,3},{3,5},{0,6},{1,4},{1,3},{0,2},//greens
+1658                     ; 259 		{6,3},{3,6},{1,6},{2,4},{2,3},{1,2},//blues
+1658                     ; 260 		{7,7},//debug; GND is tied low, no charlieplexing involved
+1658                     ; 261 		{3,0},//LED6
+1658                     ; 262 		{3,1},//LED4
+1658                     ; 263 		{3,2},//LED5
+1658                     ; 264 		{4,0},//LED14
+1658                     ; 265 		{1,5},//LED8
+1658                     ; 266 		{2,5},//LED9
+1658                     ; 267 		{4,1},//LED10
+1658                     ; 268 		{4,2},//LED16
+1658                     ; 269 		{2,6},//LED17
+1658                     ; 270 		{4,6},//LED12
+1658                     ; 271 		{4,5},//LED13
+1658                     ; 272 		{5,6} //LED11
+1658                     ; 273 	};
+1660  03b5 96            	ldw	x,sp
+1661  03b6 1c0003        	addw	x,#OFST-61
+1662  03b9 90ae0004      	ldw	y,#L324_led_lookup
+1663  03bd a63e          	ld	a,#62
+1664  03bf cd0000        	call	c_xymov
+1666                     ; 274 	set_mat(led_lookup[led_index][0],1);
+1668  03c2 96            	ldw	x,sp
+1669  03c3 1c0003        	addw	x,#OFST-61
+1670  03c6 1f01          	ldw	(OFST-63,sp),x
+1672  03c8 7b41          	ld	a,(OFST+1,sp)
+1673  03ca 5f            	clrw	x
+1674  03cb 97            	ld	xl,a
+1675  03cc 58            	sllw	x
+1676  03cd 72fb01        	addw	x,(OFST-63,sp)
+1677  03d0 f6            	ld	a,(x)
+1678  03d1 ae0001        	ldw	x,#1
+1679  03d4 95            	ld	xh,a
+1680  03d5 ad1c          	call	_set_mat
+1682                     ; 276 	if(led_index!=DEBUG_LED_INDEX) set_mat(led_lookup[led_index][1],0); //DEBUG_BROKEN
+1684  03d7 7b41          	ld	a,(OFST+1,sp)
+1685  03d9 a112          	cp	a,#18
+1686  03db 2713          	jreq	L744
+1689  03dd 96            	ldw	x,sp
+1690  03de 1c0004        	addw	x,#OFST-60
+1691  03e1 1f01          	ldw	(OFST-63,sp),x
+1693  03e3 7b41          	ld	a,(OFST+1,sp)
+1694  03e5 5f            	clrw	x
+1695  03e6 97            	ld	xl,a
+1696  03e7 58            	sllw	x
+1697  03e8 72fb01        	addw	x,(OFST-63,sp)
+1698  03eb f6            	ld	a,(x)
+1699  03ec 5f            	clrw	x
+1700  03ed 95            	ld	xh,a
+1701  03ee ad03          	call	_set_mat
+1703  03f0               L744:
+1704                     ; 278 }
+1707  03f0 5b41          	addw	sp,#65
+1708  03f2 81            	ret
+1909                     ; 283 void set_mat(u8 mat_index,bool is_high)
+1909                     ; 284 {
+1910                     	switch	.text
+1911  03f3               _set_mat:
+1913  03f3 89            	pushw	x
+1914  03f4 5203          	subw	sp,#3
+1915       00000003      OFST:	set	3
+1918                     ; 322 	if(mat_index==0)//DEBUG_BROKEN
+1920  03f6 9e            	ld	a,xh
+1921  03f7 4d            	tnz	a
+1922  03f8 2609          	jrne	L765
+1923                     ; 324 		GPIOx=GPIOD;
+1925  03fa ae500f        	ldw	x,#20495
+1926  03fd 1f01          	ldw	(OFST-2,sp),x
+1928                     ; 325 		GPIO_Pin=GPIO_PIN_4;
+1930  03ff a610          	ld	a,#16
+1931  0401 6b03          	ld	(OFST+0,sp),a
+1933  0403               L765:
+1934                     ; 327 	if(mat_index==1)
+1936  0403 7b04          	ld	a,(OFST+1,sp)
+1937  0405 a101          	cp	a,#1
+1938  0407 2609          	jrne	L175
+1939                     ; 329 		GPIOx=GPIOD;
+1941  0409 ae500f        	ldw	x,#20495
+1942  040c 1f01          	ldw	(OFST-2,sp),x
+1944                     ; 330 		GPIO_Pin=GPIO_PIN_2;
+1946  040e a604          	ld	a,#4
+1947  0410 6b03          	ld	(OFST+0,sp),a
+1949  0412               L175:
+1950                     ; 332 	if(mat_index==2)
+1952  0412 7b04          	ld	a,(OFST+1,sp)
+1953  0414 a102          	cp	a,#2
+1954  0416 2609          	jrne	L375
+1955                     ; 334 		GPIOx=GPIOC;
+1957  0418 ae500a        	ldw	x,#20490
+1958  041b 1f01          	ldw	(OFST-2,sp),x
+1960                     ; 335 		GPIO_Pin=GPIO_PIN_7;
+1962  041d a680          	ld	a,#128
+1963  041f 6b03          	ld	(OFST+0,sp),a
+1965  0421               L375:
+1966                     ; 337 	if(mat_index==3)
+1968  0421 7b04          	ld	a,(OFST+1,sp)
+1969  0423 a103          	cp	a,#3
+1970  0425 2609          	jrne	L575
+1971                     ; 339 		GPIOx=GPIOC;
+1973  0427 ae500a        	ldw	x,#20490
+1974  042a 1f01          	ldw	(OFST-2,sp),x
+1976                     ; 340 		GPIO_Pin=GPIO_PIN_6;
+1978  042c a640          	ld	a,#64
+1979  042e 6b03          	ld	(OFST+0,sp),a
+1981  0430               L575:
+1982                     ; 342 	if(mat_index==4)
+1984  0430 7b04          	ld	a,(OFST+1,sp)
+1985  0432 a104          	cp	a,#4
+1986  0434 2609          	jrne	L775
+1987                     ; 344 		GPIOx=GPIOC;
+1989  0436 ae500a        	ldw	x,#20490
+1990  0439 1f01          	ldw	(OFST-2,sp),x
+1992                     ; 345 		GPIO_Pin=GPIO_PIN_5;
+1994  043b a620          	ld	a,#32
+1995  043d 6b03          	ld	(OFST+0,sp),a
+1997  043f               L775:
+1998                     ; 347 	if(mat_index==5)
+2000  043f 7b04          	ld	a,(OFST+1,sp)
+2001  0441 a105          	cp	a,#5
+2002  0443 2609          	jrne	L106
+2003                     ; 349 		GPIOx=GPIOC;
+2005  0445 ae500a        	ldw	x,#20490
+2006  0448 1f01          	ldw	(OFST-2,sp),x
+2008                     ; 350 		GPIO_Pin=GPIO_PIN_4;
+2010  044a a610          	ld	a,#16
+2011  044c 6b03          	ld	(OFST+0,sp),a
+2013  044e               L106:
+2014                     ; 352 	if(mat_index==6)
+2016  044e 7b04          	ld	a,(OFST+1,sp)
+2017  0450 a106          	cp	a,#6
+2018  0452 2609          	jrne	L306
+2019                     ; 354 		GPIOx=GPIOC;
+2021  0454 ae500a        	ldw	x,#20490
+2022  0457 1f01          	ldw	(OFST-2,sp),x
+2024                     ; 355 		GPIO_Pin=GPIO_PIN_3;
+2026  0459 a608          	ld	a,#8
+2027  045b 6b03          	ld	(OFST+0,sp),a
+2029  045d               L306:
+2030                     ; 357 	if(mat_index==7)
+2032  045d 7b04          	ld	a,(OFST+1,sp)
+2033  045f a107          	cp	a,#7
+2034  0461 2609          	jrne	L506
+2035                     ; 359 		GPIOx=GPIOA;
+2037  0463 ae5000        	ldw	x,#20480
+2038  0466 1f01          	ldw	(OFST-2,sp),x
+2040                     ; 360 		GPIO_Pin=GPIO_PIN_3;
+2042  0468 a608          	ld	a,#8
+2043  046a 6b03          	ld	(OFST+0,sp),a
+2045  046c               L506:
+2046                     ; 362 	if(is_high) GPIOx->ODR |= (uint8_t)GPIO_Pin;
+2048  046c 0d05          	tnz	(OFST+2,sp)
+2049  046e 2708          	jreq	L706
+2052  0470 1e01          	ldw	x,(OFST-2,sp)
+2053  0472 f6            	ld	a,(x)
+2054  0473 1a03          	or	a,(OFST+0,sp)
+2055  0475 f7            	ld	(x),a
+2057  0476 2007          	jra	L116
+2058  0478               L706:
+2059                     ; 363 	else        GPIOx->ODR &= (uint8_t)(~(GPIO_Pin));
+2061  0478 1e01          	ldw	x,(OFST-2,sp)
+2062  047a 7b03          	ld	a,(OFST+0,sp)
+2063  047c 43            	cpl	a
+2064  047d f4            	and	a,(x)
+2065  047e f7            	ld	(x),a
+2066  047f               L116:
+2067                     ; 364 	GPIOx->DDR |= (uint8_t)GPIO_Pin;
+2069  047f 1e01          	ldw	x,(OFST-2,sp)
+2070  0481 e602          	ld	a,(2,x)
+2071  0483 1a03          	or	a,(OFST+0,sp)
+2072  0485 e702          	ld	(2,x),a
+2073                     ; 365 	GPIOx->CR1 |= (uint8_t)GPIO_Pin;
+2075  0487 1e01          	ldw	x,(OFST-2,sp)
+2076  0489 e603          	ld	a,(3,x)
+2077  048b 1a03          	or	a,(OFST+0,sp)
+2078  048d e703          	ld	(3,x),a
+2079                     ; 366 }
+2082  048f 5b05          	addw	sp,#5
+2083  0491 81            	ret
+2159                     ; 369 void flush_leds(u8 led_count)
+2159                     ; 370 {
+2160                     	switch	.text
+2161  0492               _flush_leds:
+2163  0492 88            	push	a
+2164  0493 5207          	subw	sp,#7
+2165       00000007      OFST:	set	7
+2168                     ; 371 	u8 led_read_index=0,led_write_index=0;
+2172  0495 0f05          	clr	(OFST-2,sp)
+2175  0497               L556:
+2176                     ; 374 	while(pwm_state&0x02){}//wait for volatile flag to clear (if still raised from the previous call)
+2178  0497 b689          	ld	a,_pwm_state
+2179  0499 a502          	bcp	a,#2
+2180  049b 26fa          	jrne	L556
+2181                     ; 375 	buffer_index=0x01^(pwm_state&0x01);//need to wait for above flag to be cleared before evaluating this
+2183  049d b689          	ld	a,_pwm_state
+2184  049f a401          	and	a,#1
+2185  04a1 a801          	xor	a,#1
+2186  04a3 6b07          	ld	(OFST+0,sp),a
+2188                     ; 377 	if(led_count==0) led_count=1;//min value
+2190  04a5 0d08          	tnz	(OFST+1,sp)
+2191  04a7 2604          	jrne	L166
+2194  04a9 a601          	ld	a,#1
+2195  04ab 6b08          	ld	(OFST+1,sp),a
+2196  04ad               L166:
+2197                     ; 378 	pwm_sleep[buffer_index]=((uint16_t)led_count)<<10;//prepare the max value of sleep, and subtract from it for each LED illuminated based on brightness (time illuminated)
+2199  04ad 7b08          	ld	a,(OFST+1,sp)
+2200  04af 5f            	clrw	x
+2201  04b0 97            	ld	xl,a
+2202  04b1 4f            	clr	a
+2203  04b2 02            	rlwa	x,a
+2204  04b3 58            	sllw	x
+2205  04b4 58            	sllw	x
+2206  04b5 7b07          	ld	a,(OFST+0,sp)
+2207  04b7 905f          	clrw	y
+2208  04b9 9097          	ld	yl,a
+2209  04bb 9058          	sllw	y
+2210  04bd 90ef82        	ldw	(_pwm_sleep,y),x
+2211                     ; 380 	for(led_read_index=0;led_read_index<LED_COUNT;led_read_index++)
+2213  04c0 0f06          	clr	(OFST-1,sp)
+2215  04c2               L366:
+2216                     ; 382 		read_brightness=pwm_brightness_buffer[led_read_index];
+2218  04c2 7b06          	ld	a,(OFST-1,sp)
+2219  04c4 5f            	clrw	x
+2220  04c5 97            	ld	xl,a
+2221  04c6 e608          	ld	a,(_pwm_brightness_buffer,x)
+2222  04c8 5f            	clrw	x
+2223  04c9 97            	ld	xl,a
+2224  04ca 1f03          	ldw	(OFST-4,sp),x
+2226                     ; 383 		if(read_brightness!=0)//min brightness, below this value instaiblity occurs magic number to avoid interrupt timing error
+2228  04cc 1e03          	ldw	x,(OFST-4,sp)
+2229  04ce 2767          	jreq	L176
+2230                     ; 385 			pwm_brightness_index[led_write_index][buffer_index]=led_read_index;
+2232  04d0 7b05          	ld	a,(OFST-2,sp)
+2233  04d2 5f            	clrw	x
+2234  04d3 97            	ld	xl,a
+2235  04d4 58            	sllw	x
+2236  04d5 01            	rrwa	x,a
+2237  04d6 1b07          	add	a,(OFST+0,sp)
+2238  04d8 2401          	jrnc	L251
+2239  04da 5c            	incw	x
+2240  04db               L251:
+2241  04db 02            	rlwa	x,a
+2242  04dc 7b06          	ld	a,(OFST-1,sp)
+2243  04de e727          	ld	(_pwm_brightness_index,x),a
+2244                     ; 386 			pwm_brightness[led_write_index][buffer_index]=((read_brightness*read_brightness)>>6)+1;//square 8-bit brightness and then clip 16 bit result down to 10 bits.  Values <8 are rounded to 0, so round that up to avoid zero-length display states
+2246  04e0 1e03          	ldw	x,(OFST-4,sp)
+2247  04e2 1603          	ldw	y,(OFST-4,sp)
+2248  04e4 cd0000        	call	c_imul
+2250  04e7 a606          	ld	a,#6
+2251  04e9               L451:
+2252  04e9 54            	srlw	x
+2253  04ea 4a            	dec	a
+2254  04eb 26fc          	jrne	L451
+2255  04ed 5c            	incw	x
+2256  04ee 7b07          	ld	a,(OFST+0,sp)
+2257  04f0 905f          	clrw	y
+2258  04f2 9097          	ld	yl,a
+2259  04f4 9058          	sllw	y
+2260  04f6 1701          	ldw	(OFST-6,sp),y
+2262  04f8 7b05          	ld	a,(OFST-2,sp)
+2263  04fa 905f          	clrw	y
+2264  04fc 9097          	ld	yl,a
+2265  04fe 9058          	sllw	y
+2266  0500 9058          	sllw	y
+2267  0502 72f901        	addw	y,(OFST-6,sp)
+2268  0505 90ef06        	ldw	(_pwm_brightness,y),x
+2269                     ; 387 			pwm_sleep[buffer_index]-=pwm_brightness[led_write_index][buffer_index];
+2271  0508 7b07          	ld	a,(OFST+0,sp)
+2272  050a 5f            	clrw	x
+2273  050b 97            	ld	xl,a
+2274  050c 58            	sllw	x
+2275  050d 7b07          	ld	a,(OFST+0,sp)
+2276  050f 905f          	clrw	y
+2277  0511 9097          	ld	yl,a
+2278  0513 9058          	sllw	y
+2279  0515 1701          	ldw	(OFST-6,sp),y
+2281  0517 7b05          	ld	a,(OFST-2,sp)
+2282  0519 905f          	clrw	y
+2283  051b 9097          	ld	yl,a
+2284  051d 9058          	sllw	y
+2285  051f 9058          	sllw	y
+2286  0521 72f901        	addw	y,(OFST-6,sp)
+2287  0524 90ee06        	ldw	y,(_pwm_brightness,y)
+2288  0527 9001          	rrwa	y,a
+2289  0529 e083          	sub	a,(_pwm_sleep+1,x)
+2290  052b 9001          	rrwa	y,a
+2291  052d e282          	sbc	a,(_pwm_sleep,x)
+2292  052f 9001          	rrwa	y,a
+2293  0531 9050          	negw	y
+2294  0533 ef82          	ldw	(_pwm_sleep,x),y
+2295                     ; 388 			led_write_index++;
+2297  0535 0c05          	inc	(OFST-2,sp)
+2299  0537               L176:
+2300                     ; 390 		pwm_brightness_buffer[led_read_index]=0;//clean up for next use
+2302  0537 7b06          	ld	a,(OFST-1,sp)
+2303  0539 5f            	clrw	x
+2304  053a 97            	ld	xl,a
+2305  053b 6f08          	clr	(_pwm_brightness_buffer,x)
+2306                     ; 380 	for(led_read_index=0;led_read_index<LED_COUNT;led_read_index++)
+2308  053d 0c06          	inc	(OFST-1,sp)
+2312  053f 7b06          	ld	a,(OFST-1,sp)
+2313  0541 a11f          	cp	a,#31
+2314  0543 2403cc04c2    	jrult	L366
+2315                     ; 392 	if(pwm_sleep[buffer_index]>(LED_COUNT<<10)||pwm_sleep[buffer_index]==0) pwm_sleep[buffer_index]=1;//leds are trying to be brighter than max, causing a negative sleep time to equalize brightness
+2317  0548 7b07          	ld	a,(OFST+0,sp)
+2318  054a 5f            	clrw	x
+2319  054b 97            	ld	xl,a
+2320  054c 58            	sllw	x
+2321  054d 9093          	ldw	y,x
+2322  054f 90ee82        	ldw	y,(_pwm_sleep,y)
+2323  0552 90a37c01      	cpw	y,#31745
+2324  0556 240b          	jruge	L576
+2326  0558 7b07          	ld	a,(OFST+0,sp)
+2327  055a 5f            	clrw	x
+2328  055b 97            	ld	xl,a
+2329  055c 58            	sllw	x
+2330  055d e683          	ld	a,(_pwm_sleep+1,x)
+2331  055f ea82          	or	a,(_pwm_sleep,x)
+2332  0561 260b          	jrne	L376
+2333  0563               L576:
+2336  0563 7b07          	ld	a,(OFST+0,sp)
+2337  0565 5f            	clrw	x
+2338  0566 97            	ld	xl,a
+2339  0567 58            	sllw	x
+2340  0568 90ae0001      	ldw	y,#1
+2341  056c ef82          	ldw	(_pwm_sleep,x),y
+2342  056e               L376:
+2343                     ; 393 	if(led_write_index==0)
+2345  056e 0d05          	tnz	(OFST-2,sp)
+2346  0570 2622          	jrne	L776
+2347                     ; 395 		led_write_index=1;
+2349  0572 a601          	ld	a,#1
+2350  0574 6b05          	ld	(OFST-2,sp),a
+2352                     ; 396 		pwm_sleep[buffer_index]=6<<10;
+2354  0576 7b07          	ld	a,(OFST+0,sp)
+2355  0578 5f            	clrw	x
+2356  0579 97            	ld	xl,a
+2357  057a 58            	sllw	x
+2358  057b 90ae1800      	ldw	y,#6144
+2359  057f ef82          	ldw	(_pwm_sleep,x),y
+2360                     ; 397 		pwm_brightness_index[0][buffer_index]=DEBUG_LED_INDEX;
+2362  0581 7b07          	ld	a,(OFST+0,sp)
+2363  0583 5f            	clrw	x
+2364  0584 97            	ld	xl,a
+2365  0585 a612          	ld	a,#18
+2366  0587 e727          	ld	(_pwm_brightness_index,x),a
+2367                     ; 398 		pwm_brightness[0][buffer_index]=1;
+2369  0589 7b07          	ld	a,(OFST+0,sp)
+2370  058b 5f            	clrw	x
+2371  058c 97            	ld	xl,a
+2372  058d 58            	sllw	x
+2373  058e 90ae0001      	ldw	y,#1
+2374  0592 ef06          	ldw	(_pwm_brightness,x),y
+2375  0594               L776:
+2376                     ; 400 	pwm_led_count[buffer_index]=led_write_index;//save the led count for the volatile pwm routine state machine.
+2378  0594 7b07          	ld	a,(OFST+0,sp)
+2379  0596 5f            	clrw	x
+2380  0597 97            	ld	xl,a
+2381  0598 7b05          	ld	a,(OFST-2,sp)
+2382  059a e786          	ld	(_pwm_led_count,x),a
+2383                     ; 403 	pwm_state|=0x02;//raise flag that data is ready for volatile pwm process to pick up and use
+2385  059c 72120089      	bset	_pwm_state,#1
+2386                     ; 404 }
+2389  05a0 5b08          	addw	sp,#8
+2390  05a2 81            	ret
+2497                     ; 407 void set_hue_max(u8 index,u16 color)
+2497                     ; 408 {
+2498                     	switch	.text
+2499  05a3               _set_hue_max:
+2501  05a3 88            	push	a
+2502  05a4 5207          	subw	sp,#7
+2503       00000007      OFST:	set	7
+2506                     ; 411 	const u8 MAX_BRIGHTNESS=180;//180**2+180**2 < 255**2  --> effectively just 1 LED ON regardless of color
+2508  05a6 a6b4          	ld	a,#180
+2509  05a8 6b05          	ld	(OFST-2,sp),a
+2511                     ; 412 	const u8 BRIGHTNESS_STEP=61;//CEIL(0x2AAB/MAX_BRIGHTNESS)
+2513  05aa a63d          	ld	a,#61
+2514  05ac 6b01          	ld	(OFST-6,sp),a
+2516                     ; 413 	u8 red=0,green=0,blue=0;
+2518  05ae 0f02          	clr	(OFST-5,sp)
+2522  05b0 0f03          	clr	(OFST-4,sp)
+2526  05b2 0f04          	clr	(OFST-3,sp)
+2528                     ; 414 	u8 residual=0;
+2530  05b4 0f06          	clr	(OFST-1,sp)
+2532                     ; 416 	for(iter=0;iter<6;iter++)
+2534  05b6 0f07          	clr	(OFST+0,sp)
+2536  05b8               L757:
+2537                     ; 418 		if(color<0x2AAB)
+2539  05b8 1e0b          	ldw	x,(OFST+4,sp)
+2540  05ba a32aab        	cpw	x,#10923
+2541  05bd 240b          	jruge	L567
+2542                     ; 420 			residual=color/BRIGHTNESS_STEP;
+2544  05bf 1e0b          	ldw	x,(OFST+4,sp)
+2545  05c1 7b01          	ld	a,(OFST-6,sp)
+2546  05c3 62            	div	x,a
+2547  05c4 01            	rrwa	x,a
+2548  05c5 6b06          	ld	(OFST-1,sp),a
+2549  05c7 02            	rlwa	x,a
+2551                     ; 421 			break;
+2553  05c8 200f          	jra	L367
+2554  05ca               L567:
+2555                     ; 423 		color-=0x2AAB;
+2557  05ca 1e0b          	ldw	x,(OFST+4,sp)
+2558  05cc 1d2aab        	subw	x,#10923
+2559  05cf 1f0b          	ldw	(OFST+4,sp),x
+2560                     ; 416 	for(iter=0;iter<6;iter++)
+2562  05d1 0c07          	inc	(OFST+0,sp)
+2566  05d3 7b07          	ld	a,(OFST+0,sp)
+2567  05d5 a106          	cp	a,#6
+2568  05d7 25df          	jrult	L757
+2569  05d9               L367:
+2570                     ; 425 	if(iter==0){ red=MAX_BRIGHTNESS; green=residual; }
+2572  05d9 0d07          	tnz	(OFST+0,sp)
+2573  05db 2608          	jrne	L767
+2576  05dd 7b05          	ld	a,(OFST-2,sp)
+2577  05df 6b02          	ld	(OFST-5,sp),a
+2581  05e1 7b06          	ld	a,(OFST-1,sp)
+2582  05e3 6b03          	ld	(OFST-4,sp),a
+2584  05e5               L767:
+2585                     ; 426 	if(iter==1){ green=MAX_BRIGHTNESS; red=MAX_BRIGHTNESS-residual; }
+2587  05e5 7b07          	ld	a,(OFST+0,sp)
+2588  05e7 a101          	cp	a,#1
+2589  05e9 260a          	jrne	L177
+2592  05eb 7b05          	ld	a,(OFST-2,sp)
+2593  05ed 6b03          	ld	(OFST-4,sp),a
+2597  05ef 7b05          	ld	a,(OFST-2,sp)
+2598  05f1 1006          	sub	a,(OFST-1,sp)
+2599  05f3 6b02          	ld	(OFST-5,sp),a
+2601  05f5               L177:
+2602                     ; 427 	if(iter==2){ green=MAX_BRIGHTNESS; blue=residual; }
+2604  05f5 7b07          	ld	a,(OFST+0,sp)
+2605  05f7 a102          	cp	a,#2
+2606  05f9 2608          	jrne	L377
+2609  05fb 7b05          	ld	a,(OFST-2,sp)
+2610  05fd 6b03          	ld	(OFST-4,sp),a
+2614  05ff 7b06          	ld	a,(OFST-1,sp)
+2615  0601 6b04          	ld	(OFST-3,sp),a
+2617  0603               L377:
+2618                     ; 428 	if(iter==3){ blue=MAX_BRIGHTNESS; green=MAX_BRIGHTNESS-residual; }
+2620  0603 7b07          	ld	a,(OFST+0,sp)
+2621  0605 a103          	cp	a,#3
+2622  0607 260a          	jrne	L577
+2625  0609 7b05          	ld	a,(OFST-2,sp)
+2626  060b 6b04          	ld	(OFST-3,sp),a
+2630  060d 7b05          	ld	a,(OFST-2,sp)
+2631  060f 1006          	sub	a,(OFST-1,sp)
+2632  0611 6b03          	ld	(OFST-4,sp),a
+2634  0613               L577:
+2635                     ; 429 	if(iter==4){ blue=MAX_BRIGHTNESS; red=residual; }
+2637  0613 7b07          	ld	a,(OFST+0,sp)
+2638  0615 a104          	cp	a,#4
+2639  0617 2608          	jrne	L777
+2642  0619 7b05          	ld	a,(OFST-2,sp)
+2643  061b 6b04          	ld	(OFST-3,sp),a
+2647  061d 7b06          	ld	a,(OFST-1,sp)
+2648  061f 6b02          	ld	(OFST-5,sp),a
+2650  0621               L777:
+2651                     ; 430 	if(iter==5){ red=MAX_BRIGHTNESS; blue=MAX_BRIGHTNESS-residual; }
+2653  0621 7b07          	ld	a,(OFST+0,sp)
+2654  0623 a105          	cp	a,#5
+2655  0625 260a          	jrne	L1001
+2658  0627 7b05          	ld	a,(OFST-2,sp)
+2659  0629 6b02          	ld	(OFST-5,sp),a
+2663  062b 7b05          	ld	a,(OFST-2,sp)
+2664  062d 1006          	sub	a,(OFST-1,sp)
+2665  062f 6b04          	ld	(OFST-3,sp),a
+2667  0631               L1001:
+2668                     ; 431 	set_rgb(index,0,red);
+2670  0631 7b02          	ld	a,(OFST-5,sp)
+2671  0633 88            	push	a
+2672  0634 7b09          	ld	a,(OFST+2,sp)
+2673  0636 5f            	clrw	x
+2674  0637 95            	ld	xh,a
+2675  0638 ad1c          	call	_set_rgb
+2677  063a 84            	pop	a
+2678                     ; 432 	set_rgb(index,1,green);
+2680  063b 7b03          	ld	a,(OFST-4,sp)
+2681  063d 88            	push	a
+2682  063e 7b09          	ld	a,(OFST+2,sp)
+2683  0640 ae0001        	ldw	x,#1
+2684  0643 95            	ld	xh,a
+2685  0644 ad10          	call	_set_rgb
+2687  0646 84            	pop	a
+2688                     ; 433 	set_rgb(index,2,blue);
+2690  0647 7b04          	ld	a,(OFST-3,sp)
+2691  0649 88            	push	a
+2692  064a 7b09          	ld	a,(OFST+2,sp)
+2693  064c ae0002        	ldw	x,#2
+2694  064f 95            	ld	xh,a
+2695  0650 ad04          	call	_set_rgb
+2697  0652 84            	pop	a
+2698                     ; 434 }
+2701  0653 5b08          	addw	sp,#8
+2702  0655 81            	ret
+2755                     ; 438 void set_rgb(u8 index,u8 color,u8 brightness)
+2755                     ; 439 { pwm_brightness_buffer[index+color*RGB_LED_COUNT]=brightness; }
+2756                     	switch	.text
+2757  0656               _set_rgb:
+2759  0656 89            	pushw	x
+2760       00000000      OFST:	set	0
+2765  0657 9f            	ld	a,xl
+2766  0658 97            	ld	xl,a
+2767  0659 a606          	ld	a,#6
+2768  065b 42            	mul	x,a
+2769  065c 01            	rrwa	x,a
+2770  065d 1b01          	add	a,(OFST+1,sp)
+2771  065f 2401          	jrnc	L261
+2772  0661 5c            	incw	x
+2773  0662               L261:
+2774  0662 02            	rlwa	x,a
+2775  0663 7b05          	ld	a,(OFST+5,sp)
+2776  0665 e708          	ld	(_pwm_brightness_buffer,x),a
+2780  0667 85            	popw	x
+2781  0668 81            	ret
+2825                     ; 440 void set_white(u8 index,u8 brightness)
+2825                     ; 441 { pwm_brightness_buffer[DEBUG_LED_INDEX+1+index]=brightness; }
+2826                     	switch	.text
+2827  0669               _set_white:
+2829  0669 89            	pushw	x
+2830       00000000      OFST:	set	0
+2835  066a 9e            	ld	a,xh
+2836  066b 5f            	clrw	x
+2837  066c 97            	ld	xl,a
+2838  066d 7b02          	ld	a,(OFST+2,sp)
+2839  066f e71b          	ld	(_pwm_brightness_buffer+19,x),a
+2843  0671 85            	popw	x
+2844  0672 81            	ret
+2879                     ; 442 void set_debug(u8 brightness)
+2879                     ; 443 { pwm_brightness_buffer[DEBUG_LED_INDEX]=brightness; }
+2880                     	switch	.text
+2881  0673               _set_debug:
+2887  0673 b71a          	ld	_pwm_brightness_buffer+18,a
+2891  0675 81            	ret
+3019                     	xdef	f_TIM2_UPD_OVF_IRQHandler
+3020                     	switch	.ubsct
+3021  0000               _button_pressed_event:
+3022  0000 00000000      	ds.b	4
+3023                     	xdef	_button_pressed_event
+3024  0004               _button_start_ms:
+3025  0004 00000000      	ds.b	4
+3026                     	xdef	_button_start_ms
+3027                     	xdef	_pwm_state
+3028                     	xdef	_pwm_visible_index
+3029                     	xdef	_pwm_led_count
+3030                     	xdef	_pwm_sleep
+3031  0008               _pwm_brightness_buffer:
+3032  0008 000000000000  	ds.b	31
+3033                     	xdef	_pwm_brightness_buffer
+3034  0027               _pwm_brightness_index:
+3035  0027 000000000000  	ds.b	62
+3036                     	xdef	_pwm_brightness_index
+3037                     	xdef	_pwm_brightness
+3038                     	xdef	_atomic_counter
+3039                     	xdef	_frame_counter
+3040                     	xref	_UART1_Cmd
+3041                     	xref	_UART1_Init
+3042                     	xref	_UART1_DeInit
+3043                     	xref	_GPIO_ReadInputPin
+3044                     	xref	_GPIO_Init
+3045                     	xdef	_set_led_on
+3046                     	xdef	_set_mat
+3047                     	xdef	_get_random
+3048                     	xdef	_is_button_down
+3049                     	xdef	_clear_button_events
+3050                     	xdef	_clear_button_event
+3051                     	xdef	_get_button_event
+3052                     	xdef	_update_buttons
+3053                     	xdef	_is_developer_valid
+3054                     	xdef	_set_hue_max
+3055                     	xdef	_flush_leds
+3056                     	xdef	_set_debug
+3057                     	xdef	_set_white
+3058                     	xdef	_set_rgb
+3059                     	xdef	_millis
+3060                     	xdef	_setup_main
+3061                     	xdef	_is_application_valid
+3062                     	xdef	_setup_serial
+3063                     	xdef	_hello_world
+3064                     	xref.b	c_lreg
+3065                     	xref.b	c_x
+3066                     	xref.b	c_y
+3086                     	xref	c_xymov
+3087                     	xref	c_lgadd
+3088                     	xref	c_lzmp
+3089                     	xref	c_lsub
+3090                     	xref	c_rtol
+3091                     	xref	c_uitolx
+3092                     	xref	c_lursh
+3093                     	xref	c_itolx
+3094                     	xref	c_ltor
+3095                     	xref	c_imul
+3096                     	end
