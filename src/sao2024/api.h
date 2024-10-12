@@ -1,6 +1,8 @@
 
-#define RGB_LED_COUNT 10  //number of RGB LEDs around periphery
-#define WHITE_LED_COUNT 12 //number of white ELDs on the Space SAO ONLY
+#define RGB_LED_COUNT 6
+#define DEBUG_LED_INDEX RGB_LED_COUNT*3 //index of the debug led
+#define WHITE_LED_COUNT 12
+#define LED_COUNT DEBUG_LED_INDEX+WHITE_LED_COUNT+1 //6 RGB (3 LEDs each) + 12 white + 1 debug
 
 void hello_world(void);
 void setup_serial(bool is_enabled,bool is_fast_baud_rate);
@@ -12,16 +14,15 @@ void set_rgb(u8 index,u8 color,u8 brightness);
 void set_white(u8 index,u8 brightness);
 void set_debug(u8 brightness);
 void flush_leds(u8 led_count);
-//u16 get_val(u8 index);
 void set_hue_max(u8 index,u16 color);
 bool is_application_valid(void);
 bool is_developer_valid(void);
 void update_buttons(void);
 bool get_button_event(u8 button_index,bool is_long);
 bool clear_button_event(u8 button_index,bool is_long);
-void clear_button_events(void);
+bool clear_button_events(void);
 bool is_button_down(u8 index);
 u16 get_random(u16 x);
 u8 get_eeprom_byte(u16 address);
 void set_mat(u8 led_index,bool is_high);
-void set_led(u8 led_index);
+void set_led_on(u8 led_index);

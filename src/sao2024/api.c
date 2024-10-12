@@ -8,11 +8,7 @@ u16 frame_counter=0;//increments once all LEDs have physically been illuminated 
 u32 atomic_counter=0;
 
 //LED pwm control state machine
-#define RGB_COUNT 6
-#define DEBUG_LED RGB_COUNT*3 //index of the debug led
-#define WHITE_COUNT 12
-//DEBUG_BROKEN
-#define LED_COUNT DEBUG_LED+WHITE_COUNT+1 //6 RGB (3 LEDs each) + 12 white + 1 debug
+//TODO: DEBUG_BROKEN
 u16 pwm_brightness[LED_COUNT][2]={{1,1}};//array index, [A vs B side live]
 u8 pwm_brightness_index[LED_COUNT][2];//led index, [A vs B side live]
 u8 pwm_brightness_buffer[LED_COUNT];//hold LED values before flushing
@@ -108,9 +104,9 @@ u32 millis()
 	return atomic_counter>>9;//TIM2->PSCR + shift = 14
 }
 
-//log short or long rpess button events for applicatio layer to use as user input
+//log short or long press button events for application layer to use as user input
 //PRECON: don't press buttons at the same time (state machine gets confused).  Leveraging just one u32 to store timestamp of button press start to conserve memory
-//PRECON: assuming button is pressed less than 1 minute (otherwise state machine gets confused)
+//PRECON: assuming button is pressed less than ~1 minute (otherwise state machine gets confused)
 void update_buttons()
 {
 	bool is_any_down=0;
@@ -132,11 +128,11 @@ void update_buttons()
 	if(!is_any_down) button_start_ms=0;
 }
 
-//returns true if the API has registered the requested type of event
+//returns true if the API has registered the requested type of event (without clearning it, like peek())
 bool get_button_event(u8 button_index,bool is_long)
 { return button_pressed_event[button_index][is_long]; }
 
-//clears the specified type of event from the event queue
+//clears the specified type of event from the event queue, like pop()
 bool clear_button_event(u8 button_index,bool is_long)
 {
 	bool out=button_pressed_event[button_index][is_long];
@@ -144,14 +140,16 @@ bool clear_button_event(u8 button_index,bool is_long)
 	return out;
 }
 
-void clear_button_events()
+bool clear_button_events()
 {
 	u8 iter;
+	bool out=0;
 	for(iter=0;iter<BUTTON_COUNT;iter++)
 	{
-		clear_button_event(iter,0);
-		clear_button_event(iter,1);
+		out|=clear_button_event(iter,0);
+		out|=clear_button_event(iter,1);
 	}
+	return out;
 }
 
 //instantaneous check to see if button is pressed (grounded)
@@ -159,6 +157,8 @@ bool is_button_down(u8 index)
 {
 	switch(index)
 	{
+		//case 0:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_3); break; }//left button //DEBUG_BROKEN
+		//case 1:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_4); break; }//right button
 		case 0:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_5); break; }//left button
 		case 1:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_6); break; }//right button
 		case 2:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_1); break; }//SWIM IO input
@@ -190,6 +190,7 @@ bool is_button_down(u8 index)
 	{//reached end of frame, including wait period
 		frame_counter++;
 		pwm_visible_index=0;//formally start new frame
+		update_buttons();
 		if(pwm_state&0x02)
 		{
 			pwm_state^=0x03;//if flag to swap A/B is set, then clear the flag and swap sides
@@ -199,7 +200,7 @@ bool is_button_down(u8 index)
 	if(pwm_visible_index<pwm_led_count[buffer_index])
 	{
 		sleep_counts=pwm_brightness[pwm_visible_index][buffer_index];//how long to keep it ON
-		set_led(pwm_brightness_index[pwm_visible_index][buffer_index]);//turn ON this LED
+		set_led_on(pwm_brightness_index[pwm_visible_index][buffer_index]);//turn ON this LED
 	}
 	pwm_visible_index++;
 	atomic_counter+=sleep_counts;
@@ -214,7 +215,7 @@ bool is_button_down(u8 index)
 }
 
 //enable 1 led to be visible: emit light
-void set_led(u8 led_index)
+void set_led_on(u8 led_index)
 {
 	/*const u8 led_lookup[LED_COUNT][2]={//[0] is HIGH mat, [1] is LOW mat
 		{0,3},{1,3},{2,3},{3,0},{4,0},{5,0},//reds
@@ -272,7 +273,7 @@ void set_led(u8 led_index)
 	};
 	set_mat(led_lookup[led_index][0],1);
 	//if(led_index!=DEBUG_LED) set_mat(led_lookup[led_index][0],1);
-	if(led_index!=DEBUG_LED) set_mat(led_lookup[led_index][1],0); //DEBUG_BROKEN
+	if(led_index!=DEBUG_LED_INDEX) set_mat(led_lookup[led_index][1],0); //DEBUG_BROKEN
 	//set_mat(led_lookup[led_index][1],0);
 }
 
@@ -425,18 +426,18 @@ void set_hue_max(u8 index,u16 color)
 
 void set_rgb(u8 index,u8 color,u8 brightness)
 {
-	pwm_brightness_buffer[index+color*RGB_COUNT]=brightness;
+	pwm_brightness_buffer[index+color*RGB_LED_COUNT]=brightness;
 }
 
 void set_white(u8 index,u8 brightness)
 {
-	pwm_brightness_buffer[DEBUG_LED+1+index]=brightness;
+	pwm_brightness_buffer[DEBUG_LED_INDEX+1+index]=brightness;
 }
 
 //debug led status
 void set_debug(u8 brightness)
 {
-	pwm_brightness_buffer[DEBUG_LED]=brightness;
+	pwm_brightness_buffer[DEBUG_LED_INDEX]=brightness;
 }
 
 void set_matrix_high_z()

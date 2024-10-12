@@ -6,7 +6,7 @@
 int main()
 {
 	setup_main();
-	hello_world();
+	//hello_world();
 	while(1)
 	{
 		if(is_application_valid()) run_application();
