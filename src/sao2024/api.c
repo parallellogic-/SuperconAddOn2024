@@ -4,7 +4,7 @@
 #include "stm8s_uart1.h"
 
 //time state
-u32 api_counter=0;//counting the amount of sleep each led has taken
+u8 frame_counter=0;//counting the amount of sleep each led has taken
 
 //LED pwm control state machine
 #define RGB_COUNT 6
@@ -23,7 +23,7 @@ u8 pwm_state=0;//LSB (bit 0) is index of pwm_brightness to pull pwm info from.  
 #define BUTTON_COUNT 2
 u32 button_start_ms;//if 0, then button is unpressed.  if >0 then button si pressed and is waiting for release
 bool button_pressed_event[BUTTON_COUNT][2];//event flag registering a button push
-#define BUTTON_LONG_PRESS_MS 512 //number of millisconds to consititue a long press rather than a short press
+#define BUTTON_LONG_PRESS_MS 512 //number of millisconds to constitue a long press rather than a short press
 #define BUTTON_MINIMUM_PRESS_MS 50 //minimum time a button needs to be pressed down to be registered as a complete button press
 
 u16 temp_delete_me=0;
@@ -36,14 +36,14 @@ void hello_world()
 	bool is_high=0;
 	long frame=0;
 	GPIO_Init(GPIOA, GPIO_PIN_3, GPIO_MODE_IN_PU_NO_IT);
-set_debug(0xFF);
-set_white(1,0xFF);
-set_rgb(1,1,0xFF);
-flush_leds(7);
+	/*set_debug(0xFF);
+	set_white(1,0xFF);
+	set_rgb(1,1,0xFF);
+	flush_leds(7);*/
 	while(1)
 	{
 		frame++;
-		if(frame%256==0)
+		//if(frame%256==0)
 		{
 			//temp_delete_me=(frame/64/256)%2?(~(frame/64)):(frame/64);
 			/*temp2_delete_me=0x00FF&((frame/256/256)%2?(~(frame/256)):(frame/256));
@@ -55,11 +55,32 @@ flush_leds(7);
 			temp4_delete_me=temp4_delete_me>>6;
 			temp3_delete_me=(temp4_delete_me%2)<<9;*/
 			//temp_delete_me=(frame/256/256)%2?(~(frame/256)):(frame/256);
-		//set_debug(((frame/1024)%2)?0xFF:0);
+			set_debug(((frame/16)%2)?0xFF:0);
 			//set_debug(0xFF);
-			//set_rgb(0,0,(frame/256/256)%2?(~(frame/256)):(frame/256));
-			//set_white(1,(frame/256/256)%2?((frame/256)):(~frame/256));
-		//flush_leds(1);
+			//set_hue_max(0,~(frame<<4));
+			//set_hue_max(1,frame<<5);
+			//set_hue_max(4,~(frame<<7));
+			if((frame>>8)&0x01)
+				set_hue_max(3,frame<<9);
+			else
+				set_hue_max(3,(((frame+1)<<9)/0x2aab)*0x2aab);
+			
+			
+			set_white(0,(frame/256)%2?(frame):(~frame));
+			set_white(1,(frame/256)%2?(~frame):(frame));
+			/*set_rgb(0,0,(frame/256)%2?(~frame):(frame));
+			set_white(1,(frame/256)%2?(frame):(~frame));
+			set_rgb(0,1,((frame+64)/256)%2?(~(frame+64)):((frame+64)));
+			set_white(2,((frame+64)/256)%2?((frame+64)):(~(frame+64)));
+			set_rgb(0,2,((frame+128)/256)%2?(~(frame+128)):((frame+128)));
+			set_white(3,((frame+128)/256)%2?((frame+128)):(~(frame+128)));
+			set_rgb(1,0,((frame+192)/256)%2?(~(frame+192)):((frame+192)));
+			set_white(4,((frame+192)/256)%2?((frame+192)):(~(frame+192)));
+			set_rgb(1,1,((frame+32)/256)%2?(~(frame+32)):((frame+32)));
+			set_white(5,((frame+32)/256)%2?((frame+32)):(~(frame+32)));
+			set_rgb(1,2,((frame+160)/256)%2?(~(frame+160)):((frame+160)));
+			set_white(6,((frame+160)/256)%2?((frame+160)):(~(frame+160)));*/
+			flush_leds(9);
 			//set_mat(6,(frame/1024)%2);//debug LED
 			//GPIO_Init(GPIOA, GPIO_PIN_3,((frame/1024)%2)?GPIO_MODE_OUT_PP_HIGH_SLOW:GPIO_MODE_OUT_PP_LOW_SLOW);
 		}
@@ -122,7 +143,7 @@ void setup_main()
 
 u32 millis()
 {
-	return api_counter>>10;
+	return 0;//api_counter>>10;
 }
 
 //log short or long rpess button events for applicatio layer to use as user input
@@ -201,6 +222,7 @@ bool is_button_down(u8 index)
 	}
 	if(pwm_visible_index>pwm_led_count[buffer_index])
 	{//reached end of frame, including wait period
+		frame_counter++;
 		pwm_visible_index=0;//formally start new frame
 		if(pwm_state&0x02)
 		{
@@ -319,6 +341,8 @@ void flush_leds(u8 led_count)
 		}
 		pwm_brightness_buffer[led_read_index]=0;//clean up for next use
 	}
+	if(pwm_sleep[buffer_index]>(LED_COUNT<<10)) pwm_sleep[buffer_index]=1;//leds are trying to be brighter than max, causing a negative sleep time to equalize brightness
+	//if(led_write_index==0) led_write_index=1;//if no leds writte, arbitrarily try to show one
 	pwm_led_count[buffer_index]=led_write_index;//save the led count for the volatile pwm routine state machine.
 	//note: user may have requeted more LEDs to be lit then are actually there, so use the found LED count (leds>0 brightness), led_write_index,
 	//rather than user-specified value: led_count (effective time to be ON for each frame)
@@ -344,7 +368,26 @@ void flush_leds(u8 led_count)
 //assumes max brightness
 void set_hue_max(u8 index,u16 color)
 {
-	const u8 brightness=255;
+	u8 red=0,green=0,blue=0;
+	u8 residual=0;
+	u8 iter;
+	for(iter=0;iter<6;iter++)
+	{
+		if(color<0x2AAB)
+		{
+			residual=color/43;
+			break;
+		}
+		color-=0x2AAB;
+	}
+	if(iter==0){ red=255; green=residual; }
+	if(iter==1){ green=255; red=255-residual; }
+	if(iter==2){ green=255; blue=residual; }
+	if(iter==3){ blue=255; green=255-residual; }
+	if(iter==4){ blue=255; red=residual; }
+	if(iter==5){ red=255; blue=255-residual; }
+	
+	/*const u8 brightness=255;
 	u8 red=0,green=0,blue=0;
 	u16 residual_16=color%(0x2AAB);
 	u8 residual_8=(residual_16<<8)/0x2AAB;
@@ -381,7 +424,7 @@ void set_hue_max(u8 index,u16 color)
 			blue=brightness-residual_8;
 			break;
 		}default:{}
-	}
+	}*/
 	set_rgb(index,0,red);
 	set_rgb(index,1,green);
 	set_rgb(index,2,blue);
@@ -414,4 +457,3 @@ u8 get_eeprom_byte(u16 eeprom_address)
 {
 	return (*(PointerAttr uint8_t *) (0x4000+eeprom_address));
 }
-
