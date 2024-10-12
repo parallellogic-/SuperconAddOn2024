@@ -10,7 +10,6 @@ u8 frame_counter=0;//counting the amount of sleep each led has taken
 //#define RGB_COUNT 6
 #define RGB_COUNT 10
 #define DEBUG_LED RGB_COUNT*3 //index of the debug led
-//#define WHITE_COUNT 12
 #define WHITE_COUNT 1
 #define LED_COUNT DEBUG_LED+WHITE_COUNT+1 //6 RGB (3 LEDs each) + 12 white + 1 debug
 u16 pwm_brightness[LED_COUNT][2]={{1,1}};//array index, [A vs B side live]
@@ -59,17 +58,13 @@ void hello_world()
 			//temp_delete_me=(frame/256/256)%2?(~(frame/256)):(frame/256);
 			//set_debug(((frame/16)%2)?0xFF:0);
 			//set_debug(0xFF);
-			//set_hue_max(0,~(frame<<4));
-			//set_hue_max(1,frame<<5);
-			//set_hue_max(4,~(frame<<7));
-			set_hue_max(4,(frame<<8));
-			set_hue_max(5,(frame<<8)+0x5556);
-			set_hue_max(6,(frame<<8)+0xAAAB);
-			set_hue_max(9,(frame<<8)+0xAAAB);
-			set_hue_max(0,(frame<<8)+0xD554);
-			set_hue_max(1,(frame<<8)+0x2AAB);
-			//set_white(0,(frame/256)%2?(frame):(~frame));
-			//set_debug((frame/256)%2?(~frame):(frame));
+			set_hue_max(3,(frame<<8));
+			//set_hue_max(1,(frame<<8)+0x2AAB);
+			//set_hue_max(2,(frame<<8)+0x5556);
+			//set_hue_max(3,(frame<<8)+0x8000);
+			//set_hue_max(4,(frame<<8)+0xAAAB);
+			//set_hue_max(5,(frame<<8)+0xD556);
+			
 			
 			//set_white(0,(frame/256)%2?(frame):(~frame));
 			//set_white(1,(frame/256)%2?(~frame):(frame));
@@ -85,7 +80,7 @@ void hello_world()
 			set_white(5,((frame+32)/256)%2?((frame+32)):(~(frame+32)));
 			set_rgb(1,2,((frame+160)/256)%2?(~(frame+160)):((frame+160)));
 			set_white(6,((frame+160)/256)%2?((frame+160)):(~(frame+160)));*/
-			flush_leds(10);
+			flush_leds(9);
 			//set_mat(6,(frame/1024)%2);//debug LED
 			//GPIO_Init(GPIOA, GPIO_PIN_3,((frame/1024)%2)?GPIO_MODE_OUT_PP_HIGH_SLOW:GPIO_MODE_OUT_PP_LOW_SLOW);
 		}
@@ -277,8 +272,8 @@ void set_led(u8 led_index)
 		{0,2},{2,0},{5,1},{6,1},{6,4},{5,3},{3,5},{0,6},{1,4},{1,3},//greens
 		{1,2},{2,1},{5,2},{6,2},{5,4},{6,3},{3,6},{1,6},{2,4},{2,3},//blues
 		{7,7},//debug; GND is tied low, no charlieplexing involved
-		{3,1},//LED6
-		/*{3,1},//LED4
+		{3,0}/*,//LED6
+		{3,1},//LED4
 		{3,2},//LED5
 		{4,0},//LED14
 		{1,5},//LED8
@@ -409,6 +404,22 @@ void flush_leds(u8 led_count)
 	pwm_led_count[buffer_index]=led_write_index;//save the led count for the volatile pwm routine state machine.
 	//note: user may have requeted more LEDs to be lit then are actually there, so use the found LED count (leds>0 brightness), led_write_index,
 	//rather than user-specified value: led_count (effective time to be ON for each frame)
+	
+	//pwm_state=0x00;
+	//pwm_led_count[0]=2;
+	//pwm_led_count[1]=2;
+	//pwm_sleep[0]=14;
+	//pwm_sleep[1]=14;
+	//pwm_visible_index=0;
+	/*pwm_brightness[0][0]=1017;
+	pwm_brightness[0][1]=1017;
+	pwm_brightness[1][0]=1017;
+	pwm_brightness[1][1]=1017;*/
+	//pwm_brightness_index[0][0]=18;
+	//pwm_brightness_index[0][1]=18;
+	//pwm_brightness_index[1][0]=8;
+	//pwm_brightness_index[1][1]=8;
+	
 	pwm_state|=0x02;//raise flag that data is ready for volatile pwm process to pick up and use
 }
 
@@ -433,6 +444,45 @@ void set_hue_max(u8 index,u16 color)
 	if(iter==3){ blue=255; green=255-residual; }
 	if(iter==4){ blue=255; red=residual; }
 	if(iter==5){ red=255; blue=255-residual; }
+	
+	/*const u8 brightness=255;
+	u8 red=0,green=0,blue=0;
+	u16 residual_16=color%(0x2AAB);
+	u8 residual_8=(residual_16<<8)/0x2AAB;
+	switch(color/(0x2AAB))
+	{
+		case 0:{
+			red=brightness;
+			green=residual_8;
+			blue=0;
+			break;
+		}case 1:{
+			red=brightness-residual_8;
+			green=brightness;
+			blue=0;
+			break;
+		}case 2:{
+			red=0;
+			green=brightness;
+			blue=residual_8;
+			break;
+		}case 3:{
+			red=0;
+			green=brightness-residual_8;
+			blue=brightness;
+			break;
+		}case 4:{
+			red=residual_8;
+			green=0;
+			blue=brightness;
+			break;
+		}case 5:{
+			red=brightness;
+			green=0;
+			blue=brightness-residual_8;
+			break;
+		}default:{}
+	}*/
 	set_rgb(index,0,red);
 	set_rgb(index,1,green);
 	set_rgb(index,2,blue);
