@@ -4,14 +4,14 @@
 #include "stm8s_uart1.h"
 
 //time state
-u8 frame_counter=0;//increments once all LEDs have physically been illuminated once
+u16 frame_counter=0;//increments once all LEDs have physically been illuminated once
+u32 atomic_counter=0;
 
 //LED pwm control state machine
-//#define RGB_COUNT 6
-#define RGB_COUNT 10
+#define RGB_COUNT 6
 #define DEBUG_LED RGB_COUNT*3 //index of the debug led
-//#define WHITE_COUNT 12
-#define WHITE_COUNT 1
+#define WHITE_COUNT 12
+//DEBUG_BROKEN
 #define LED_COUNT DEBUG_LED+WHITE_COUNT+1 //6 RGB (3 LEDs each) + 12 white + 1 debug
 u16 pwm_brightness[LED_COUNT][2]={{1,1}};//array index, [A vs B side live]
 u8 pwm_brightness_index[LED_COUNT][2];//led index, [A vs B side live]
@@ -30,19 +30,22 @@ bool button_pressed_event[BUTTON_COUNT][2];//event flag registering a button pus
 
 void hello_world()
 {//basic program that blinks the debug LED ON/OFF
+	const u8 cycle_speed=8;//larger=faster
+	const u8 white_speed=5;//smaller=faster
 	u16 frame=0;
 	while(1)
 	{
 		frame++;
-		set_hue_max(0,(frame<<10));
-		set_hue_max(5,(frame<<10)+0x2AAB);
-		set_hue_max(6,(frame<<10)+0x5556);
-		set_hue_max(7,(frame<<10)+0x8000);
-		set_hue_max(8,(frame<<10)+0xAAAB);
-		set_hue_max(9,(frame<<10)+0xD554);
-		set_white(0,(frame>>6)&0x01?(frame<<2):(~(frame<<2)));
-		set_debug(  (frame>>6)&0x01?(~(frame<<2)):(frame<<2));
-		flush_leds(10);
+		set_hue_max(0,(frame<<cycle_speed));
+		set_hue_max(1,(frame<<cycle_speed)+0x2AAB);
+		set_hue_max(2,(frame<<cycle_speed)+0x5556);
+		set_hue_max(3,(frame<<cycle_speed)+0x8000);
+		set_hue_max(4,(frame<<cycle_speed)+0xAAAB);
+		set_hue_max(5,(frame<<cycle_speed)+0xD554);
+		//set_debug(  (frame>>6)&0x01?(~(frame<<2)):(frame<<2));
+		//set_white((frame>>6)%12,(millis()/1024)&0x01?0xFF:0);
+		set_white((frame>>(white_speed+1))%12,(frame>>white_speed)&0x01?(~(frame<<(8-white_speed))):(frame<<(8-white_speed)));
+		flush_leds(7);
 	}
 }
 
@@ -73,13 +76,13 @@ void setup_serial(bool is_enabled,bool is_fast_baud_rate)
 //leave application mode if SWIM pin floats high or sleep mode is activated (long press on left button)
 bool is_application_valid()
 {
-	return !is_button_down(2) && !get_button_event(0,1);
+	return 1;//!is_button_down(2) && !get_button_event(0,1);
 }
 
 //exit developer mode if SWIM pin floats high
 bool is_developer_valid()
 {
-	return is_button_down(2) && !get_button_event(0,1);
+	return 0;//is_button_down(2) && !get_button_event(0,1);
 }
 
 void setup_main()
@@ -102,7 +105,7 @@ void setup_main()
 
 u32 millis()
 {
-	return 0;//api_counter>>10;
+	return atomic_counter>>9;//TIM2->PSCR + shift = 14
 }
 
 //log short or long rpess button events for applicatio layer to use as user input
@@ -176,7 +179,7 @@ bool is_button_down(u8 index)
 	GPIOA->CR1 &= (uint8_t)(~(GPIO_PIN_3));
 	
 	GPIOD->DDR &= (uint8_t)(~(GPIO_PIN_4));
-	GPIOD->CR1 &= (uint8_t)(~(GPIO_PIN_4));//TEMP
+	GPIOD->CR1 &= (uint8_t)(~(GPIO_PIN_4));//DEBUG_BROKEN
 	
   TIM2->CR1 &= ~TIM2_CR1_CEN;  // Clear the CEN bit to stop the timer
 	if(pwm_visible_index==pwm_led_count[buffer_index])//hold all LEDs OFF at end of frame to stabalize the display brightness, regardless of how long the displayed LEDs are ON for
@@ -199,6 +202,7 @@ bool is_button_down(u8 index)
 		set_led(pwm_brightness_index[pwm_visible_index][buffer_index]);//turn ON this LED
 	}
 	pwm_visible_index++;
+	atomic_counter+=sleep_counts;
 	
   TIM2->CNTRH = 0;// Set the high byte of the counter
   TIM2->CNTRL = 0;// Set the low byte of the counter
@@ -230,13 +234,13 @@ void set_led(u8 led_index)
 		{3,5},//LED17
 		{4,5} //LED18
 	};*/
-	const u8 led_lookup[LED_COUNT][2]={//[0] is HIGH mat, [1] is LOW mat
-		{0,1},{1,0},{5,0},{6,0},{6,5},{4,3},{3,4},{0,5},{0,4},{0,3},//reds
-		{0,2},{2,0},{5,1},{6,1},{6,4},{5,3},{3,5},{0,6},{1,4},{1,3},//greens
-		{1,2},{2,1},{5,2},{6,2},{5,4},{6,3},{3,6},{1,6},{2,4},{2,3},//blues
-		//{7,7},//debug; GND is tied low, no charlieplexing involved
-		{3,0},//LED6
-		{3,1},//LED4
+	//const u8 led_lookup[LED_COUNT][2]={//[0] is HIGH mat, [1] is LOW mat //MAGIC
+	//	{0,1},{1,0},{5,0},{6,0},{6,5},{4,3},{3,4},{0,5},{0,4},{0,3},//reds
+	//	{0,2},{2,0},{5,1},{6,1},{6,4},{5,3},{3,5},{0,6},{1,4},{1,3},//greens
+	//	{1,2},{2,1},{5,2},{6,2},{5,4},{6,3},{3,6},{1,6},{2,4},{2,3},//blues
+	//	//{7,7},//debug; GND is tied low, no charlieplexing involved
+	//	{3,0},//LED6
+	//	{3,1},//LED4
 		/*{3,2},//LED5
 		{4,0},//LED14
 		{1,5},//LED8
@@ -247,11 +251,29 @@ void set_led(u8 led_index)
 		{4,6},//LED12
 		{4,5},//LED13
 		{5,6}*/ //LED11
+	//};
+	const u8 led_lookup[LED_COUNT][2]={//[0] is HIGH mat, [1] is LOW mat ////DEBUG_BROKEN
+		{4,3},{3,4},{0,5},{0,4},{0,3},{0,1},//reds
+		{5,3},{3,5},{0,6},{1,4},{1,3},{0,2},//greens
+		{6,3},{3,6},{1,6},{2,4},{2,3},{1,2},//blues
+		{7,7},//debug; GND is tied low, no charlieplexing involved
+		{3,0},//LED6
+		{3,1},//LED4
+		{3,2},//LED5
+		{4,0},//LED14
+		{1,5},//LED8
+		{2,5},//LED9
+		{4,1},//LED10
+		{4,2},//LED16
+		{2,6},//LED17
+		{4,6},//LED12
+		{4,5},//LED13
+		{5,6} //LED11
 	};
 	set_mat(led_lookup[led_index][0],1);
 	//if(led_index!=DEBUG_LED) set_mat(led_lookup[led_index][0],1);
-	//if(led_index!=DEBUG_LED) set_mat(led_lookup[led_index][1],0);
-	set_mat(led_lookup[led_index][1],0);
+	if(led_index!=DEBUG_LED) set_mat(led_lookup[led_index][1],0); //DEBUG_BROKEN
+	//set_mat(led_lookup[led_index][1],0);
 }
 
 //enable high or low side of an LED to form a complete circuit
@@ -294,7 +316,7 @@ void set_mat(u8 mat_index,bool is_high)
 		GPIOx=GPIOA;
 		GPIO_Pin=GPIO_PIN_3;
 	}*/
-	if(mat_index==0)
+	if(mat_index==0)//DEBUG_BROKEN
 	{
 		GPIOx=GPIOD;
 		GPIO_Pin=GPIO_PIN_4;
@@ -374,6 +396,10 @@ void flush_leds(u8 led_count)
 //assumes max brightness
 void set_hue_max(u8 index,u16 color)
 {
+	//const u8 MAX_BRIGHTNESS=255;//for >1 LED ON fully at a time
+	//const u8 BRIGHTNESS_STEP=43;//CEIL(0x2AAB/MAX_BRIGHTNESS)
+	const u8 MAX_BRIGHTNESS=180;//180**2+180**2 < 255**2
+	const u8 BRIGHTNESS_STEP=61;//CEIL(0x2AAB/MAX_BRIGHTNESS)
 	u8 red=0,green=0,blue=0;
 	u8 residual=0;
 	u8 iter;
@@ -381,17 +407,17 @@ void set_hue_max(u8 index,u16 color)
 	{
 		if(color<0x2AAB)
 		{
-			residual=color/43;
+			residual=color/BRIGHTNESS_STEP;
 			break;
 		}
 		color-=0x2AAB;
 	}
-	if(iter==0){ red=255; green=residual; }
-	if(iter==1){ green=255; red=255-residual; }
-	if(iter==2){ green=255; blue=residual; }
-	if(iter==3){ blue=255; green=255-residual; }
-	if(iter==4){ blue=255; red=residual; }
-	if(iter==5){ red=255; blue=255-residual; }
+	if(iter==0){ red=MAX_BRIGHTNESS; green=residual; }
+	if(iter==1){ green=MAX_BRIGHTNESS; red=MAX_BRIGHTNESS-residual; }
+	if(iter==2){ green=MAX_BRIGHTNESS; blue=residual; }
+	if(iter==3){ blue=MAX_BRIGHTNESS; green=MAX_BRIGHTNESS-residual; }
+	if(iter==4){ blue=MAX_BRIGHTNESS; red=residual; }
+	if(iter==5){ red=MAX_BRIGHTNESS; blue=MAX_BRIGHTNESS-residual; }
 	set_rgb(index,0,red);
 	set_rgb(index,1,green);
 	set_rgb(index,2,blue);
@@ -420,7 +446,7 @@ void set_matrix_high_z()
 	GPIOA->CR1 &= (uint8_t)(~(GPIO_PIN_3));
 	
 	
-	GPIOD->CR1 &= (uint8_t)(~(GPIO_PIN_3));//TEMP
+	GPIOD->CR1 &= (uint8_t)(~(GPIO_PIN_3));//DEBUG_BROKEN
 }
 
 u8 get_eeprom_byte(u16 eeprom_address)

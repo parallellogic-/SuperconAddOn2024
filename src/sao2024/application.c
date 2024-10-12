@@ -2,12 +2,6 @@
 #include "application.h"
 #include "api.h"
 
-const u8 SUBMENU_COUNT=3; //screen savers, games, puzzles
-const u8 SUBMENU_TIME_OUT_MS=2048; //how long the top menu will display for before entering the submenu
-const u8 SCREEN_SAVER_COUNT_PONY=3;
-const u8 SCREEN_SAVER_COUNT_SPACE=2;
-const u16 SCREEN_SAVER_DURATION_MS=32768;
-
 void setup_application()
 {
 	setup_serial(0,0);
@@ -22,13 +16,13 @@ void run_application()
 	setup_application();
 	while(is_application_valid())
 	{
-		if(clear_button_event(0,0)) submenu_index=(submenu_index+1)%SUBMENU_COUNT;//incement menu selection after every left button release
+		//if(clear_button_event(0,0)) submenu_index=(submenu_index+1)%SUBMENU_COUNT;//incement menu selection after every left button release
 		if(is_button_down(0)) show_top_menu_since_ms=millis();
-		if((show_top_menu_since_ms+SUBMENU_TIME_OUT_MS)>millis())
+		//if((show_top_menu_since_ms+SUBMENU_TIME_OUT_MS)>millis())
 		{//if the coutndown timeout expiration is in the future (because button is currently down or within 2 seconds of timeout), show top menu
 			//for(iter=0;iter<RGB_LED_COUNT;iter++) set_hue(iter,submenu_index<<13,255);//set all LEDs to the same color
 			flush_leds(RGB_LED_COUNT+1);//10 RGB LEDs and the status LED to give feedback about the button push to the user
-		}else{
+		}/*else*/{
 			show_top_menu_since_ms=0;
 			switch(submenu_index)
 			{
@@ -53,7 +47,7 @@ void show_screen_savers()
 	{
 		if(is_auto_cycle)
 		{
-			screen_saver_index=millis()/SCREEN_SAVER_DURATION_MS;
+			//screen_saver_index=millis()/SCREEN_SAVER_DURATION_MS;
 			if(clear_button_event(1,1)) is_auto_cycle=0;
 		}else{
 			if(clear_button_event(1,0)) screen_saver_index++;//short right button push to go to next screen saver
