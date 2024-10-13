@@ -4,12 +4,6 @@
 
 #define SCREENSAVER_COUNT 7
 
-void setup_application()
-{
-	setup_serial(0,0);
-	get_button_event(0xFF,0xFF,1);//clear_button_events();
-}
-
 void run_application()
 {
 	u8 new_game_state=0,old_game_state=255;
@@ -24,7 +18,9 @@ void run_application()
 	u8 game_level;
 	u8 submenu_index;
 	bool is_target_element_placed;//for cycle, is_reverse_direction
-	setup_application();
+	//setup_application();
+	setup_serial(0,0);
+	get_button_event(0xFF,0xFF,1);//clear_button_events();
 	while(is_application_valid())
 	{
 		effective_led_count=1;//default empty list
@@ -73,7 +69,7 @@ void run_application()
 				//display the target pattern to the user
 				for(iter=0;iter<RGB_LED_COUNT;iter++)
 				{
-					if(target_pattern[iter]<=(game_state_elapsed_ms>>9) && target_pattern[iter]<=game_level)
+					if(target_pattern[iter]<=(u8)(game_state_elapsed_ms>>9) && target_pattern[iter]<=game_level)
 					{//this element is visible at this level
 						set_element_hue(iter,iter);
 					}
@@ -118,13 +114,13 @@ void run_application()
 				if(get_button_event(0xFF,1,1)) new_game_state=6;
 			}break;
 			case 3:{//lose
-				if((game_state_elapsed_ms>>8)&0x04){ get_button_event(0xFF,0xFF,1); new_game_state=0; }//restart game after timeout, and clear any button pushes registered during lose
-				if((game_state_elapsed_ms>>7)&0x01) for(iter=0;iter<RGB_LED_COUNT;iter++) set_rgb(iter,0,255);//flash red LEDs
+				if(game_state_elapsed_ms&0x0400){ get_button_event(0xFF,0xFF,1); new_game_state=0; }//restart game after timeout, and clear any button pushes registered during lose
+				if(game_state_elapsed_ms&0x80) for(iter=0;iter<RGB_LED_COUNT;iter++) set_rgb(iter,0,255);//flash red LEDs
 				effective_led_count=RGB_LED_COUNT;
 			}break;
 			case 4:{//mini-win
-				if((game_state_elapsed_ms>>8)&0x04){ get_button_event(0xFF,0xFF,1);  new_game_state=1; }//go to next level, clear any button pushse during transition
-				if((game_state_elapsed_ms>>7)&0x01) for(iter=0;iter<RGB_LED_COUNT;iter++) set_rgb(iter,1,255);//flash green LEDs
+				if(game_state_elapsed_ms&0x0400){ get_button_event(0xFF,0xFF,1);  new_game_state=1; }//go to next level, clear any button pushse during transition
+				if(game_state_elapsed_ms&0x80) for(iter=0;iter<RGB_LED_COUNT;iter++) set_rgb(iter,1,255);//flash green LEDs
 				effective_led_count=RGB_LED_COUNT;
 			}break;
 			case 5:{//win
@@ -135,8 +131,8 @@ void run_application()
 			}break;
 			case 6:{//cyclone
 				set_element_hue(RGB_LED_COUNT-1,RGB_LED_COUNT-1);
-				cursor=((game_state_elapsed_ms>>8)+(game_level>1?((game_state_elapsed_ms+(2<<6))>>8):0)
-									 			  								+(game_level>3?((game_state_elapsed_ms+(3<<6))>>8):0))%RGB_LED_COUNT;//player position
+				cursor=(((u16)game_state_elapsed_ms>>8)+(game_level>1?(((u16)game_state_elapsed_ms+(2<<6))>>8):0)
+									 			  								     +(game_level>3?(((u16)game_state_elapsed_ms+(3<<6))>>8):0))%RGB_LED_COUNT;//player position
 				if(is_target_element_placed) cursor=RGB_LED_COUNT-cursor-1;//reverse direction
 				set_element_hue(cursor,game_level);
 				if(get_button_event(0xFF,0,1)) new_game_state=7;//show user evaluation of performance
@@ -152,7 +148,7 @@ void run_application()
 					else new_game_state=6; //go to next level, clear any button pushse during transition
 				}
 				if(get_button_event(0xFF,1,1)) new_game_state=0;//long press drops to idle mode
-				if((game_state_elapsed_ms>>7)&0x01)
+				if(game_state_elapsed_ms&0x80)
 				{//blinking
 					set_element_hue(cursor,game_level);//cursor
 					if(cursor!=(RGB_LED_COUNT-1)) set_element_hue(RGB_LED_COUNT-1,RGB_LED_COUNT-1);//goal post
@@ -194,7 +190,6 @@ u8 show_screensaver(u8 screensaver_index)
 {
 	switch(screensaver_index%SCREENSAVER_COUNT)
 	{
-		case 0: return set_frame_rainbow(0);
 		case 1: return set_frame_rainbow(0)+set_sparkles(0);
 		case 2: return set_frame_rainbow(0)+set_sparkles(1);
 		case 3: return set_sparkles(1);
@@ -202,7 +197,7 @@ u8 show_screensaver(u8 screensaver_index)
 		case 5: return set_frame_rainbow(1)+set_sparkles(0);
 		case 6: return set_frame_rainbow(1)+set_sparkles(1);
 	}
-	return 1;
+	return set_frame_rainbow(0);
 }
 
 u8 set_frame_rainbow(bool is_circular)
@@ -227,7 +222,8 @@ u8 set_sparkles(bool is_fireworks)
 		state=(iter<<9)+millis();//randomize start phasing, and incremetn state in time
 		state-=millis()>>(2+(iter&0x03));//randomize the state progression rates
 		state+=millis()>>(2+((iter>>2)&0x02));
-		if(!((state>>11)&(is_fireworks?0x01:0x03)))//only ON 25% of the time for standard, dim ON 50% of the dime for fireworks
+		//if(!((state>>11)&(is_fireworks?0x01:0x03)))//only ON 25% of the time for standard, dim ON 50% of the dime for fireworks
+		if(!(state&(is_fireworks?0x0800:0x1800)))//only ON 25% of the time for standard, dim ON 50% of the dime for fireworks
 		{
 			//set_white(iter,(state>>10)&0x01?(~(state>>2)):(state>>2));//symmetric brighten and darken
 			if(is_fireworks)
@@ -239,13 +235,13 @@ u8 set_sparkles(bool is_fireworks)
 	return WHITE_LED_COUNT/4;
 }
 
-u8 set_white_test()
+/*u8 set_white_test()
 {
 	set_white((millis()>>6)%WHITE_LED_COUNT,0xFF);
 	return 1;
-}
+}*/
 
-u8 set_debug_buttons()
+/*u8 set_debug_buttons()
 {//light up leds based on button states
 	set_white(0,is_button_down(0)?0xFF:0);
 	set_white(1,is_button_down(1)?0xFF:0);
@@ -256,4 +252,4 @@ u8 set_debug_buttons()
 	set_white(5,get_button_event(1,0,0)?0xFF:0);
 	set_white(6,get_button_event(1,1,0)?0xFF:0);
 	return 7;
-}
+}*/

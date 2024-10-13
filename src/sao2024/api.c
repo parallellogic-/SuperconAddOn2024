@@ -461,7 +461,7 @@ void set_hue_max(u8 index,u16 color)
 //set the brightness of individual LEDs
 //  to be made visible in the next frame after calling flush_leds()
 void set_rgb(u8 index,u8 color,u8 brightness)
-{ pwm_brightness_buffer[index+color*RGB_LED_COUNT]=brightness; }
+{ pwm_brightness_buffer[index+color*RGB_LED_COUNT]=brightness; }//smaller SRAM size with multiply operation than with 2-case if statement add
 void set_white(u8 index,u8 brightness)
 { pwm_brightness_buffer[DEBUG_LED_INDEX+1+index]=brightness; }
 void set_debug(u8 brightness)

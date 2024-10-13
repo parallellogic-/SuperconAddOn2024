@@ -1278,7 +1278,7 @@
 2620  0654 5b08          	addw	sp,#8
 2621  0656 81            	ret
 2674                     ; 463 void set_rgb(u8 index,u8 color,u8 brightness)
-2674                     ; 464 { pwm_brightness_buffer[index+color*RGB_LED_COUNT]=brightness; }
+2674                     ; 464 { pwm_brightness_buffer[index+color*RGB_LED_COUNT]=brightness; }//smaller SRAM size with multiply operation than with 2-case if statement add
 2675                     	switch	.text
 2676  0657               _set_rgb:
 2678  0657 89            	pushw	x
