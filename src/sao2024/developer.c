@@ -10,7 +10,7 @@
 void setup_developer()
 {
 	setup_serial(1,1);//enabled, 0: 9600 baud, 1: at high speed (1MBaud)
-	clear_button_events();
+	get_button_event(0xFF,0xFF,1);//clear_button_events();
 	flush_leds(0);//clear outstanding led buffer
 	set_debug(255);//show only one debug led ON
 	flush_leds(1);

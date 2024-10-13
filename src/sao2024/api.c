@@ -4,7 +4,6 @@
 #include "stm8s_uart1.h"
 
 //time state
-u16 frame_counter=0;//increments once all LEDs have physically been illuminated once
 u32 atomic_counter=0;
 
 //LED pwm control state machine
@@ -19,9 +18,10 @@ u8 pwm_state=0;//LSB (bit 0) is index of pwm_brightness to pull pwm info from.  
 
 //buttons
 #define BUTTON_COUNT 2
-u32 button_start_ms;//if 0, then button is unpressed.  if >0 then button si pressed and is waiting for release
+u32 button_start_ms=0;
+bool is_right_button_down=0;
 bool button_pressed_event[BUTTON_COUNT][2];//event flag registering a button push
-#define BUTTON_LONG_PRESS_MS 512 //number of millisconds to constitue a long press rather than a short press
+#define BUTTON_LONG_PRESS_MS 512 //number of millisconds to consititue a long press rather than a short press
 #define BUTTON_MINIMUM_PRESS_MS 50 //minimum time a button needs to be pressed down to be registered as a complete button press
 
 void hello_world()
@@ -106,48 +106,54 @@ u32 millis()
 
 //log short or long press button events for application layer to use as user input
 //PRECON: don't press buttons at the same time (state machine gets confused).  Leveraging just one u32 to store timestamp of button press start to conserve memory
-//PRECON: assuming button is pressed less than ~1 minute (otherwise state machine gets confused)
 void update_buttons()
 {
-	bool is_any_down=0;
+	u32 elapsed_pressed_ms;
 	u8 button_index;
-	u16 elapsed_pressed_ms=millis()-button_start_ms;
-	for(button_index=0;button_index<BUTTON_COUNT;button_index++)
+	if(button_start_ms)
 	{
-		if(is_button_down(button_index))
+		set_debug(255);
+		if(!is_button_down(is_right_button_down))
 		{
-			if(!button_start_ms) button_start_ms=millis();//if button is down and haven't started a button press event, start it
-			set_debug(255);//only need to enable this when true.  Is automatically cleared every frame
-			is_any_down=1;
-		}else{
-			if(elapsed_pressed_ms>BUTTON_LONG_PRESS_MS) button_pressed_event[button_index][1]=1;
-			else if(elapsed_pressed_ms>BUTTON_MINIMUM_PRESS_MS) button_pressed_event[button_index][0]=1;
-			//else ignore button press
+			elapsed_pressed_ms=millis()-button_start_ms;
+			if(elapsed_pressed_ms>BUTTON_LONG_PRESS_MS) button_pressed_event[is_right_button_down][1]=1;
+			else if(elapsed_pressed_ms>BUTTON_MINIMUM_PRESS_MS) button_pressed_event[is_right_button_down][0]=1;
+			button_start_ms=0;
+		}
+	}else{
+		for(button_index=0;button_index<BUTTON_COUNT && !button_start_ms;button_index++)
+		{
+			if(is_button_down(button_index))
+			{
+				is_right_button_down=button_index;
+				button_start_ms=millis();
+			}
 		}
 	}
-	if(!is_any_down) button_start_ms=0;
 }
 
-//returns true if the API has registered the requested type of event (without clearning it, like peek())
-bool get_button_event(u8 button_index,bool is_long)
-{ return button_pressed_event[button_index][is_long]; }
-
-//clears the specified type of event from the event queue, like pop()
-bool clear_button_event(u8 button_index,bool is_long)
-{
-	bool out=button_pressed_event[button_index][is_long];
-	button_pressed_event[button_index][is_long]=0;
-	return out;
-}
-
-bool clear_button_events()
+//returns true if the API has registered the requested type of event
+//use 0xFF for u8 parmaeter to apply to all
+//get one button or many, get short or long press, clear from event queue (pop() behavior) or not (peek() behavior)
+bool get_button_event(u8 button_index,u8 is_long,bool is_clear)
 {
 	u8 iter;
 	bool out=0;
 	for(iter=0;iter<BUTTON_COUNT;iter++)
 	{
-		out|=clear_button_event(iter,0);
-		out|=clear_button_event(iter,1);
+		if(button_index==iter || button_index==0xFF)
+		{
+			if(is_long==0 || is_long==0xFF)
+			{
+				out|=button_pressed_event[iter][0];
+				if(is_clear) button_pressed_event[iter][0]=0;
+			}
+			if(is_long==1 || is_long==0xFF)
+			{
+				out|=button_pressed_event[iter][1];
+				if(is_clear) button_pressed_event[iter][1]=0;
+			}
+		}
 	}
 	return out;
 }
@@ -188,7 +194,6 @@ bool is_button_down(u8 index)
 	}
 	if(pwm_visible_index>pwm_led_count[buffer_index])
 	{//reached end of frame, including wait period
-		frame_counter++;
 		pwm_visible_index=0;//formally start new frame
 		update_buttons();
 		if(pwm_state&0x02)
@@ -319,7 +324,18 @@ void set_mat(u8 mat_index,bool is_high)
 		GPIOx=GPIOA;
 		GPIO_Pin=GPIO_PIN_3;
 	}*/
-	if(mat_index==0)//DEBUG_BROKEN
+	switch(mat_index)//DEBUG_BROKEN
+	{
+		case 0:  GPIOx=GPIOD; GPIO_Pin=GPIO_PIN_4; break;
+		case 1:  GPIOx=GPIOD; GPIO_Pin=GPIO_PIN_2; break;
+		case 2:  GPIOx=GPIOC; GPIO_Pin=GPIO_PIN_7; break;
+		case 3:  GPIOx=GPIOC; GPIO_Pin=GPIO_PIN_6; break;
+		case 4:  GPIOx=GPIOC; GPIO_Pin=GPIO_PIN_5; break;
+		case 5:  GPIOx=GPIOC; GPIO_Pin=GPIO_PIN_4; break;
+		case 6:  GPIOx=GPIOC; GPIO_Pin=GPIO_PIN_3; break;
+		default: GPIOx=GPIOA; GPIO_Pin=GPIO_PIN_3; break;
+	}
+	/*if(mat_index==0)
 	{
 		GPIOx=GPIOD;
 		GPIO_Pin=GPIO_PIN_4;
@@ -358,7 +374,7 @@ void set_mat(u8 mat_index,bool is_high)
 	{
 		GPIOx=GPIOA;
 		GPIO_Pin=GPIO_PIN_3;
-	}
+	}*/
 	if(is_high) GPIOx->ODR |= (uint8_t)GPIO_Pin;
 	else        GPIOx->ODR &= (uint8_t)(~(GPIO_Pin));
 	GPIOx->DDR |= (uint8_t)GPIO_Pin;
@@ -422,12 +438,21 @@ void set_hue_max(u8 index,u16 color)
 		}
 		color-=0x2AAB;
 	}
-	if(iter==0){ red=MAX_BRIGHTNESS; green=residual; }
+	switch(iter)
+	{
+	  case 0: red=MAX_BRIGHTNESS; green=residual; break;
+		case 1: green=MAX_BRIGHTNESS; red=MAX_BRIGHTNESS-residual; break;
+		case 2: green=MAX_BRIGHTNESS; blue=residual; break;
+		case 3: blue=MAX_BRIGHTNESS; green=MAX_BRIGHTNESS-residual; break;
+		case 4: blue=MAX_BRIGHTNESS; red=residual; break;
+		default: red=MAX_BRIGHTNESS; blue=MAX_BRIGHTNESS-residual; break;
+	}
+	/*if(iter==0){ red=MAX_BRIGHTNESS; green=residual; }
 	if(iter==1){ green=MAX_BRIGHTNESS; red=MAX_BRIGHTNESS-residual; }
 	if(iter==2){ green=MAX_BRIGHTNESS; blue=residual; }
 	if(iter==3){ blue=MAX_BRIGHTNESS; green=MAX_BRIGHTNESS-residual; }
 	if(iter==4){ blue=MAX_BRIGHTNESS; red=residual; }
-	if(iter==5){ red=MAX_BRIGHTNESS; blue=MAX_BRIGHTNESS-residual; }
+	if(iter==5){ red=MAX_BRIGHTNESS; blue=MAX_BRIGHTNESS-residual; }*/
 	set_rgb(index,0,red);
 	set_rgb(index,1,green);
 	set_rgb(index,2,blue);
