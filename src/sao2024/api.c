@@ -223,44 +223,46 @@ bool is_button_down(u8 index)
 
 @far @interrupt void I2C_EventHandler(void)
 {
-	// Check for Address Matched Event
+	// Check if the address was matched (slave address matched)
     if (I2C_CheckEvent(I2C_EVENT_SLAVE_RECEIVER_ADDRESS_MATCHED))
     {
-        //registerIndex = 0;  // Reset index on address match
-        I2C_AcknowledgeConfig(I2C_ACK_CURR);
+        // Clear the address matched event flag
+        I2C_ClearITPendingBit(I2C_ITPENDINGBIT_ADDRESSSENTMATCHED);
+				I2C_AcknowledgeConfig(I2C_ACK_CURR);
     }
     
-    // Check for Data Received (in Receive mode)
+    // Check if a byte has been received (Master -> Slave data reception)
     if (I2C_CheckEvent(I2C_EVENT_SLAVE_BYTE_RECEIVED))
     {
-        /*if (registerIndex < NUM_REGISTERS)
-        {
-            i2cRegisters[registerIndex++] = I2C_ReceiveData();  // Store data into register
-        }
-        else
-        {
-            uint8_t dummy = I2C_ReceiveData();  // Receive, but ignore extra bytes
-        }*/
-        I2C_AcknowledgeConfig(I2C_ACK_CURR);  // Send ACK
-    }
-    
-    // Check for Data Request (in Transmit mode)
-    if (I2C_CheckEvent(I2C_EVENT_SLAVE_TRANSMITTER_ADDRESS_MATCHED))
-    {
-        //I2C_SendData(i2cRegisters[registerIndex++]);  // Send data from the current register
+        // Read the received byte from the data register
+        /*received_data =*/I2C_ReceiveData();
+        
+        // You can process the received data here if needed
     }
 
-    // Check for Byte Transmitted (continue sending remaining data)
+    // Check if a byte is to be transmitted (Slave -> Master data transmission)
+    if (I2C_CheckEvent(I2C_EVENT_SLAVE_TRANSMITTER_ADDRESS_MATCHED))
+    {
+        // Load the data register with the byte to be sent
+        I2C_SendData(0xAB);
+    }
+    
+    // Check if the byte has been transmitted
     if (I2C_CheckEvent(I2C_EVENT_SLAVE_BYTE_TRANSMITTED))
     {
-        /*if (registerIndex < NUM_REGISTERS)
-        {
-            I2C_SendData(i2cRegisters[registerIndex++]);  // Send next byte
-        }
-        else
-        {
-            I2C_SendData(0x00);  // If index exceeds, send 0s
-        }*/
+        // Load the next byte to be transmitted (if necessary)
+        // You can change 'data_to_send' with new data here
+        I2C_SendData(0xCD);  // Continue sending the same data
+				I2C_AcknowledgeConfig(I2C_ACK_CURR);
+    }
+    
+    // Check for a stop condition (End of communication)
+    if (I2C_CheckEvent(I2C_EVENT_SLAVE_STOP_DETECTED))
+    {
+        // Clear the stop detection flag
+        I2C_ClearITPendingBit(I2C_ITPENDINGBIT_STOPDETECTION);
+        I2C_AcknowledgeConfig(I2C_ACK_CURR);
+        // You can handle any post-communication logic here
     }
 }
 
