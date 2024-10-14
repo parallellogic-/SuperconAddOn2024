@@ -25,3 +25,8 @@ bool is_button_down(u8 index);
 u16 get_random(u16 x);
 void set_mat(u8 led_index,bool is_high);
 void set_led_on(u8 led_index);
+
+	void I2C_transaction_begin(void);
+		void I2C_transaction_end(void);
+			void I2C_byte_received(u8 u8_RxData);
+				u8 I2C_byte_write(void);

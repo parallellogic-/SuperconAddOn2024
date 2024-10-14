@@ -21,10 +21,13 @@ void run_developer()
 	char command;
 	u8 parameter_count;//number of parameters recevied
 	u32 parameters[MAX_TERMINAL_PARAMETERS];
+	u32 start_ms;
 	setup_developer();
 	while(1)
 	{
-		set_debug(((millis()>>8)&0x01)?0xFF:0);
+		start_ms=millis();
+		set_debug(((start_ms>>8)&0x01)?0xFF:0);
+		while(((millis()>>7)&0x01)==((start_ms>>7)&0x01)){}
 		flush_leds(1);
 	}
 	/*while(1)

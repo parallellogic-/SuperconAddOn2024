@@ -174,6 +174,43 @@ bool is_button_down(u8 index)
 	return 0;
 }
 
+#define MAX_BUFFER  1
+
+   u8 u8_My_Buffer[MAX_BUFFER];
+   u8 *u8_MyBuffp;
+   u8 MessageBegin;
+
+// ********************** Data link function ****************************
+// * These functions must be modified according to your application neeeds *
+// * See AN document for more precision
+// **********************************************************************
+
+	void I2C_transaction_begin(void)
+	{
+		MessageBegin = TRUE;
+	}
+	void I2C_transaction_end(void)
+	{
+		//Not used in this example
+	}
+	void I2C_byte_received(u8 u8_RxData)
+	{
+		if (MessageBegin == TRUE  &&  u8_RxData < MAX_BUFFER) {
+			u8_MyBuffp= &u8_My_Buffer[u8_RxData];
+			MessageBegin = FALSE;
+		}
+    else if(u8_MyBuffp < &u8_My_Buffer[MAX_BUFFER])
+      *(u8_MyBuffp++) = u8_RxData;
+	}
+	u8 I2C_byte_write(void)
+	{
+		return 0xDE;
+		if (u8_MyBuffp < &u8_My_Buffer[MAX_BUFFER])
+			return *(u8_MyBuffp++);
+		else
+			return 0x00;
+	}
+
 //millisecond-ish interrupt to select which LED is ON
 @far @interrupt void TIM2_UPD_OVF_IRQHandler (void) {
 	bool buffer_index=pwm_state&0x01;//primary vs redundant side to pull data from
@@ -223,48 +260,61 @@ bool is_button_down(u8 index)
 
 @far @interrupt void I2C_EventHandler(void)
 {
-	// Check if the address was matched (slave address matched)
-    if (I2C_CheckEvent(I2C_EVENT_SLAVE_RECEIVER_ADDRESS_MATCHED))
-    {
-        // Clear the address matched event flag
-        I2C_ClearITPendingBit(I2C_ITPENDINGBIT_ADDRESSSENTMATCHED);
-				I2C_AcknowledgeConfig(I2C_ACK_CURR);
-    }
-    
-    // Check if a byte has been received (Master -> Slave data reception)
-    if (I2C_CheckEvent(I2C_EVENT_SLAVE_BYTE_RECEIVED))
-    {
-        // Read the received byte from the data register
-        /*received_data =*/I2C_ReceiveData();
-        
-        // You can process the received data here if needed
-    }
+	static u8 sr1;					
+	static u8 sr2;
+	static u8 sr3;
+	
+// save the I2C registers configuration
+sr1 = I2C->SR1;
+sr2 = I2C->SR2;
+sr3 = I2C->SR3;
 
-    // Check if a byte is to be transmitted (Slave -> Master data transmission)
-    if (I2C_CheckEvent(I2C_EVENT_SLAVE_TRANSMITTER_ADDRESS_MATCHED))
-    {
-        // Load the data register with the byte to be sent
-        I2C_SendData(0xAB);
-    }
-    
-    // Check if the byte has been transmitted
-    if (I2C_CheckEvent(I2C_EVENT_SLAVE_BYTE_TRANSMITTED))
-    {
-        // Load the next byte to be transmitted (if necessary)
-        // You can change 'data_to_send' with new data here
-        I2C_SendData(0xCD);  // Continue sending the same data
-				I2C_AcknowledgeConfig(I2C_ACK_CURR);
-    }
-    
-    // Check for a stop condition (End of communication)
-    if (I2C_CheckEvent(I2C_EVENT_SLAVE_STOP_DETECTED))
-    {
-        // Clear the stop detection flag
-        I2C_ClearITPendingBit(I2C_ITPENDINGBIT_STOPDETECTION);
-        I2C_AcknowledgeConfig(I2C_ACK_CURR);
-        // You can handle any post-communication logic here
-    }
+/* Communication error? */
+  if (sr2 & (I2C_SR2_WUFH | I2C_SR2_OVR |I2C_SR2_ARLO |I2C_SR2_BERR))
+  {		
+    I2C->CR2|= I2C_CR2_STOP;  // stop communication - release the lines
+    I2C->SR2= 0;					    // clear all error flags
+	}
+/* More bytes received ? */
+  if ((sr1 & (I2C_SR1_RXNE | I2C_SR1_BTF)) == (I2C_SR1_RXNE | I2C_SR1_BTF))
+  {
+    I2C_byte_received(I2C->DR);
+  }
+/* Byte received ? */
+  if (sr1 & I2C_SR1_RXNE)
+  {
+    I2C_byte_received(I2C->DR);
+  }
+/* NAK? (=end of slave transmit comm) */
+  if (sr2 & I2C_SR2_AF)
+  {	
+    I2C->SR2 &= ~I2C_SR2_AF;	  // clear AF
+		I2C_transaction_end();
+	}
+/* Stop bit from Master  (= end of slave receive comm) */
+  if (sr1 & I2C_SR1_STOPF) 
+  {
+    I2C->CR2 |= I2C_CR2_ACK;	  // CR2 write to clear STOPF
+		I2C_transaction_end();
+	}
+/* Slave address matched (= Start Comm) */
+  if (sr1 & I2C_SR1_ADDR)
+  {	 
+		I2C_transaction_begin();
+	}
+/* More bytes to transmit ? */
+  if ((sr1 & (I2C_SR1_TXE | I2C_SR1_BTF)) == (I2C_SR1_TXE | I2C_SR1_BTF))
+  {
+		I2C->DR = I2C_byte_write();
+  }
+/* Byte to transmit ? */
+  if (sr1 & I2C_SR1_TXE)
+  {
+		I2C->DR = I2C_byte_write();
+  }	
+	GPIOD->ODR^=1;
 }
+
 
 //enable one led to be visible: physically emit light
 void set_led_on(u8 led_index)

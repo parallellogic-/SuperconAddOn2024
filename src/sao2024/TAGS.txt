@@ -2083,15 +2083,15 @@ disableInterrupts	stm8s.h	2736;"	macro
 enableInterrupts	stm8s.h	2716;"	macro
 enableInterrupts	stm8s.h	2725;"	macro
 enableInterrupts	stm8s.h	2735;"	macro
-execute_terminal_command	developer.c	75;"	function	signature:(char command,u32 (*parameters)[MAX_TERMINAL_PARAMETERS],u8 parameter_count)
+execute_terminal_command	developer.c	78;"	function	signature:(char command,u32 (*parameters)[MAX_TERMINAL_PARAMETERS],u8 parameter_count)
 execute_terminal_command	developer.h	8;"	prototype	signature:(char command,u32 (*parameters)[MAX_TERMINAL_PARAMETERS],u8 parameter_count)
-flush_leds	api.c	430;"	function	signature:(u8 led_count)
+flush_leds	api.c	427;"	function	signature:(u8 led_count)
 flush_leds	api.h	17;"	prototype	signature:(u8 led_count)
 get_button_event	api.c	140;"	function	signature:(u8 button_index,u8 is_long,bool is_clear)
 get_button_event	api.h	23;"	prototype	signature:(u8 button_index,u8 is_long,bool is_clear)
 get_random	api.c	49;"	function	signature:(u16 x)
 get_random	api.h	25;"	prototype	signature:(u16 x)
-get_terminal_command	developer.c	44;"	function	signature:(char *command,u32 (*parameters)[MAX_TERMINAL_PARAMETERS],u8 *parameter_count)
+get_terminal_command	developer.c	47;"	function	signature:(char *command,u32 (*parameters)[MAX_TERMINAL_PARAMETERS],u8 *parameter_count)
 get_terminal_command	developer.h	7;"	prototype	signature:(char *command,u32 (*parameters)[MAX_TERMINAL_PARAMETERS],u8 *parameter_count)
 halt	stm8s.h	2723;"	macro
 halt	stm8s.h	2732;"	macro
@@ -2132,23 +2132,23 @@ run_developer	developer.h	6;"	prototype	signature:(void)
 s16	stm8s.h	223;"	typedef
 s32	stm8s.h	222;"	typedef
 s8	stm8s.h	224;"	typedef
-set_debug	api.c	512;"	function	signature:(u8 brightness)
+set_debug	api.c	509;"	function	signature:(u8 brightness)
 set_debug	api.h	16;"	prototype	signature:(u8 brightness)
 set_element_hue	application.c	171;"	function	signature:(u8 led_index,u8 color_index)
 set_element_hue	application.h	8;"	prototype	signature:(u8 led_index,u8 color_index)
 set_frame_rainbow	application.c	202;"	function	signature:(bool is_circular)
 set_frame_rainbow	application.h	4;"	prototype	signature:(bool is_circular)
-set_hue_max	api.c	468;"	function	signature:(u8 index,u16 color)
+set_hue_max	api.c	465;"	function	signature:(u8 index,u16 color)
 set_hue_max	api.h	18;"	prototype	signature:(u8 index,u16 color)
-set_led_on	api.c	268;"	function	signature:(u8 led_index)
+set_led_on	api.c	265;"	function	signature:(u8 led_index)
 set_led_on	api.h	27;"	prototype	signature:(u8 led_index)
-set_mat	api.c	333;"	function	signature:(u8 mat_index,bool is_high)
+set_mat	api.c	330;"	function	signature:(u8 mat_index,bool is_high)
 set_mat	api.h	26;"	prototype	signature:(u8 led_index,bool is_high)
-set_rgb	api.c	508;"	function	signature:(u8 index,u8 color,u8 brightness)
+set_rgb	api.c	505;"	function	signature:(u8 index,u8 color,u8 brightness)
 set_rgb	api.h	14;"	prototype	signature:(u8 index,u8 color,u8 brightness)
 set_sparkles	application.c	214;"	function	signature:(bool is_fireworks)
 set_sparkles	application.h	5;"	prototype	signature:(bool is_fireworks)
-set_white	api.c	510;"	function	signature:(u8 index,u8 brightness)
+set_white	api.c	507;"	function	signature:(u8 index,u8 brightness)
 set_white	api.h	15;"	prototype	signature:(u8 index,u8 brightness)
 setup_developer	developer.c	10;"	function
 setup_developer	developer.h	5;"	prototype	signature:(void)
