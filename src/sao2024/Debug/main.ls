@@ -1,29 +1,23 @@
    1                     ; C Compiler for STM8 (COSMIC Software)
    2                     ; Parser V4.12.8.1 - 09 Jan 2023
    3                     ; Generator (Limited) V4.5.5 - 08 Nov 2022
-  47                     ; 6 int main()
-  47                     ; 7 {
-  49                     	switch	.text
-  50  0000               _main:
-  54                     ; 8 	setup_main();
-  56  0000 cd0000        	call	_setup_main
-  58  0003               L12:
-  59                     ; 12 		if(is_application_valid()) run_application();
-  61  0003 cd0000        	call	_is_application_valid
-  63  0006 4d            	tnz	a
-  64  0007 2703          	jreq	L52
-  67  0009 cd0000        	call	_run_application
-  69  000c               L52:
-  70                     ; 13 		if(is_developer_valid()) run_developer();
-  72  000c cd0000        	call	_is_developer_valid
-  74  000f 4d            	tnz	a
-  75  0010 27f1          	jreq	L12
-  78  0012 cd0000        	call	_run_developer
-  80  0015 20ec          	jra	L12
-  93                     	xdef	_main
-  94                     	xref	_run_developer
-  95                     	xref	_run_application
-  96                     	xref	_is_developer_valid
-  97                     	xref	_setup_main
-  98                     	xref	_is_application_valid
- 117                     	end
+   4                     ; Optimizer V4.5.5 - 08 Nov 2022
+  51                     ; 6 int main()
+  51                     ; 7 {
+  53                     	switch	.text
+  54  0000               _main:
+  58                     ; 8 	setup_main();
+  60  0000 cd0000        	call	_setup_main
+  62                     ; 10 	if(1 || is_button_down(0) || is_button_down(1)) run_developer();//DEBUG_BROKEN default to developer mode
+  64  0003 cd0000        	call	_run_developer
+  66                     ; 11 	run_application();
+  68  0006 cd0000        	call	_run_application
+  70                     ; 12 	return 0;
+  72  0009 5f            	clrw	x
+  75  000a 81            	ret	
+  88                     	xdef	_main
+  89                     	xref	_run_developer
+  90                     	xref	_run_application
+  91                     	xref	_is_button_down
+  92                     	xref	_setup_main
+ 111                     	end

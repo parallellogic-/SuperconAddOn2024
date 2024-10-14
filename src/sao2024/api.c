@@ -1,5 +1,6 @@
 #include "STM8s.h"
 #include "api.h"
+#include "stm8s_i2c.h"
 #include "stm8s_gpio.h"
 #include "stm8s_uart1.h"
 
@@ -69,24 +70,15 @@ void setup_serial(bool is_enabled,bool is_fast_baud_rate)
 	}
 }
 
-//leave application mode if SWIM pin floats high or sleep mode is activated (long press on left button)
-bool is_application_valid()
-{
-	return 1;//!is_button_down(2) && !get_button_event(0,1);
-}
-
-//exit developer mode if SWIM pin floats high
-bool is_developer_valid()
-{
-	return 0;//is_button_down(2) && !get_button_event(0,1);
-}
-
 void setup_main()
 {
 	CLK->CKDIVR &= (u8)~(CLK_CKDIVR_HSIDIV);			// fhsi= fhsirc (HSIDIV= 0), run at 16 MHz
+	//CLK->CKDIVR |= (uint8_t)CLK_PRESCALER_HSIDIV1;
+	//CLK_HSIPrescalerConfig(CLK_PRESCALER_HSIDIV1);  // Set clock speed
 	
-	GPIO_Init(GPIOD, GPIO_PIN_1, GPIO_MODE_IN_PU_NO_IT);//SWIM input to choose between application and developer modes
-		
+	//GPIO_Init(GPIOD, GPIO_PIN_1, GPIO_MODE_IN_PU_NO_IT);//SWIM input to choose between application and developer modes
+	
+	//configure LED interrupt on TIM2
 	//run pwm interrupt at ~2.000 kHz period (to allow for >40 Hz frames with all LEDs ON)
 	//TIM2->CCR1H=0;//this will always be zero based on application architecutre
 	TIM2->PSCR= 5;// init divider register 16MHz/2^X
@@ -96,7 +88,17 @@ void setup_main()
 	TIM2->CR1|= TIM2_CR1_URS | TIM2_CR1_CEN;// enable timer
 	//TIM2->IER= TIM2_IER_UIE | TIM2_IER_CC1IE;// enable TIM2 interrupt
 	TIM2->IER= TIM2_IER_UIE;// enable TIM2 interrupt
-	enableInterrupts();
+	
+	setup_serial(0,0);//disable UART
+
+	//enable iuser input buttons DEBUG_BROKEN
+	
+	//setup I2C
+	I2C_DeInit();
+	I2C_Init(100000, I2C_SLAVE_ADDRESS_DEFAULT<<1, I2C_DUTYCYCLE_2, I2C_ACK_CURR, I2C_ADDMODE_7BIT, 16);
+	I2C_ITConfig(I2C_IT_EVT | I2C_IT_BUF | I2C_IT_ERR, ENABLE);  // Enable I2C interrupts
+	I2C_Cmd(ENABLE);
+	enableInterrupts();  // Enable global interrupts
 }
 
 u32 millis()
@@ -217,6 +219,49 @@ bool is_button_down(u8 index)
   // Re-enable TIM2 after setting the counter value
 	TIM2->SR1&=~TIM2_SR1_UIF;//reset interrupt
   TIM2->CR1 |= TIM2_CR1_CEN;   // Set the CEN bit to restart the timer
+}
+
+@far @interrupt void I2C_EventHandler(void)
+{
+	// Check for Address Matched Event
+    if (I2C_CheckEvent(I2C_EVENT_SLAVE_RECEIVER_ADDRESS_MATCHED))
+    {
+        //registerIndex = 0;  // Reset index on address match
+        I2C_AcknowledgeConfig(I2C_ACK_CURR);
+    }
+    
+    // Check for Data Received (in Receive mode)
+    if (I2C_CheckEvent(I2C_EVENT_SLAVE_BYTE_RECEIVED))
+    {
+        /*if (registerIndex < NUM_REGISTERS)
+        {
+            i2cRegisters[registerIndex++] = I2C_ReceiveData();  // Store data into register
+        }
+        else
+        {
+            uint8_t dummy = I2C_ReceiveData();  // Receive, but ignore extra bytes
+        }*/
+        I2C_AcknowledgeConfig(I2C_ACK_CURR);  // Send ACK
+    }
+    
+    // Check for Data Request (in Transmit mode)
+    if (I2C_CheckEvent(I2C_EVENT_SLAVE_TRANSMITTER_ADDRESS_MATCHED))
+    {
+        //I2C_SendData(i2cRegisters[registerIndex++]);  // Send data from the current register
+    }
+
+    // Check for Byte Transmitted (continue sending remaining data)
+    if (I2C_CheckEvent(I2C_EVENT_SLAVE_BYTE_TRANSMITTED))
+    {
+        /*if (registerIndex < NUM_REGISTERS)
+        {
+            I2C_SendData(i2cRegisters[registerIndex++]);  // Send next byte
+        }
+        else
+        {
+            I2C_SendData(0x00);  // If index exceeds, send 0s
+        }*/
+    }
 }
 
 //enable one led to be visible: physically emit light

@@ -100,9 +100,9 @@ BRR2	stm8s.h	1977;"	member	struct:UART3_struct
 BRR2	stm8s.h	2069;"	member	struct:UART4_struct
 BTR1	stm8s.h	2297;"	member	struct:__anon36::__anon37::__anon43
 BTR2	stm8s.h	2298;"	member	struct:__anon36::__anon37::__anon43
-BUTTON_COUNT	api.c	25;"	macro	file:
-BUTTON_LONG_PRESS_MS	api.c	28;"	macro	file:
-BUTTON_MINIMUM_PRESS_MS	api.c	29;"	macro	file:
+BUTTON_COUNT	api.c	21;"	macro	file:
+BUTTON_LONG_PRESS_MS	api.c	25;"	macro	file:
+BUTTON_MINIMUM_PRESS_MS	api.c	26;"	macro	file:
 BYTE_0	stm8s.h	2800;"	macro
 BYTE_1	stm8s.h	2801;"	macro
 BYTE_2	stm8s.h	2802;"	macro
@@ -580,7 +580,7 @@ DB8RL	stm8s.h	317;"	member	struct:ADC1_struct
 DB9RH	stm8s.h	318;"	member	struct:ADC1_struct
 DB9RL	stm8s.h	319;"	member	struct:ADC1_struct
 DDR	stm8s.h	269;"	member	struct:GPIO_struct
-DEBUG_LED	api.c	12;"	macro	file:
+DEBUG_LED_INDEX	api.h	4;"	macro
 DGR	stm8s.h	2182;"	member	struct:__anon36
 DISABLE	stm8s.h	235;"	enumerator	enum:__anon34
 DM	stm8s.h	2704;"	macro
@@ -878,6 +878,8 @@ I2C_EVENT_SLAVE_GENERALCALLADDRESS_MATCHED	stm8s_i2c.h	284;"	enumerator	enum:__a
 I2C_EVENT_SLAVE_RECEIVER_ADDRESS_MATCHED	stm8s_i2c.h	280;"	enumerator	enum:__anon8
 I2C_EVENT_SLAVE_STOP_DETECTED	stm8s_i2c.h	317;"	enumerator	enum:__anon8
 I2C_EVENT_SLAVE_TRANSMITTER_ADDRESS_MATCHED	stm8s_i2c.h	281;"	enumerator	enum:__anon8
+I2C_EventHandler	api.c	224;"	function	signature:(void)
+I2C_EventHandler	stm8_interrupt_vector.c	25;"	prototype	file:	signature:(void)
 I2C_Event_TypeDef	stm8s_i2c.h	325;"	typedef	typeref:enum:__anon8
 I2C_FLAG_ACKNOWLEDGEFAILURE	stm8s_i2c.h	114;"	enumerator	enum:__anon6
 I2C_FLAG_ADDRESSSENTMATCHED	stm8s_i2c.h	108;"	enumerator	enum:__anon6
@@ -950,6 +952,7 @@ I2C_OARL_ADD0	stm8s.h	1387;"	macro
 I2C_OARL_RESET_VALUE	stm8s.h	1355;"	macro
 I2C_ReceiveData	stm8s_i2c.c	427;"	function	signature:(void)
 I2C_ReceiveData	stm8s_i2c.h	518;"	prototype	signature:(void)
+I2C_SLAVE_ADDRESS_DEFAULT	api.h	2;"	macro
 I2C_SR1_ADD10	stm8s.h	1398;"	macro
 I2C_SR1_ADDR	stm8s.h	1400;"	macro
 I2C_SR1_BTF	stm8s.h	1399;"	macro
@@ -1072,7 +1075,7 @@ IWDG_RLR_RESET_VALUE	stm8s.h	1622;"	macro
 IWDG_TypeDef	stm8s.h	1615;"	typedef	typeref:struct:IWDG_struct
 IWDG_struct	stm8s.h	1609;"	struct
 KR	stm8s.h	1611;"	member	struct:IWDG_struct
-LED_COUNT	api.c	15;"	macro	file:
+LED_COUNT	api.h	6;"	macro
 LSI_VALUE	stm8s.h	119;"	macro
 LTRH	stm8s.h	331;"	member	struct:ADC1_struct
 LTRL	stm8s.h	332;"	member	struct:ADC1_struct
@@ -1184,8 +1187,7 @@ RESERVED2	stm8s.h	829;"	member	struct:TIM2_struct
 RESERVED3	stm8s.h	1525;"	member	struct:FLASH_struct
 RESET	stm8s.h	233;"	enumerator	enum:__anon33
 RFR	stm8s.h	2180;"	member	struct:__anon36
-RGB_COUNT	api.c	11;"	macro	file:
-RGB_LED_COUNT	api.h	2;"	macro
+RGB_LED_COUNT	api.h	3;"	macro
 RLR	stm8s.h	1613;"	member	struct:IWDG_struct
 RST	stm8s.h	2650;"	macro
 RST_BaseAddress	stm8s.h	2568;"	macro
@@ -1206,6 +1208,7 @@ S32_MAX	stm8s.h	247;"	macro
 S32_MIN	stm8s.h	248;"	macro
 S8_MAX	stm8s.h	241;"	macro
 S8_MIN	stm8s.h	242;"	macro
+SCREENSAVER_COUNT	application.c	5;"	macro	file:
 SET	stm8s.h	233;"	enumerator	enum:__anon33
 SMCR	stm8s.h	1125;"	member	struct:TIM5_struct
 SMCR	stm8s.h	1264;"	member	struct:TIM6_struct
@@ -1494,7 +1497,7 @@ TIM2_SR2_CC2OF	stm8s.h	905;"	macro
 TIM2_SR2_CC3OF	stm8s.h	904;"	macro
 TIM2_SR2_RESET_VALUE	stm8s.h	861;"	macro
 TIM2_TypeDef	stm8s.h	852;"	typedef	typeref:struct:TIM2_struct
-TIM2_UPD_OVF_IRQHandler	api.c	170;"	function	signature:(void)
+TIM2_UPD_OVF_IRQHandler	api.c	178;"	function	signature:(void)
 TIM2_UPD_OVF_IRQHandler	stm8_interrupt_vector.c	23;"	prototype	file:	signature:(void)
 TIM2_struct	stm8s.h	824;"	struct
 TIM3	stm8s.h	2686;"	macro
@@ -2037,8 +2040,7 @@ UART4_struct	stm8s.h	2064;"	struct
 UNUSED	stm8s.h	2805;"	macro
 VECTOR_ID	stm8s.h	2759;"	macro
 ValBit	stm8s.h	2798;"	macro
-WHITE_COUNT	api.c	13;"	macro	file:
-WHITE_LED_COUNT	api.h	3;"	macro
+WHITE_LED_COUNT	api.h	5;"	macro
 WR	stm8s.h	1636;"	member	struct:WWDG_struct
 WWDG	stm8s.h	2652;"	macro
 WWDG_BaseAddress	stm8s.h	2570;"	macro
@@ -2069,40 +2071,33 @@ __STM8S_STDPERIPH_VERSION_SUB1	stm8s.h	183;"	macro
 __STM8S_STDPERIPH_VERSION_SUB2	stm8s.h	184;"	macro
 __STM8S_UART1_H	stm8s_uart1.h	30;"	macro
 _stext	stm8_interrupt_vector.c	22;"	prototype	file:
-_vectab	stm8_interrupt_vector.c	26;"	variable
+_vectab	stm8_interrupt_vector.c	27;"	variable
 assert_param	stm8s.h	2836;"	macro
 atomic_counter	api.c	8;"	variable
 bool	stm8s.h	231;"	typedef	typeref:enum:__anon32
-button_pressed_event	api.c	27;"	variable
-button_start_ms	api.c	26;"	variable
-clear_button_event	api.c	140;"	function	signature:(u8 button_index,bool is_long)
-clear_button_event	api.h	21;"	prototype	signature:(u8 button_index,bool is_long)
-clear_button_events	api.c	147;"	function
-clear_button_events	api.h	22;"	prototype	signature:(void)
+button_pressed_event	api.c	24;"	variable
+button_start_ms	api.c	22;"	variable
 disableInterrupts	stm8s.h	2717;"	macro
 disableInterrupts	stm8s.h	2726;"	macro
 disableInterrupts	stm8s.h	2736;"	macro
 enableInterrupts	stm8s.h	2716;"	macro
 enableInterrupts	stm8s.h	2725;"	macro
 enableInterrupts	stm8s.h	2735;"	macro
-execute_terminal_command	developer.c	70;"	function	signature:(char command,u32 (*parameters)[MAX_TERMINAL_PARAMETERS],u8 parameter_count)
+execute_terminal_command	developer.c	76;"	function	signature:(char command,u32 (*parameters)[MAX_TERMINAL_PARAMETERS],u8 parameter_count)
 execute_terminal_command	developer.h	8;"	prototype	signature:(char command,u32 (*parameters)[MAX_TERMINAL_PARAMETERS],u8 parameter_count)
-flush_leds	api.c	366;"	function	signature:(u8 led_count)
-flush_leds	api.h	14;"	prototype	signature:(u8 led_count)
-frame_counter	api.c	7;"	variable
-get_button_event	api.c	136;"	function	signature:(u8 button_index,bool is_long)
-get_button_event	api.h	20;"	prototype	signature:(u8 button_index,bool is_long)
-get_eeprom_byte	api.c	452;"	function	signature:(u16 eeprom_address)
-get_eeprom_byte	api.h	25;"	prototype	signature:(u16 address)
-get_random	api.c	52;"	function	signature:(u16 x)
-get_random	api.h	24;"	prototype	signature:(u16 x)
-get_terminal_command	developer.c	39;"	function	signature:(char *command,u32 (*parameters)[MAX_TERMINAL_PARAMETERS],u8 *parameter_count)
+flush_leds	api.c	435;"	function	signature:(u8 led_count)
+flush_leds	api.h	17;"	prototype	signature:(u8 led_count)
+get_button_event	api.c	140;"	function	signature:(u8 button_index,u8 is_long,bool is_clear)
+get_button_event	api.h	23;"	prototype	signature:(u8 button_index,u8 is_long,bool is_clear)
+get_random	api.c	49;"	function	signature:(u16 x)
+get_random	api.h	25;"	prototype	signature:(u16 x)
+get_terminal_command	developer.c	45;"	function	signature:(char *command,u32 (*parameters)[MAX_TERMINAL_PARAMETERS],u8 *parameter_count)
 get_terminal_command	developer.h	7;"	prototype	signature:(char *command,u32 (*parameters)[MAX_TERMINAL_PARAMETERS],u8 *parameter_count)
 halt	stm8s.h	2723;"	macro
 halt	stm8s.h	2732;"	macro
 halt	stm8s.h	2742;"	macro
-hello_world	api.c	31;"	function
-hello_world	api.h	5;"	prototype	signature:(void)
+hello_world	api.c	28;"	function
+hello_world	api.h	8;"	prototype	signature:(void)
 int16_t	stm8s.h	212;"	typedef
 int32_t	stm8s.h	213;"	typedef
 int8_t	stm8s.h	211;"	typedef
@@ -2110,70 +2105,59 @@ interrupt_handler	stm8_interrupt_vector.c	11;"	member	struct:interrupt_vector	fi
 interrupt_handler_t	stm8_interrupt_vector.c	7;"	typedef	file:
 interrupt_instruction	stm8_interrupt_vector.c	10;"	member	struct:interrupt_vector	file:
 interrupt_vector	stm8_interrupt_vector.c	9;"	struct	file:
-is_application_valid	api.c	77;"	function
-is_application_valid	api.h	17;"	prototype	signature:(void)
-is_application_valid	api.h	7;"	prototype	signature:(void)
-is_button_down	api.c	158;"	function	signature:(u8 index)
-is_button_down	api.h	23;"	prototype	signature:(u8 index)
-is_developer_valid	api.c	83;"	function
-is_developer_valid	api.h	18;"	prototype	signature:(void)
-is_submenu_valid	application.c	37;"	function
-is_submenu_valid	application.h	8;"	prototype	signature:(void)
+is_application_valid	api.h	10;"	prototype	signature:(void)
+is_button_down	api.c	164;"	function	signature:(u8 index)
+is_button_down	api.h	24;"	prototype	signature:(u8 index)
+is_right_button_down	api.c	23;"	variable
 main	main.c	6;"	function
-millis	api.c	106;"	function
-millis	api.h	9;"	prototype	signature:(void)
+millis	api.c	104;"	function
+millis	api.h	12;"	prototype	signature:(void)
 nop	stm8s.h	2720;"	macro
 nop	stm8s.h	2729;"	macro
 nop	stm8s.h	2739;"	macro
-pwm_brightness	api.c	16;"	variable
-pwm_brightness_buffer	api.c	18;"	variable
-pwm_brightness_index	api.c	17;"	variable
-pwm_led_count	api.c	20;"	variable
-pwm_sleep	api.c	19;"	variable
-pwm_state	api.c	22;"	variable
-pwm_visible_index	api.c	21;"	variable
+pwm_brightness	api.c	12;"	variable
+pwm_brightness_buffer	api.c	14;"	variable
+pwm_brightness_index	api.c	13;"	variable
+pwm_led_count	api.c	16;"	variable
+pwm_sleep	api.c	15;"	variable
+pwm_state	api.c	18;"	variable
+pwm_visible_index	api.c	17;"	variable
 rim	stm8s.h	2718;"	macro
 rim	stm8s.h	2727;"	macro
 rim	stm8s.h	2737;"	macro
-run_application	application.c	11;"	function
-run_application	application.h	4;"	prototype	signature:(void)
+run_application	application.c	7;"	function
+run_application	application.h	3;"	prototype	signature:(void)
 run_developer	developer.c	19;"	function
 run_developer	developer.h	6;"	prototype	signature:(void)
 s16	stm8s.h	223;"	typedef
 s32	stm8s.h	222;"	typedef
 s8	stm8s.h	224;"	typedef
-set_debug	api.c	437;"	function	signature:(u8 brightness)
-set_debug	api.h	13;"	prototype	signature:(u8 brightness)
-set_frame_blink	application.c	75;"	function
-set_frame_blink	application.h	10;"	prototype	signature:(void)
-set_frame_rainbow	application.c	68;"	function
-set_frame_rainbow	application.h	9;"	prototype	signature:(void)
-set_hue_max	api.c	397;"	function	signature:(u8 index,u16 color)
-set_hue_max	api.h	16;"	prototype	signature:(u8 index,u16 color)
-set_led	api.c	217;"	function	signature:(u8 led_index)
-set_led	api.h	27;"	prototype	signature:(u8 led_index)
-set_mat	api.c	280;"	function	signature:(u8 mat_index,bool is_high)
+set_debug	api.c	517;"	function	signature:(u8 brightness)
+set_debug	api.h	16;"	prototype	signature:(u8 brightness)
+set_element_hue	application.c	171;"	function	signature:(u8 led_index,u8 color_index)
+set_element_hue	application.h	8;"	prototype	signature:(u8 led_index,u8 color_index)
+set_frame_rainbow	application.c	202;"	function	signature:(bool is_circular)
+set_frame_rainbow	application.h	4;"	prototype	signature:(bool is_circular)
+set_hue_max	api.c	473;"	function	signature:(u8 index,u16 color)
+set_hue_max	api.h	18;"	prototype	signature:(u8 index,u16 color)
+set_led_on	api.c	273;"	function	signature:(u8 led_index)
+set_led_on	api.h	27;"	prototype	signature:(u8 led_index)
+set_mat	api.c	338;"	function	signature:(u8 mat_index,bool is_high)
 set_mat	api.h	26;"	prototype	signature:(u8 led_index,bool is_high)
-set_matrix_high_z	api.c	442;"	function
-set_matrix_high_z	api.h	10;"	prototype	signature:(void)
-set_rgb	api.c	426;"	function	signature:(u8 index,u8 color,u8 brightness)
-set_rgb	api.h	11;"	prototype	signature:(u8 index,u8 color,u8 brightness)
-set_white	api.c	431;"	function	signature:(u8 index,u8 brightness)
-set_white	api.h	12;"	prototype	signature:(u8 index,u8 brightness)
-setup_application	application.c	5;"	function
-setup_application	application.h	3;"	prototype	signature:(void)
+set_rgb	api.c	513;"	function	signature:(u8 index,u8 color,u8 brightness)
+set_rgb	api.h	14;"	prototype	signature:(u8 index,u8 color,u8 brightness)
+set_sparkles	application.c	214;"	function	signature:(bool is_fireworks)
+set_sparkles	application.h	5;"	prototype	signature:(bool is_fireworks)
+set_white	api.c	515;"	function	signature:(u8 index,u8 brightness)
+set_white	api.h	15;"	prototype	signature:(u8 index,u8 brightness)
 setup_developer	developer.c	10;"	function
 setup_developer	developer.h	5;"	prototype	signature:(void)
-setup_main	api.c	88;"	function
-setup_main	api.h	8;"	prototype	signature:(void)
-setup_serial	api.c	59;"	function	signature:(bool is_enabled,bool is_fast_baud_rate)
-setup_serial	api.h	6;"	prototype	signature:(bool is_enabled,bool is_fast_baud_rate)
-show_cyclone	application.c	100;"	function
-show_cyclone	application.h	6;"	prototype	signature:(void)
-show_puzzle	application.c	108;"	function
-show_puzzle	application.h	7;"	prototype	signature:(void)
-show_screen_savers	application.c	42;"	function
-show_screen_savers	application.h	5;"	prototype	signature:(void)
+setup_main	api.c	73;"	function
+setup_main	api.h	11;"	prototype	signature:(void)
+setup_serial	api.c	56;"	function	signature:(bool is_enabled,bool is_fast_baud_rate)
+setup_serial	api.h	9;"	prototype	signature:(bool is_enabled,bool is_fast_baud_rate)
+show_screensaver	application.c	188;"	function	signature:(u8 screensaver_index)
+show_screensaver	application.h	7;"	prototype	signature:(u8 screensaver_index)
 sim	stm8s.h	2719;"	macro
 sim	stm8s.h	2728;"	macro
 sim	stm8s.h	2738;"	macro
@@ -2186,7 +2170,7 @@ u8	stm8s.h	228;"	typedef
 uint16_t	stm8s.h	217;"	typedef
 uint32_t	stm8s.h	218;"	typedef
 uint8_t	stm8s.h	216;"	typedef
-update_buttons	api.c	114;"	function
+update_buttons	api.c	111;"	function
 update_buttons	api.h	19;"	prototype	signature:(void)
 wfi	stm8s.h	2722;"	macro
 wfi	stm8s.h	2731;"	macro

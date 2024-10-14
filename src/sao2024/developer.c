@@ -9,9 +9,9 @@
 
 void setup_developer()
 {
-	setup_serial(1,1);//enabled, 0: 9600 baud, 1: at high speed (1MBaud)
+	//setup_serial(1,1);//enabled, 0: 9600 baud, 1: at high speed (1MBaud)
 	get_button_event(0xFF,0xFF,1);//clear_button_events();
-	flush_leds(0);//clear outstanding led buffer
+	//flush_leds(0);//clear outstanding led buffer
 	set_debug(255);//show only one debug led ON
 	flush_leds(1);
 }
@@ -22,7 +22,12 @@ void run_developer()
 	u8 parameter_count;//number of parameters recevied
 	u32 parameters[MAX_TERMINAL_PARAMETERS];
 	setup_developer();
-	while(is_developer_valid())
+	while(1)
+	{
+		set_debug(((millis()>>8)&0x01)?0xFF:0);
+		flush_leds(1);
+	}
+	/*while(1)
 	{
 		Serial_print_string("> ");
 		get_terminal_command(&command,&parameters,&parameter_count);
@@ -30,7 +35,7 @@ void run_developer()
 		execute_terminal_command(command,&parameters,parameter_count);
 		command=0;
 		parameter_count=0;
-	}
+	}*/
 	
 	//Serial_print_string("DONE");
 	//Serial_newline();
@@ -41,7 +46,7 @@ void get_terminal_command(char *command,u32 (*parameters)[MAX_TERMINAL_PARAMETER
 	bool is_new_line=0;
 	bool is_any_input=0;//set to true after new inpute received, including a value of '0'
 	char input_char;
-	while(is_developer_valid() && !is_new_line)
+	while(!is_new_line)
 	{
 		if(Serial_available())
 		{

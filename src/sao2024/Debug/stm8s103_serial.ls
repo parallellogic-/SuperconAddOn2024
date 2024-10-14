@@ -1,300 +1,287 @@
    1                     ; C Compiler for STM8 (COSMIC Software)
    2                     ; Parser V4.12.8.1 - 09 Jan 2023
    3                     ; Generator (Limited) V4.5.5 - 08 Nov 2022
-  45                     ; 7  char Serial_read_char(void)
-  45                     ; 8  {
-  47                     	switch	.text
-  48  0000               _Serial_read_char:
-  52  0000               L32:
-  53                     ; 9 	 while (UART1_GetFlagStatus(UART1_FLAG_TXE) == RESET);
-  55  0000 ae0080        	ldw	x,#128
-  56  0003 cd0000        	call	_UART1_GetFlagStatus
-  58  0006 4d            	tnz	a
-  59  0007 27f7          	jreq	L32
-  60                     ; 10 	 UART1_ClearFlag(UART1_FLAG_RXNE);
-  62  0009 ae0020        	ldw	x,#32
-  63  000c cd0000        	call	_UART1_ClearFlag
-  65                     ; 11 	 return (UART1_ReceiveData8());
-  67  000f cd0000        	call	_UART1_ReceiveData8
-  71  0012 81            	ret
- 107                     ; 14  void Serial_print_char (char value)
- 107                     ; 15  {
- 108                     	switch	.text
- 109  0013               _Serial_print_char:
- 113                     ; 16 	 UART1_SendData8(value);
- 115  0013 cd0000        	call	_UART1_SendData8
- 118  0016               L74:
- 119                     ; 17 	 while (UART1_GetFlagStatus(UART1_FLAG_TXE) == RESET); //wait for sending
- 121  0016 ae0080        	ldw	x,#128
- 122  0019 cd0000        	call	_UART1_GetFlagStatus
- 124  001c 4d            	tnz	a
- 125  001d 27f7          	jreq	L74
- 126                     ; 18  }
- 129  001f 81            	ret
- 167                     ; 20   void Serial_begin(uint32_t baud_rate)
- 167                     ; 21  {
- 168                     	switch	.text
- 169  0020               _Serial_begin:
- 171       00000000      OFST:	set	0
- 174                     ; 22 	 GPIO_Init(GPIOD, GPIO_PIN_5, GPIO_MODE_OUT_PP_HIGH_FAST);
- 176  0020 4bf0          	push	#240
- 177  0022 4b20          	push	#32
- 178  0024 ae500f        	ldw	x,#20495
- 179  0027 cd0000        	call	_GPIO_Init
- 181  002a 85            	popw	x
- 182                     ; 23 	 GPIO_Init(GPIOD, GPIO_PIN_6, GPIO_MODE_IN_PU_NO_IT);
- 184  002b 4b40          	push	#64
- 185  002d 4b40          	push	#64
- 186  002f ae500f        	ldw	x,#20495
- 187  0032 cd0000        	call	_GPIO_Init
- 189  0035 85            	popw	x
- 190                     ; 25 	 UART1_DeInit(); //Deinitialize UART peripherals 
- 192  0036 cd0000        	call	_UART1_DeInit
- 194                     ; 28 		UART1_Init(baud_rate, 
- 194                     ; 29                 UART1_WORDLENGTH_8D, 
- 194                     ; 30                 UART1_STOPBITS_1, 
- 194                     ; 31                 UART1_PARITY_NO, 
- 194                     ; 32                 UART1_SYNCMODE_CLOCK_DISABLE, 
- 194                     ; 33                 UART1_MODE_TXRX_ENABLE); //(BaudRate, Wordlegth, StopBits, Parity, SyncMode, Mode)
- 196  0039 4b0c          	push	#12
- 197  003b 4b80          	push	#128
- 198  003d 4b00          	push	#0
- 199  003f 4b00          	push	#0
- 200  0041 4b00          	push	#0
- 201  0043 1e0a          	ldw	x,(OFST+10,sp)
- 202  0045 89            	pushw	x
- 203  0046 1e0a          	ldw	x,(OFST+10,sp)
- 204  0048 89            	pushw	x
- 205  0049 cd0000        	call	_UART1_Init
- 207  004c 5b09          	addw	sp,#9
- 208                     ; 35 		UART1_Cmd(ENABLE);
- 210  004e a601          	ld	a,#1
- 211  0050 cd0000        	call	_UART1_Cmd
- 213                     ; 36  }
- 216  0053 81            	ret
- 270                     ; 38  void Serial_print_u32(u32 number)
- 270                     ; 39  {
- 271                     	switch	.text
- 272  0054               _Serial_print_u32:
- 274  0054 89            	pushw	x
- 275       00000002      OFST:	set	2
- 278                     ; 42 	 Serial_print_string("0x");
- 280  0055 ae0005        	ldw	x,#L711
- 281  0058 cd010d        	call	_Serial_print_string
- 283                     ; 43 	 for(iter=28;iter<32;iter-=4)
- 285  005b a61c          	ld	a,#28
- 286  005d 6b02          	ld	(OFST+0,sp),a
- 288  005f               L121:
- 289                     ; 45 		 digit=number>>iter;
- 291  005f 96            	ldw	x,sp
- 292  0060 1c0005        	addw	x,#OFST+3
- 293  0063 cd0000        	call	c_ltor
- 295  0066 7b02          	ld	a,(OFST+0,sp)
- 296  0068 cd0000        	call	c_lursh
- 298  006b b603          	ld	a,c_lreg+3
- 299  006d 6b01          	ld	(OFST-1,sp),a
- 301                     ; 46 		 if(digit>9) Serial_print_char('A'+(digit-10));
- 303  006f 7b01          	ld	a,(OFST-1,sp)
- 304  0071 a10a          	cp	a,#10
- 305  0073 2508          	jrult	L721
- 308  0075 7b01          	ld	a,(OFST-1,sp)
- 309  0077 ab37          	add	a,#55
- 310  0079 ad98          	call	_Serial_print_char
- 313  007b 2006          	jra	L131
- 314  007d               L721:
+   4                     ; Optimizer V4.5.5 - 08 Nov 2022
+  50                     ; 7  char Serial_read_char(void)
+  50                     ; 8  {
+  52                     	switch	.text
+  53  0000               _Serial_read_char:
+  57  0000               L32:
+  58                     ; 9 	 while (UART1_GetFlagStatus(UART1_FLAG_TXE) == RESET);
+  60  0000 ae0080        	ldw	x,#128
+  61  0003 cd0000        	call	_UART1_GetFlagStatus
+  63  0006 4d            	tnz	a
+  64  0007 27f7          	jreq	L32
+  65                     ; 10 	 UART1_ClearFlag(UART1_FLAG_RXNE);
+  67  0009 ae0020        	ldw	x,#32
+  68  000c cd0000        	call	_UART1_ClearFlag
+  70                     ; 11 	 return (UART1_ReceiveData8());
+  75  000f cc0000        	jp	_UART1_ReceiveData8
+ 111                     ; 14  void Serial_print_char (char value)
+ 111                     ; 15  {
+ 112                     	switch	.text
+ 113  0012               _Serial_print_char:
+ 117                     ; 16 	 UART1_SendData8(value);
+ 119  0012 cd0000        	call	_UART1_SendData8
+ 122  0015               L74:
+ 123                     ; 17 	 while (UART1_GetFlagStatus(UART1_FLAG_TXE) == RESET); //wait for sending
+ 125  0015 ae0080        	ldw	x,#128
+ 126  0018 cd0000        	call	_UART1_GetFlagStatus
+ 128  001b 4d            	tnz	a
+ 129  001c 27f7          	jreq	L74
+ 130                     ; 18  }
+ 133  001e 81            	ret	
+ 171                     ; 20   void Serial_begin(uint32_t baud_rate)
+ 171                     ; 21  {
+ 172                     	switch	.text
+ 173  001f               _Serial_begin:
+ 175       00000000      OFST:	set	0
+ 178                     ; 22 	 GPIO_Init(GPIOD, GPIO_PIN_5, GPIO_MODE_OUT_PP_HIGH_FAST);
+ 180  001f 4bf0          	push	#240
+ 181  0021 4b20          	push	#32
+ 182  0023 ae500f        	ldw	x,#20495
+ 183  0026 cd0000        	call	_GPIO_Init
+ 185  0029 85            	popw	x
+ 186                     ; 23 	 GPIO_Init(GPIOD, GPIO_PIN_6, GPIO_MODE_IN_PU_NO_IT);
+ 188  002a 4b40          	push	#64
+ 189  002c 4b40          	push	#64
+ 190  002e ae500f        	ldw	x,#20495
+ 191  0031 cd0000        	call	_GPIO_Init
+ 193  0034 85            	popw	x
+ 194                     ; 25 	 UART1_DeInit(); //Deinitialize UART peripherals 
+ 196  0035 cd0000        	call	_UART1_DeInit
+ 198                     ; 28 		UART1_Init(baud_rate, 
+ 198                     ; 29                 UART1_WORDLENGTH_8D, 
+ 198                     ; 30                 UART1_STOPBITS_1, 
+ 198                     ; 31                 UART1_PARITY_NO, 
+ 198                     ; 32                 UART1_SYNCMODE_CLOCK_DISABLE, 
+ 198                     ; 33                 UART1_MODE_TXRX_ENABLE); //(BaudRate, Wordlegth, StopBits, Parity, SyncMode, Mode)
+ 200  0038 4b0c          	push	#12
+ 201  003a 4b80          	push	#128
+ 202  003c 4b00          	push	#0
+ 203  003e 4b00          	push	#0
+ 204  0040 4b00          	push	#0
+ 205  0042 1e0a          	ldw	x,(OFST+10,sp)
+ 206  0044 89            	pushw	x
+ 207  0045 1e0a          	ldw	x,(OFST+10,sp)
+ 208  0047 89            	pushw	x
+ 209  0048 cd0000        	call	_UART1_Init
+ 211  004b 5b09          	addw	sp,#9
+ 212                     ; 35 		UART1_Cmd(ENABLE);
+ 214  004d a601          	ld	a,#1
+ 216                     ; 36  }
+ 219  004f cc0000        	jp	_UART1_Cmd
+ 273                     ; 38  void Serial_print_u32(u32 number)
+ 273                     ; 39  {
+ 274                     	switch	.text
+ 275  0052               _Serial_print_u32:
+ 277  0052 89            	pushw	x
+ 278       00000002      OFST:	set	2
+ 281                     ; 42 	 Serial_print_string("0x");
+ 283  0053 ae0005        	ldw	x,#L711
+ 284  0056 cd00fd        	call	_Serial_print_string
+ 286                     ; 43 	 for(iter=28;iter<32;iter-=4)
+ 288  0059 a61c          	ld	a,#28
+ 289  005b 6b02          	ld	(OFST+0,sp),a
+ 291  005d               L121:
+ 292                     ; 45 		 digit=number>>iter;
+ 294  005d 96            	ldw	x,sp
+ 295  005e 1c0005        	addw	x,#OFST+3
+ 296  0061 cd0000        	call	c_ltor
+ 298  0064 7b02          	ld	a,(OFST+0,sp)
+ 299  0066 cd0000        	call	c_lursh
+ 301  0069 b603          	ld	a,c_lreg+3
+ 302  006b 6b01          	ld	(OFST-1,sp),a
+ 304                     ; 46 		 if(digit>9) Serial_print_char('A'+(digit-10));
+ 306  006d a10a          	cp	a,#10
+ 307  006f 2504          	jrult	L721
+ 310  0071 ab37          	add	a,#55
+ 313  0073 2002          	jra	L131
+ 314  0075               L721:
  315                     ; 47 		 else Serial_print_char('0'+digit);
- 317  007d 7b01          	ld	a,(OFST-1,sp)
- 318  007f ab30          	add	a,#48
- 319  0081 ad90          	call	_Serial_print_char
- 321  0083               L131:
- 322                     ; 48 		 if(iter==16) Serial_print_char('_');
- 324  0083 7b02          	ld	a,(OFST+0,sp)
- 325  0085 a110          	cp	a,#16
- 326  0087 2604          	jrne	L331
- 329  0089 a65f          	ld	a,#95
- 330  008b ad86          	call	_Serial_print_char
- 332  008d               L331:
+ 317  0075 ab30          	add	a,#48
+ 319  0077               L131:
+ 320  0077 ad99          	call	_Serial_print_char
+ 321                     ; 48 		 if(iter==16) Serial_print_char('_');
+ 323  0079 7b02          	ld	a,(OFST+0,sp)
+ 324  007b a110          	cp	a,#16
+ 325  007d 2606          	jrne	L331
+ 328  007f a65f          	ld	a,#95
+ 329  0081 ad8f          	call	_Serial_print_char
+ 331  0083 7b02          	ld	a,(OFST+0,sp)
+ 332  0085               L331:
  333                     ; 43 	 for(iter=28;iter<32;iter-=4)
- 335  008d 7b02          	ld	a,(OFST+0,sp)
- 336  008f a004          	sub	a,#4
- 337  0091 6b02          	ld	(OFST+0,sp),a
- 341  0093 7b02          	ld	a,(OFST+0,sp)
- 342  0095 a120          	cp	a,#32
- 343  0097 25c6          	jrult	L121
- 344                     ; 50  }
- 347  0099 85            	popw	x
- 348  009a 81            	ret
- 351                     .const:	section	.text
- 352  0000               L531_digit:
- 353  0000 00            	dc.b	0
- 354  0001 00000000      	ds.b	4
- 407                     ; 52  void Serial_print_int (int number) //Funtion to print int value to serial monitor 
- 407                     ; 53  {
- 408                     	switch	.text
- 409  009b               _Serial_print_int:
- 411  009b 89            	pushw	x
- 412  009c 5208          	subw	sp,#8
- 413       00000008      OFST:	set	8
- 416                     ; 54 	 char count = 0;
- 418  009e 0f08          	clr	(OFST+0,sp)
- 420                     ; 55 	 char digit[5] = "";
- 422  00a0 96            	ldw	x,sp
- 423  00a1 1c0003        	addw	x,#OFST-5
- 424  00a4 90ae0000      	ldw	y,#L531_digit
- 425  00a8 a605          	ld	a,#5
- 426  00aa cd0000        	call	c_xymov
- 429  00ad 2023          	jra	L171
- 430  00af               L561:
- 431                     ; 59 		 digit[count] = number%10;
- 433  00af 96            	ldw	x,sp
- 434  00b0 1c0003        	addw	x,#OFST-5
- 435  00b3 9f            	ld	a,xl
- 436  00b4 5e            	swapw	x
- 437  00b5 1b08          	add	a,(OFST+0,sp)
- 438  00b7 2401          	jrnc	L61
- 439  00b9 5c            	incw	x
- 440  00ba               L61:
- 441  00ba 02            	rlwa	x,a
- 442  00bb 1609          	ldw	y,(OFST+1,sp)
- 443  00bd a60a          	ld	a,#10
- 444  00bf cd0000        	call	c_smody
- 446  00c2 9001          	rrwa	y,a
- 447  00c4 f7            	ld	(x),a
- 448  00c5 9002          	rlwa	y,a
- 449                     ; 60 		 count++;
- 451  00c7 0c08          	inc	(OFST+0,sp)
- 453                     ; 61 		 number = number/10;
- 455  00c9 1e09          	ldw	x,(OFST+1,sp)
- 456  00cb a60a          	ld	a,#10
- 457  00cd cd0000        	call	c_sdivx
- 459  00d0 1f09          	ldw	(OFST+1,sp),x
- 460  00d2               L171:
- 461                     ; 57 	 while (number != 0) //split the int to char array 
- 463  00d2 1e09          	ldw	x,(OFST+1,sp)
- 464  00d4 26d9          	jrne	L561
- 466  00d6 201f          	jra	L771
- 467  00d8               L571:
- 468                     ; 66 		UART1_SendData8(digit[count-1] + 0x30);
- 470  00d8 96            	ldw	x,sp
- 471  00d9 1c0003        	addw	x,#OFST-5
- 472  00dc 1f01          	ldw	(OFST-7,sp),x
- 474  00de 7b08          	ld	a,(OFST+0,sp)
- 475  00e0 5f            	clrw	x
- 476  00e1 97            	ld	xl,a
- 477  00e2 5a            	decw	x
- 478  00e3 72fb01        	addw	x,(OFST-7,sp)
- 479  00e6 f6            	ld	a,(x)
- 480  00e7 ab30          	add	a,#48
- 481  00e9 cd0000        	call	_UART1_SendData8
- 484  00ec               L502:
- 485                     ; 67 		while (UART1_GetFlagStatus(UART1_FLAG_TXE) == RESET); //wait for sending 
- 487  00ec ae0080        	ldw	x,#128
- 488  00ef cd0000        	call	_UART1_GetFlagStatus
- 490  00f2 4d            	tnz	a
- 491  00f3 27f7          	jreq	L502
- 492                     ; 68 		count--; 
- 494  00f5 0a08          	dec	(OFST+0,sp)
- 496  00f7               L771:
- 497                     ; 64 	 while (count !=0) //print char array in correct direction 
- 499  00f7 0d08          	tnz	(OFST+0,sp)
- 500  00f9 26dd          	jrne	L571
- 501                     ; 70  }
- 504  00fb 5b0a          	addw	sp,#10
- 505  00fd 81            	ret
- 530                     ; 72  void Serial_newline(void)
- 530                     ; 73  {
- 531                     	switch	.text
- 532  00fe               _Serial_newline:
- 536                     ; 74 	 UART1_SendData8(0x0a);
- 538  00fe a60a          	ld	a,#10
- 539  0100 cd0000        	call	_UART1_SendData8
- 542  0103               L322:
- 543                     ; 75 	while (UART1_GetFlagStatus(UART1_FLAG_TXE) == RESET); //wait for sending 
- 545  0103 ae0080        	ldw	x,#128
- 546  0106 cd0000        	call	_UART1_GetFlagStatus
- 548  0109 4d            	tnz	a
- 549  010a 27f7          	jreq	L322
- 550                     ; 76  }
- 553  010c 81            	ret
- 600                     ; 78  void Serial_print_string (char string[])
- 600                     ; 79  {
- 601                     	switch	.text
- 602  010d               _Serial_print_string:
- 604  010d 89            	pushw	x
- 605  010e 88            	push	a
- 606       00000001      OFST:	set	1
- 609                     ; 81 	 char i=0;
- 611  010f 0f01          	clr	(OFST+0,sp)
- 614  0111 2016          	jra	L552
- 615  0113               L152:
- 616                     ; 85 		UART1_SendData8(string[i]);
- 618  0113 7b01          	ld	a,(OFST+0,sp)
- 619  0115 5f            	clrw	x
- 620  0116 97            	ld	xl,a
- 621  0117 72fb02        	addw	x,(OFST+1,sp)
- 622  011a f6            	ld	a,(x)
- 623  011b cd0000        	call	_UART1_SendData8
- 626  011e               L362:
- 627                     ; 86 		while (UART1_GetFlagStatus(UART1_FLAG_TXE) == RESET);
- 629  011e ae0080        	ldw	x,#128
- 630  0121 cd0000        	call	_UART1_GetFlagStatus
- 632  0124 4d            	tnz	a
- 633  0125 27f7          	jreq	L362
- 634                     ; 87 		i++;
- 636  0127 0c01          	inc	(OFST+0,sp)
- 638  0129               L552:
- 639                     ; 83 	 while (string[i] != 0x00)
- 641  0129 7b01          	ld	a,(OFST+0,sp)
- 642  012b 5f            	clrw	x
- 643  012c 97            	ld	xl,a
- 644  012d 72fb02        	addw	x,(OFST+1,sp)
- 645  0130 7d            	tnz	(x)
- 646  0131 26e0          	jrne	L152
- 647                     ; 89  }
- 650  0133 5b03          	addw	sp,#3
- 651  0135 81            	ret
- 696                     ; 91  bool Serial_available()
- 696                     ; 92  {
- 697                     	switch	.text
- 698  0136               _Serial_available:
- 702                     ; 93 	 if(UART1_GetFlagStatus(UART1_FLAG_RXNE) == TRUE)
- 704  0136 ae0020        	ldw	x,#32
- 705  0139 cd0000        	call	_UART1_GetFlagStatus
- 707  013c a101          	cp	a,#1
- 708  013e 2603          	jrne	L703
- 709                     ; 94 	 return TRUE;
- 711  0140 a601          	ld	a,#1
- 714  0142 81            	ret
- 715  0143               L703:
- 716                     ; 96 	 return FALSE;
- 718  0143 4f            	clr	a
- 721  0144 81            	ret
- 734                     	xref	_GPIO_Init
- 735                     	xref	_UART1_ClearFlag
- 736                     	xref	_UART1_GetFlagStatus
- 737                     	xref	_UART1_SendData8
- 738                     	xref	_UART1_ReceiveData8
- 739                     	xref	_UART1_Cmd
- 740                     	xref	_UART1_Init
- 741                     	xref	_UART1_DeInit
- 742                     	xdef	_Serial_print_u32
- 743                     	xdef	_Serial_read_char
- 744                     	xdef	_Serial_available
- 745                     	xdef	_Serial_newline
- 746                     	xdef	_Serial_print_string
- 747                     	xdef	_Serial_print_char
- 748                     	xdef	_Serial_print_int
- 749                     	xdef	_Serial_begin
- 750                     	switch	.const
- 751  0005               L711:
- 752  0005 307800        	dc.b	"0x",0
- 753                     	xref.b	c_lreg
- 754                     	xref.b	c_x
- 755                     	xref.b	c_y
- 775                     	xref	c_sdivx
- 776                     	xref	c_smody
- 777                     	xref	c_smodx
- 778                     	xref	c_xymov
- 779                     	xref	c_lursh
- 780                     	xref	c_ltor
- 781                     	end
+ 335  0085 a004          	sub	a,#4
+ 336  0087 6b02          	ld	(OFST+0,sp),a
+ 340  0089 a120          	cp	a,#32
+ 341  008b 25d0          	jrult	L121
+ 342                     ; 50  }
+ 345  008d 85            	popw	x
+ 346  008e 81            	ret	
+ 349                     .const:	section	.text
+ 350  0000               L531_digit:
+ 351  0000 00            	dc.b	0
+ 352  0001 00000000      	ds.b	4
+ 405                     ; 52  void Serial_print_int (int number) //Funtion to print int value to serial monitor 
+ 405                     ; 53  {
+ 406                     	switch	.text
+ 407  008f               _Serial_print_int:
+ 409  008f 89            	pushw	x
+ 410  0090 5208          	subw	sp,#8
+ 411       00000008      OFST:	set	8
+ 414                     ; 54 	 char count = 0;
+ 416  0092 0f08          	clr	(OFST+0,sp)
+ 418                     ; 55 	 char digit[5] = "";
+ 420  0094 96            	ldw	x,sp
+ 421  0095 1c0003        	addw	x,#OFST-5
+ 422  0098 90ae0000      	ldw	y,#L531_digit
+ 423  009c a605          	ld	a,#5
+ 424  009e cd0000        	call	c_xymov
+ 427  00a1 2021          	jra	L171
+ 428  00a3               L561:
+ 429                     ; 59 		 digit[count] = number%10;
+ 431  00a3 96            	ldw	x,sp
+ 432  00a4 1c0003        	addw	x,#OFST-5
+ 433  00a7 9f            	ld	a,xl
+ 434  00a8 5e            	swapw	x
+ 435  00a9 1b08          	add	a,(OFST+0,sp)
+ 436  00ab 2401          	jrnc	L25
+ 437  00ad 5c            	incw	x
+ 438  00ae               L25:
+ 439  00ae 02            	rlwa	x,a
+ 440  00af 1609          	ldw	y,(OFST+1,sp)
+ 441  00b1 a60a          	ld	a,#10
+ 442  00b3 cd0000        	call	c_smody
+ 444  00b6 9001          	rrwa	y,a
+ 445  00b8 f7            	ld	(x),a
+ 446                     ; 60 		 count++;
+ 448  00b9 0c08          	inc	(OFST+0,sp)
+ 450                     ; 61 		 number = number/10;
+ 452  00bb a60a          	ld	a,#10
+ 453  00bd 1e09          	ldw	x,(OFST+1,sp)
+ 454  00bf cd0000        	call	c_sdivx
+ 456  00c2 1f09          	ldw	(OFST+1,sp),x
+ 457  00c4               L171:
+ 458                     ; 57 	 while (number != 0) //split the int to char array 
+ 460  00c4 1e09          	ldw	x,(OFST+1,sp)
+ 461  00c6 26db          	jrne	L561
+ 463  00c8 201d          	jra	L771
+ 464  00ca               L571:
+ 465                     ; 66 		UART1_SendData8(digit[count-1] + 0x30);
+ 467  00ca 96            	ldw	x,sp
+ 468  00cb 1c0003        	addw	x,#OFST-5
+ 469  00ce 1f01          	ldw	(OFST-7,sp),x
+ 471  00d0 5f            	clrw	x
+ 472  00d1 97            	ld	xl,a
+ 473  00d2 5a            	decw	x
+ 474  00d3 72fb01        	addw	x,(OFST-7,sp)
+ 475  00d6 f6            	ld	a,(x)
+ 476  00d7 ab30          	add	a,#48
+ 477  00d9 cd0000        	call	_UART1_SendData8
+ 480  00dc               L502:
+ 481                     ; 67 		while (UART1_GetFlagStatus(UART1_FLAG_TXE) == RESET); //wait for sending 
+ 483  00dc ae0080        	ldw	x,#128
+ 484  00df cd0000        	call	_UART1_GetFlagStatus
+ 486  00e2 4d            	tnz	a
+ 487  00e3 27f7          	jreq	L502
+ 488                     ; 68 		count--; 
+ 490  00e5 0a08          	dec	(OFST+0,sp)
+ 492  00e7               L771:
+ 493                     ; 64 	 while (count !=0) //print char array in correct direction 
+ 495  00e7 7b08          	ld	a,(OFST+0,sp)
+ 496  00e9 26df          	jrne	L571
+ 497                     ; 70  }
+ 500  00eb 5b0a          	addw	sp,#10
+ 501  00ed 81            	ret	
+ 526                     ; 72  void Serial_newline(void)
+ 526                     ; 73  {
+ 527                     	switch	.text
+ 528  00ee               _Serial_newline:
+ 532                     ; 74 	 UART1_SendData8(0x0a);
+ 534  00ee a60a          	ld	a,#10
+ 535  00f0 cd0000        	call	_UART1_SendData8
+ 538  00f3               L322:
+ 539                     ; 75 	while (UART1_GetFlagStatus(UART1_FLAG_TXE) == RESET); //wait for sending 
+ 541  00f3 ae0080        	ldw	x,#128
+ 542  00f6 cd0000        	call	_UART1_GetFlagStatus
+ 544  00f9 4d            	tnz	a
+ 545  00fa 27f7          	jreq	L322
+ 546                     ; 76  }
+ 549  00fc 81            	ret	
+ 596                     ; 78  void Serial_print_string (char string[])
+ 596                     ; 79  {
+ 597                     	switch	.text
+ 598  00fd               _Serial_print_string:
+ 600  00fd 89            	pushw	x
+ 601  00fe 88            	push	a
+ 602       00000001      OFST:	set	1
+ 605                     ; 81 	 char i=0;
+ 607  00ff 0f01          	clr	(OFST+0,sp)
+ 610  0101 200e          	jra	L552
+ 611  0103               L152:
+ 612                     ; 85 		UART1_SendData8(string[i]);
+ 614  0103 cd0000        	call	_UART1_SendData8
+ 617  0106               L362:
+ 618                     ; 86 		while (UART1_GetFlagStatus(UART1_FLAG_TXE) == RESET);
+ 620  0106 ae0080        	ldw	x,#128
+ 621  0109 cd0000        	call	_UART1_GetFlagStatus
+ 623  010c 4d            	tnz	a
+ 624  010d 27f7          	jreq	L362
+ 625                     ; 87 		i++;
+ 627  010f 0c01          	inc	(OFST+0,sp)
+ 629  0111               L552:
+ 630                     ; 83 	 while (string[i] != 0x00)
+ 632  0111 7b01          	ld	a,(OFST+0,sp)
+ 633  0113 5f            	clrw	x
+ 634  0114 97            	ld	xl,a
+ 635  0115 72fb02        	addw	x,(OFST+1,sp)
+ 636  0118 f6            	ld	a,(x)
+ 637  0119 26e8          	jrne	L152
+ 638                     ; 89  }
+ 641  011b 5b03          	addw	sp,#3
+ 642  011d 81            	ret	
+ 687                     ; 91  bool Serial_available()
+ 687                     ; 92  {
+ 688                     	switch	.text
+ 689  011e               _Serial_available:
+ 693                     ; 93 	 if(UART1_GetFlagStatus(UART1_FLAG_RXNE) == TRUE)
+ 695  011e ae0020        	ldw	x,#32
+ 696  0121 cd0000        	call	_UART1_GetFlagStatus
+ 698  0124 4a            	dec	a
+ 699  0125 2602          	jrne	L703
+ 700                     ; 94 	 return TRUE;
+ 702  0127 4c            	inc	a
+ 705  0128 81            	ret	
+ 706  0129               L703:
+ 707                     ; 96 	 return FALSE;
+ 709  0129 4f            	clr	a
+ 712  012a 81            	ret	
+ 725                     	xref	_GPIO_Init
+ 726                     	xref	_UART1_ClearFlag
+ 727                     	xref	_UART1_GetFlagStatus
+ 728                     	xref	_UART1_SendData8
+ 729                     	xref	_UART1_ReceiveData8
+ 730                     	xref	_UART1_Cmd
+ 731                     	xref	_UART1_Init
+ 732                     	xref	_UART1_DeInit
+ 733                     	xdef	_Serial_print_u32
+ 734                     	xdef	_Serial_read_char
+ 735                     	xdef	_Serial_available
+ 736                     	xdef	_Serial_newline
+ 737                     	xdef	_Serial_print_string
+ 738                     	xdef	_Serial_print_char
+ 739                     	xdef	_Serial_print_int
+ 740                     	xdef	_Serial_begin
+ 741                     	switch	.const
+ 742  0005               L711:
+ 743  0005 307800        	dc.b	"0x",0
+ 744                     	xref.b	c_lreg
+ 745                     	xref.b	c_x
+ 746                     	xref.b	c_y
+ 766                     	xref	c_sdivx
+ 767                     	xref	c_smody
+ 768                     	xref	c_smodx
+ 769                     	xref	c_xymov
+ 770                     	xref	c_lursh
+ 771                     	xref	c_ltor
+ 772                     	end

@@ -1,4 +1,5 @@
 
+#define I2C_SLAVE_ADDRESS_DEFAULT 0x30
 #define RGB_LED_COUNT 6
 #define DEBUG_LED_INDEX RGB_LED_COUNT*3 //index of the debug led
 #define WHITE_LED_COUNT 12
@@ -15,8 +16,6 @@ void set_white(u8 index,u8 brightness);
 void set_debug(u8 brightness);
 void flush_leds(u8 led_count);
 void set_hue_max(u8 index,u16 color);
-bool is_application_valid(void);
-bool is_developer_valid(void);
 void update_buttons(void);
 //bool get_button_event(u8 button_index,bool is_long);
 //bool clear_button_event(u8 button_index,bool is_long);

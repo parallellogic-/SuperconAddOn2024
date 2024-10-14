@@ -19,9 +19,8 @@ void run_application()
 	u8 submenu_index;
 	bool is_target_element_placed;//for cycle, is_reverse_direction
 	//setup_application();
-	setup_serial(0,0);
 	get_button_event(0xFF,0xFF,1);//clear_button_events();
-	while(is_application_valid())
+	while(1)
 	{
 		effective_led_count=1;//default empty list
 		is_new_state=0;//flag to signify a new state has been entered

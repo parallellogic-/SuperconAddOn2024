@@ -22,6 +22,7 @@ struct interrupt_vector {
 extern void _stext();     /* startup routine */
 extern @far @interrupt void TIM2_UPD_OVF_IRQHandler (void); //millis counter
 //extern @far @interrupt void TIM2_CapComp_IRQ_Handler (void); //LED PWM
+extern @far @interrupt void I2C_EventHandler (void); //LED PWM
 
 struct interrupt_vector const _vectab[] = {
 	{0x82, (interrupt_handler_t)_stext}, /* reset */
@@ -46,7 +47,7 @@ struct interrupt_vector const _vectab[] = {
 	{0x82, NonHandledInterrupt}, /* irq16 */
 	{0x82, NonHandledInterrupt}, /* irq17 */
 	{0x82, NonHandledInterrupt}, /* irq18 */
-	{0x82, NonHandledInterrupt}, /* irq19 */
+	{0x82, I2C_EventHandler}, /* irq19 */
 	{0x82, NonHandledInterrupt}, /* irq20 */
 	{0x82, NonHandledInterrupt}, /* irq21 */
 	{0x82, NonHandledInterrupt}, /* irq22 */
