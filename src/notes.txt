@@ -110,3 +110,14 @@ Make sure the STM8 is using the correct I2C address. The Arduino sends 0x30, whi
 
 TODO: watchdog 
 --> watchdog has a max of 127/(16 MHz) ~= 8 milliseconds but want like 0.5 seconds
+
+-- 10/14/24
+
+surprised how small it is - could have made larger for free (min size with rails is 70mm square for full color silk screen)
+white silkscreen avoce artwork on front (wasn't plaaned, presumably needed for part placement?)
+cautious to break off mouse bites
+would have been better to laser cut a sample to check the scale
+barely plugged vias, minuscule light through vias, 100 mil header is clean
+rgb sillkscreen extendsd under parts - silkscreen is done before part reflow
+hard to test uart/i2c with current programmer configuration (without de-solder/re-soldering header multiple times)
+yellow color on RGB looks dirty...

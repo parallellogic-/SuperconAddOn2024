@@ -30,6 +30,12 @@ void hello_world()
 	const u8 cycle_speed=8;//larger=faster
 	const u8 white_speed=5;//smaller=faster
 	u16 frame=0;
+	while(0)
+	{
+		frame++;
+		set_debug(  (frame>>6)&0x01?(~(frame<<2)):(frame<<2));
+		flush_leds(7);
+	}
 	while(1)
 	{
 		frame++;
@@ -91,7 +97,9 @@ void setup_main()
 	
 	setup_serial(0,0);//disable UART
 
-	//enable iuser input buttons DEBUG_BROKEN
+	//enable user input buttons DEBUG_BROKEN
+	GPIO_Init(GPIOD, GPIO_PIN_3, GPIO_MODE_IN_PU_NO_IT);
+	GPIO_Init(GPIOD, GPIO_PIN_4, GPIO_MODE_IN_PU_NO_IT);
 	
 	//setup I2C
 	I2C_DeInit();
@@ -165,10 +173,10 @@ bool is_button_down(u8 index)
 {
 	switch(index)
 	{
-		//case 0:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_3); break; }//left button //DEBUG_BROKEN
-		//case 1:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_4); break; }//right button
-		case 0:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_5); }//left button
-		case 1:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_6); }//right button
+		case 0:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_3); break; }//left button //DEBUG_BROKEN
+		case 1:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_4); break; }//right button
+		//case 0:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_5); }//left button
+		//case 1:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_6); }//right button
 		case 2:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_1); }//SWIM IO input
 	}
 	return 0;
@@ -223,8 +231,8 @@ bool is_button_down(u8 index)
 	GPIOD->CR1 &= (uint8_t)(~(GPIO_PIN_2));
 	GPIOA->CR1 &= (uint8_t)(~(GPIO_PIN_3));
 	
-	GPIOD->DDR &= (uint8_t)(~(GPIO_PIN_4));
-	GPIOD->CR1 &= (uint8_t)(~(GPIO_PIN_4));//DEBUG_BROKEN
+	//GPIOD->DDR &= (uint8_t)(~(GPIO_PIN_4));
+	//GPIOD->CR1 &= (uint8_t)(~(GPIO_PIN_4));//DEBUG_BROKEN
 	
   TIM2->CR1 &= ~TIM2_CR1_CEN;  // Clear the CEN bit to stop the timer
 	if(pwm_visible_index==pwm_led_count[buffer_index])//hold all LEDs OFF at end of frame to stabalize the display brightness, regardless of how long the displayed LEDs are ON for
@@ -319,7 +327,7 @@ sr3 = I2C->SR3;
 //enable one led to be visible: physically emit light
 void set_led_on(u8 led_index)
 {
-	/*const u8 led_lookup[LED_COUNT][2]={//[0] is HIGH mat, [1] is LOW mat
+	const u8 led_lookup[LED_COUNT][2]={//[0] is HIGH mat, [1] is LOW mat
 		{0,3},{1,3},{2,3},{3,0},{4,0},{5,0},//reds
 		{0,4},{1,4},{2,4},{3,1},{4,1},{5,1},//greens
 		{0,5},{1,5},{2,5},{3,2},{4,2},{5,2},//blues
@@ -336,7 +344,7 @@ void set_led_on(u8 led_index)
 		{5,4},//LED16
 		{3,5},//LED17
 		{4,5} //LED18
-	};*/
+	};
 	//const u8 led_lookup[LED_COUNT][2]={//[0] is HIGH mat, [1] is LOW mat //MAGIC
 	//	{0,1},{1,0},{5,0},{6,0},{6,5},{4,3},{3,4},{0,5},{0,4},{0,3},//reds
 	//	{0,2},{2,0},{5,1},{6,1},{6,4},{5,3},{3,5},{0,6},{1,4},{1,3},//greens
@@ -355,7 +363,7 @@ void set_led_on(u8 led_index)
 		{4,5},//LED13
 		{5,6}*/ //LED11
 	//};
-	const u8 led_lookup[LED_COUNT][2]={//[0] is HIGH mat, [1] is LOW mat ////DEBUG_BROKEN
+	/*const u8 led_lookup[LED_COUNT][2]={//[0] is HIGH mat, [1] is LOW mat ////DEBUG_BROKEN
 		{4,3},{3,4},{0,5},{0,4},{0,3},{0,1},//reds
 		{5,3},{3,5},{0,6},{1,4},{1,3},{0,2},//greens
 		{6,3},{3,6},{1,6},{2,4},{2,3},{1,2},//blues
@@ -372,7 +380,7 @@ void set_led_on(u8 led_index)
 		{4,6},//LED12
 		{4,5},//LED13
 		{5,6} //LED11
-	};
+	};*/
 	set_mat(led_lookup[led_index][0],1);
 	//if(led_index!=DEBUG_LED) set_mat(led_lookup[led_index][0],1);
 	if(led_index!=DEBUG_LED_INDEX) set_mat(led_lookup[led_index][1],0); //DEBUG_BROKEN
@@ -386,7 +394,7 @@ void set_mat(u8 mat_index,bool is_high)
 {
 	GPIO_TypeDef* GPIOx;
 	GPIO_Pin_TypeDef GPIO_Pin;
-	/*if(mat_index==0)
+	if(mat_index==0)
 	{
 		GPIOx=GPIOC;
 		GPIO_Pin=GPIO_PIN_3;
@@ -420,8 +428,18 @@ void set_mat(u8 mat_index,bool is_high)
 	{
 		GPIOx=GPIOA;
 		GPIO_Pin=GPIO_PIN_3;
-	}*/
+	}
 	switch(mat_index)//DEBUG_BROKEN
+	{
+		case 0:  GPIOx=GPIOC; GPIO_Pin=GPIO_PIN_3; break;
+		case 1:  GPIOx=GPIOC; GPIO_Pin=GPIO_PIN_4; break;
+		case 2:  GPIOx=GPIOC; GPIO_Pin=GPIO_PIN_5; break;
+		case 3:  GPIOx=GPIOC; GPIO_Pin=GPIO_PIN_6; break;
+		case 4:  GPIOx=GPIOC; GPIO_Pin=GPIO_PIN_7; break;
+		case 5:  GPIOx=GPIOD; GPIO_Pin=GPIO_PIN_2; break;
+		default: GPIOx=GPIOA; GPIO_Pin=GPIO_PIN_3; break;
+	}
+	/*switch(mat_index)//DEBUG_BROKEN
 	{
 		case 0:  GPIOx=GPIOD; GPIO_Pin=GPIO_PIN_4; break;
 		case 1:  GPIOx=GPIOD; GPIO_Pin=GPIO_PIN_2; break;
@@ -431,46 +449,6 @@ void set_mat(u8 mat_index,bool is_high)
 		case 5:  GPIOx=GPIOC; GPIO_Pin=GPIO_PIN_4; break;
 		case 6:  GPIOx=GPIOC; GPIO_Pin=GPIO_PIN_3; break;
 		default: GPIOx=GPIOA; GPIO_Pin=GPIO_PIN_3; break;
-	}
-	/*if(mat_index==0)
-	{
-		GPIOx=GPIOD;
-		GPIO_Pin=GPIO_PIN_4;
-	}
-	if(mat_index==1)
-	{
-		GPIOx=GPIOD;
-		GPIO_Pin=GPIO_PIN_2;
-	}
-	if(mat_index==2)
-	{
-		GPIOx=GPIOC;
-		GPIO_Pin=GPIO_PIN_7;
-	}
-	if(mat_index==3)
-	{
-		GPIOx=GPIOC;
-		GPIO_Pin=GPIO_PIN_6;
-	}
-	if(mat_index==4)
-	{
-		GPIOx=GPIOC;
-		GPIO_Pin=GPIO_PIN_5;
-	}
-	if(mat_index==5)
-	{
-		GPIOx=GPIOC;
-		GPIO_Pin=GPIO_PIN_4;
-	}
-	if(mat_index==6)
-	{
-		GPIOx=GPIOC;
-		GPIO_Pin=GPIO_PIN_3;
-	}
-	if(mat_index==7)
-	{
-		GPIOx=GPIOA;
-		GPIO_Pin=GPIO_PIN_3;
 	}*/
 	if(is_high) GPIOx->ODR |= (uint8_t)GPIO_Pin;
 	else        GPIOx->ODR &= (uint8_t)(~(GPIO_Pin));
@@ -536,7 +514,7 @@ void set_hue_max(u8 index,u16 color)
 		color-=0x2AAB;
 	}
 	switch(iter)
-	{
+	{//less sram than a pile of if() statements
 	  case 0: red=MAX_BRIGHTNESS; green=residual; break;
 		case 1: green=MAX_BRIGHTNESS; red=MAX_BRIGHTNESS-residual; break;
 		case 2: green=MAX_BRIGHTNESS; blue=residual; break;
@@ -544,12 +522,6 @@ void set_hue_max(u8 index,u16 color)
 		case 4: blue=MAX_BRIGHTNESS; red=residual; break;
 		default: red=MAX_BRIGHTNESS; blue=MAX_BRIGHTNESS-residual; break;
 	}
-	/*if(iter==0){ red=MAX_BRIGHTNESS; green=residual; }
-	if(iter==1){ green=MAX_BRIGHTNESS; red=MAX_BRIGHTNESS-residual; }
-	if(iter==2){ green=MAX_BRIGHTNESS; blue=residual; }
-	if(iter==3){ blue=MAX_BRIGHTNESS; green=MAX_BRIGHTNESS-residual; }
-	if(iter==4){ blue=MAX_BRIGHTNESS; red=residual; }
-	if(iter==5){ red=MAX_BRIGHTNESS; blue=MAX_BRIGHTNESS-residual; }*/
 	set_rgb(index,0,red);
 	set_rgb(index,1,green);
 	set_rgb(index,2,blue);
