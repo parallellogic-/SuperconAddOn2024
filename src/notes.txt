@@ -1,0 +1,112 @@
+
+STM8 programming reference: https://hackaday.io/project/161239-stm8s-development-board
+STM8 programmer setup: https://circuitdigest.com/microcontroller-projects/getting-started-with-stm8s-using-stvd-and-cosmic-c-compiler
+Including Cosmic C license request (allow 2 business days to get a key) ref. https://github.com/NevynUK/The-Way-of-the-Register
+
+STM8S003F3P6TR processor
+https://jlcpcb.com/partdetail/C52717
+Basic white led https://jlcpcb.com/partdetail/Hubei_KentoElec-KT0603W/C2290
+
+
+copied empty project from 2023
+added in i2c lib from STM8S103F3_SPL-master
+
+TODO: blink LED
+
+--
+
+Compiling stm8s_i2c.c...
+cxstm8 +debug -pxp -no -l +mods0 -pp -i"C:\Program Files (x86)\COSMIC\FSE_Compilers\CXSTM8\Hstm8"  -clDebug\ -coDebug\ stm8s_i2c.c 
+#error cpstm8 C:\Program Files (x86)\COSMIC\FSE_Compilers\CXSTM8\Hstm8\mods0.h:1 FlexLM Feature has expired.
+stm8s_i2c.c:
+ The command: "cxstm8 +debug -pxp -no -l +mods0 -pp -i"C:\Program Files (x86)\COSMIC\FSE_Compilers\CXSTM8\Hstm8"  -clDebug\ -coDebug\ stm8s_i2c.c " has failed, the returned value is: 1
+exit code=1.
+
+luna.elf - 3 error(s), 0 warning(s)
+
+--> cosmic c license expired
+
+STVP set to STM8S003F3
+
+set from debug to release build
+
+--
+
+bug in RGB display was in the set_hue_max method - was dividing by too much and losing the fractional brightness of the target led, so only get 2-bit color in defcon badge
+nixed the precision millis() function and dropped TIM2 into 16-bit timer functionality
+
+*put yes/no/immedaite on gray/green/rey arrows in flow diagram
+star=start entry to diagram
+
+define what acryonms mean
+
+--
+
+1010 1010 1010
+ *   
+  **
+
+0.000002 sec per count
+6144 counts per frame (1024 counts at 6 leds)
+/512
+~=ms 1khz
+
+12 ms/frame --> 80 FPS
+
+---
+
+Note that Arduino and STM8 disagree on addresses accroding to chatGPT and verified in HW
+Arduino is sending on 0x30 and STM receives on 0x18.  oscope reads as 0x30
+
+Make sure the STM8 is using the correct I2C address. The Arduino sends 0x30, which corresponds to 0x18 (since the last bit is used to indicate read/write in I2C).
+
+    Shift Address: Some I2C libraries require you to shift the 7-bit address left by 1 bit when setting it up. For example, the STM8's I2C peripheral might expect 0x18 as the slave address, which is 0x30 when shifted left and combined with the R/W bit.
+
+---
+
+
+	// Check for Address Matched Event
+    if (I2C_CheckEvent(I2C_EVENT_SLAVE_RECEIVER_ADDRESS_MATCHED))
+    {
+        //registerIndex = 0;  // Reset index on address match
+        I2C_AcknowledgeConfig(I2C_ACK_CURR);
+    }
+    
+    // Check for Data Received (in Receive mode)
+    if (I2C_CheckEvent(I2C_EVENT_SLAVE_BYTE_RECEIVED))
+    {
+        /*if (registerIndex < NUM_REGISTERS)
+        {
+            i2cRegisters[registerIndex++] = I2C_ReceiveData();  // Store data into register
+        }
+        else
+        {
+            uint8_t dummy = I2C_ReceiveData();  // Receive, but ignore extra bytes
+        }*/
+				I2C_ReceiveData();//if not done, whole system locks up.  if is done, then only stm8 lcoks up
+        //I2C_AcknowledgeConfig(I2C_ACK_CURR);  // Send ACK
+    }
+    
+    // Check for Data Request (in Transmit mode)
+    if (I2C_CheckEvent(I2C_EVENT_SLAVE_TRANSMITTER_ADDRESS_MATCHED))
+    {
+        //I2C_SendData(i2cRegisters[registerIndex++]);  // Send data from the current register
+				I2C_SendData(0xDE);
+    }
+
+    // Check for Byte Transmitted (continue sending remaining data)
+    if (I2C_CheckEvent(I2C_EVENT_SLAVE_BYTE_TRANSMITTED))
+    {
+        /*if (registerIndex < NUM_REGISTERS)
+        {
+            I2C_SendData(i2cRegisters[registerIndex++]);  // Send next byte
+        }
+        else
+        {
+            I2C_SendData(0x00);  // If index exceeds, send 0s
+        }*/
+				I2C_SendData(0xAD);
+    }
+
+TODO: watchdog 
+--> watchdog has a max of 127/(16 MHz) ~= 8 milliseconds but want like 0.5 seconds
