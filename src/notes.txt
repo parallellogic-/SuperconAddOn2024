@@ -114,10 +114,20 @@ TODO: watchdog
 -- 10/14/24
 
 surprised how small it is - could have made larger for free (min size with rails is 70mm square for full color silk screen)
-white silkscreen avoce artwork on front (wasn't plaaned, presumably needed for part placement?)
+white silkscreen avoce artwork on front (wasn't planned, presumably needed for part placement?)
 cautious to break off mouse bites
 would have been better to laser cut a sample to check the scale
 barely plugged vias, minuscule light through vias, 100 mil header is clean
 rgb sillkscreen extendsd under parts - silkscreen is done before part reflow
 hard to test uart/i2c with current programmer configuration (without de-solder/re-soldering header multiple times)
-yellow color on RGB looks dirty...
+***yellow color on RGB looks dirty...
+
+- Kinda surprised how small they are.  They're the size I designed them to be, I just never made a mock-up to get an idea of the dimensions
+- They left a bit of while silkscreen around each part, which irks me a bit, I know I didn't have that in the design files (if I did, it would have come out as black).  I suspect that's a technical limitation of whatever process they use (can only get color so close to the pads or something)
+- Buttons and LEDs work, no issue
+
+***refactor debug led coming on when all others are off
+
+users think the colored gems are rockets
+
+*need a diagram illustrating what I did (design/layout) vs others (art, fab, delivery) - illustrative cartoons to show what each stage looks like
