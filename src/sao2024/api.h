@@ -6,7 +6,7 @@
 #define LED_COUNT DEBUG_LED_INDEX+WHITE_LED_COUNT+1 //6 RGB (3 LEDs each) + 12 white + 1 debug
 
 void hello_world(void);
-void setup_serial(bool is_enabled,bool is_fast_baud_rate);
+//void setup_serial(bool is_enabled,bool is_fast_baud_rate);
 bool is_application_valid(void);
 void setup_main(void);
 u32 millis(void);
@@ -26,7 +26,11 @@ u16 get_random(u16 x);
 void set_mat(u8 led_index,bool is_high);
 void set_led_on(u8 led_index);
 
-	void I2C_transaction_begin(void);
-		void I2C_transaction_end(void);
-			void I2C_byte_received(u8 u8_RxData);
-				u8 I2C_byte_write(void);
+void I2C_transaction_begin(void);
+void I2C_transaction_end(bool is_slave_txd);
+void I2C_byte_received(u8 u8_RxData);
+u8 I2C_byte_write(void);
+
+bool is_application(void);
+u8 get_developer_flag(void);
+void set_developer_flag(u8 value);

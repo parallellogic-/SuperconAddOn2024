@@ -2,7 +2,7 @@
 #include "api.h"
 #include "stm8s_i2c.h"
 #include "stm8s_gpio.h"
-#include "stm8s_uart1.h"
+//#include "stm8s_uart1.h"
 
 //time state
 u32 atomic_counter=0;
@@ -16,6 +16,7 @@ u16 pwm_sleep[2]={1,1};//[A vs B side live], how many LED LSBs to wait with LEDs
 u8 pwm_led_count[2]={1,1};//how many visible LEDs to cycle through
 u8 pwm_visible_index=0;//which led is visible this moment in time
 u8 pwm_state=0;//LSB (bit 0) is index of pwm_brightness to pull pwm info from.  bit 1 is a flag the application layer raises for the API layer to clear requesting a switch
+bool is_valid_i2c_received=0;//stay in application state until a valid i2c command is received, at which point drop out of application into developer mode
 
 //buttons
 #define BUTTON_COUNT 2
@@ -52,6 +53,11 @@ void hello_world()
 	}
 }
 
+bool is_application()
+{
+	return !is_valid_i2c_received;
+}
+
 u16 get_random(u16 x)
 {
 	u16 a=1664525;
@@ -59,22 +65,22 @@ u16 get_random(u16 x)
 	return a * x + c;
 }
 
-void setup_serial(bool is_enabled,bool is_fast_baud_rate)
+/*void setup_serial(bool is_enabled,bool is_fast_baud_rate)
 {
 	if(is_enabled)
 	{
 		GPIO_Init(GPIOD, GPIO_PIN_5, GPIO_MODE_OUT_PP_HIGH_FAST);
 		GPIO_Init(GPIOD, GPIO_PIN_6, GPIO_MODE_IN_PU_NO_IT);
-		UART1_DeInit();
-		UART1_Init(is_fast_baud_rate?57600:9600, UART1_WORDLENGTH_8D, UART1_STOPBITS_1, UART1_PARITY_NO, UART1_SYNCMODE_CLOCK_DISABLE, UART1_MODE_TXRX_ENABLE);
-		UART1_Cmd(ENABLE);
+		//UART1_DeInit();
+		//UART1_Init(is_fast_baud_rate?57600:9600, UART1_WORDLENGTH_8D, UART1_STOPBITS_1, UART1_PARITY_NO, UART1_SYNCMODE_CLOCK_DISABLE, UART1_MODE_TXRX_ENABLE);
+		//UART1_Cmd(ENABLE);
 	}else{
-		UART1_Cmd(DISABLE);
-		UART1_DeInit();
+		//UART1_Cmd(DISABLE);
+		//UART1_DeInit();
 		GPIO_Init(GPIOD, GPIO_PIN_5, GPIO_MODE_IN_PU_NO_IT);
 		GPIO_Init(GPIOD, GPIO_PIN_6, GPIO_MODE_IN_PU_NO_IT);
 	}
-}
+}*/
 
 void setup_main()
 {
@@ -95,7 +101,9 @@ void setup_main()
 	//TIM2->IER= TIM2_IER_UIE | TIM2_IER_CC1IE;// enable TIM2 interrupt
 	TIM2->IER= TIM2_IER_UIE;// enable TIM2 interrupt
 	
-	setup_serial(0,0);//disable UART
+	//setup_serial(0,0);//disable UART
+	//GPIO_Init(GPIOD, GPIO_PIN_5, GPIO_MODE_OUT_PP_HIGH_SLOW);
+	//GPIO_Init(GPIOD, GPIO_PIN_6, GPIO_MODE_OUT_PP_HIGH_SLOW);
 
 	//enable user input buttons DEBUG_BROKEN
 	GPIO_Init(GPIOD, GPIO_PIN_3, GPIO_MODE_IN_PU_NO_IT);
@@ -120,6 +128,7 @@ void update_buttons()
 {
 	u32 elapsed_pressed_ms;
 	u8 button_index;
+	if(is_valid_i2c_received) GPIO_Init(GPIOD, GPIO_PIN_6, (is_button_down(0)||is_button_down(1))?GPIO_MODE_OUT_PP_HIGH_SLOW:GPIO_MODE_OUT_PP_LOW_SLOW);
 	if(button_start_ms)
 	{
 		set_debug(255);
@@ -143,7 +152,7 @@ void update_buttons()
 }
 
 //returns true if the API has registered the requested type of event
-//use 0xFF for u8 parmaeter to apply to all
+//use 0xFF for u8 parmaeter to apply to all (all buttons and/or all types of events: long/shrot)
 //get one button or many, get short or long press, clear from event queue (pop() behavior) or not (peek() behavior)
 bool get_button_event(u8 button_index,u8 is_long,bool is_clear)
 {
@@ -173,20 +182,33 @@ bool is_button_down(u8 index)
 {
 	switch(index)
 	{
-		case 0:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_3); break; }//left button //DEBUG_BROKEN
+		case 0:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_3); break; }//left button
 		case 1:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_4); break; }//right button
-		//case 0:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_5); }//left button
-		//case 1:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_6); }//right button
-		case 2:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_1); }//SWIM IO input
+		//case 2:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_1); }//SWIM IO input
 	}
 	return 0;
 }
 
-#define MAX_BUFFER  1
+#define ADDRESS_COUNT_WRITE 6
+#define ADDRESS_COUNT_READ 8
 
-   u8 u8_My_Buffer[MAX_BUFFER];
+   u8 u8_My_Buffer[ADDRESS_COUNT_WRITE];
    u8 *u8_MyBuffp;
    u8 MessageBegin;
+
+u8 this_addr;
+bool is_developer_debug=1;
+u8 developer_flag=0;//can't call flush_leds within I2C service routine because flush waits for the LED interrupt to finish, which can't happen when inside another interrupt
+//so raise flag for developer to service interrupt
+u8 i2c_transaction_byte_count=0;
+
+u8 get_developer_flag(){ return developer_flag; }
+void set_developer_flag(u8 value)
+{
+	if(value!=0) GPIO_Init(GPIOD, GPIO_PIN_5, GPIO_MODE_OUT_PP_HIGH_SLOW);//frame_buffer_pin
+	developer_flag=value;
+	if(value==0) GPIO_Init(GPIOD, GPIO_PIN_5, GPIO_MODE_OUT_PP_LOW_SLOW);
+}
 
 // ********************** Data link function ****************************
 // * These functions must be modified according to your application neeeds *
@@ -196,30 +218,78 @@ bool is_button_down(u8 index)
 	void I2C_transaction_begin(void)
 	{
 		MessageBegin = TRUE;
+		//this_addr=0;
 	}
-	void I2C_transaction_end(void)
+	void I2C_transaction_end(bool is_slave_txd)
 	{
-		//Not used in this example
+		is_valid_i2c_received=1;
+		if(is_slave_txd)
+		{//master read from slave
+			u8_My_Buffer[2]=u8_My_Buffer[2]+1;
+		}else{//master write to slave
+			u8_My_Buffer[1]=u8_My_Buffer[1]+1;
+			switch(this_addr)
+			{
+				case 0:{
+					is_developer_debug=!is_developer_debug;
+					set_debug(is_developer_debug?0xFF:0);
+					set_developer_flag(1);
+				}break;
+				case 3:{//started at 3 and got an odd number of bytes, so last recevied byte is effective led count
+						if(i2c_transaction_byte_count>1 && u8_MyBuffp==&u8_My_Buffer[4])
+						{
+							set_developer_flag(u8_My_Buffer[3]);
+							u8_My_Buffer[3]=0;//reset the led_index register to default state
+						}
+				}break;
+				case 4:{//if did nothing but write to index 4, then set that one led (BUT NOT flush)
+					if(u8_My_Buffer[3]<LED_COUNT) pwm_brightness_buffer[u8_My_Buffer[3]]=u8_My_Buffer[4];
+				}break;
+				case 5:{//if did nothing but write to 5, then only flush
+					set_developer_flag(u8_My_Buffer[5]);//note: an excessively high value here (>>10) will cause the LEDs on the SAO to flicker notably
+				}break;
+				default: break;
+			}
+		}
+		i2c_transaction_byte_count=0;
 	}
 	void I2C_byte_received(u8 u8_RxData)
 	{
-		if (MessageBegin == TRUE  &&  u8_RxData < MAX_BUFFER) {
+		if (MessageBegin == TRUE  &&  u8_RxData < ADDRESS_COUNT_READ) {
 			u8_MyBuffp= &u8_My_Buffer[u8_RxData];
 			MessageBegin = FALSE;
+			this_addr=u8_RxData;
 		}
-    else if(u8_MyBuffp < &u8_My_Buffer[MAX_BUFFER])
-      *(u8_MyBuffp++) = u8_RxData;
+    else
+		{
+			i2c_transaction_byte_count++;
+      if(u8_MyBuffp < &u8_My_Buffer[ADDRESS_COUNT_WRITE]) *(u8_MyBuffp++) = u8_RxData;
+			if(this_addr==3 && u8_MyBuffp==&u8_My_Buffer[5])
+			{//started at 3 and got up to 5, then push one LED out and then back up two places
+				if(u8_My_Buffer[3]<LED_COUNT) pwm_brightness_buffer[u8_My_Buffer[3]]=u8_My_Buffer[4];
+				u8_MyBuffp-=2;
+			}
+		}
 	}
 	u8 I2C_byte_write(void)
 	{
-		return 0xDE;
-		if (u8_MyBuffp < &u8_My_Buffer[MAX_BUFFER])
+		if (u8_MyBuffp < &u8_My_Buffer[ADDRESS_COUNT_WRITE])
 			return *(u8_MyBuffp++);
+		else if(this_addr==6 || this_addr==7)
+		{
+			return
+				get_button_event(1,1,this_addr==7)<<5 |
+				get_button_event(0,1,this_addr==7)<<4 |
+				get_button_event(1,0,this_addr==7)<<3 |
+				get_button_event(0,0,this_addr==7)<<2 |
+				is_button_down(1)<<1 |
+				is_button_down(0);
+		}
 		else
 			return 0x00;
 	}
 
-//millisecond-ish interrupt to select which LED is ON
+//interrupt to enable the next LED ON
 @far @interrupt void TIM2_UPD_OVF_IRQHandler (void) {
 	bool buffer_index=pwm_state&0x01;//primary vs redundant side to pull data from
 	u16 sleep_counts=1;
@@ -230,10 +300,6 @@ bool is_button_down(u8 index)
 	GPIOC->CR1 &= (uint8_t)(~(GPIO_PIN_7 | GPIO_PIN_6 | GPIO_PIN_5 | GPIO_PIN_4 | GPIO_PIN_3));//float
 	GPIOD->CR1 &= (uint8_t)(~(GPIO_PIN_2));
 	GPIOA->CR1 &= (uint8_t)(~(GPIO_PIN_3));
-	
-	//GPIOD->DDR &= (uint8_t)(~(GPIO_PIN_4));
-	//GPIOD->CR1 &= (uint8_t)(~(GPIO_PIN_4));//DEBUG_BROKEN
-	
   TIM2->CR1 &= ~TIM2_CR1_CEN;  // Clear the CEN bit to stop the timer
 	if(pwm_visible_index==pwm_led_count[buffer_index])//hold all LEDs OFF at end of frame to stabalize the display brightness, regardless of how long the displayed LEDs are ON for
 	{
@@ -252,7 +318,12 @@ bool is_button_down(u8 index)
 	if(pwm_visible_index<pwm_led_count[buffer_index])
 	{
 		sleep_counts=pwm_brightness[pwm_visible_index][buffer_index];//how long to keep it ON
-		set_led_on(pwm_brightness_index[pwm_visible_index][buffer_index]);//turn ON this LED
+		if(sleep_counts==0)
+		{//catch dummy case if all LEDs are OFF and need to have one LED "ON"
+			sleep_counts=1<<10;
+		}else{
+			set_led_on(pwm_brightness_index[pwm_visible_index][buffer_index]);//turn ON this LED
+		}
 	}
 	pwm_visible_index++;
 	atomic_counter+=sleep_counts;
@@ -297,13 +368,13 @@ sr3 = I2C->SR3;
   if (sr2 & I2C_SR2_AF)
   {	
     I2C->SR2 &= ~I2C_SR2_AF;	  // clear AF
-		I2C_transaction_end();
+		I2C_transaction_end(1);
 	}
 /* Stop bit from Master  (= end of slave receive comm) */
   if (sr1 & I2C_SR1_STOPF) 
   {
     I2C->CR2 |= I2C_CR2_ACK;	  // CR2 write to clear STOPF
-		I2C_transaction_end();
+		I2C_transaction_end(0);
 	}
 /* Slave address matched (= Start Comm) */
   if (sr1 & I2C_SR1_ADDR)
@@ -345,46 +416,8 @@ void set_led_on(u8 led_index)
 		{3,5},//LED17
 		{4,5} //LED18
 	};
-	//const u8 led_lookup[LED_COUNT][2]={//[0] is HIGH mat, [1] is LOW mat //MAGIC
-	//	{0,1},{1,0},{5,0},{6,0},{6,5},{4,3},{3,4},{0,5},{0,4},{0,3},//reds
-	//	{0,2},{2,0},{5,1},{6,1},{6,4},{5,3},{3,5},{0,6},{1,4},{1,3},//greens
-	//	{1,2},{2,1},{5,2},{6,2},{5,4},{6,3},{3,6},{1,6},{2,4},{2,3},//blues
-	//	//{7,7},//debug; GND is tied low, no charlieplexing involved
-	//	{3,0},//LED6
-	//	{3,1},//LED4
-		/*{3,2},//LED5
-		{4,0},//LED14
-		{1,5},//LED8
-		{2,5},//LED9
-		{4,1},//LED10
-		{4,2},//LED16
-		{2,6},//LED17
-		{4,6},//LED12
-		{4,5},//LED13
-		{5,6}*/ //LED11
-	//};
-	/*const u8 led_lookup[LED_COUNT][2]={//[0] is HIGH mat, [1] is LOW mat ////DEBUG_BROKEN
-		{4,3},{3,4},{0,5},{0,4},{0,3},{0,1},//reds
-		{5,3},{3,5},{0,6},{1,4},{1,3},{0,2},//greens
-		{6,3},{3,6},{1,6},{2,4},{2,3},{1,2},//blues
-		{7,7},//debug; GND is tied low, no charlieplexing involved
-		{3,0},//LED6
-		{3,1},//LED4
-		{3,2},//LED5
-		{4,0},//LED14
-		{1,5},//LED8
-		{2,5},//LED9
-		{4,1},//LED10
-		{4,2},//LED16
-		{2,6},//LED17
-		{4,6},//LED12
-		{4,5},//LED13
-		{5,6} //LED11
-	};*/
 	set_mat(led_lookup[led_index][0],1);
-	//if(led_index!=DEBUG_LED) set_mat(led_lookup[led_index][0],1);
-	if(led_index!=DEBUG_LED_INDEX) set_mat(led_lookup[led_index][1],0); //DEBUG_BROKEN
-	//set_mat(led_lookup[led_index][1],0);
+	if(led_index!=DEBUG_LED_INDEX) set_mat(led_lookup[led_index][1],0);
 }
 
 //enable the high or low side of an LED
@@ -394,42 +427,7 @@ void set_mat(u8 mat_index,bool is_high)
 {
 	GPIO_TypeDef* GPIOx;
 	GPIO_Pin_TypeDef GPIO_Pin;
-	if(mat_index==0)
-	{
-		GPIOx=GPIOC;
-		GPIO_Pin=GPIO_PIN_3;
-	}
-	if(mat_index==1)
-	{
-		GPIOx=GPIOC;
-		GPIO_Pin=GPIO_PIN_4;
-	}
-	if(mat_index==2)
-	{
-		GPIOx=GPIOC;
-		GPIO_Pin=GPIO_PIN_5;
-	}
-	if(mat_index==3)
-	{
-		GPIOx=GPIOC;
-		GPIO_Pin=GPIO_PIN_6;
-	}
-	if(mat_index==4)
-	{
-		GPIOx=GPIOC;
-		GPIO_Pin=GPIO_PIN_7;
-	}
-	if(mat_index==5)
-	{
-		GPIOx=GPIOD;
-		GPIO_Pin=GPIO_PIN_2;
-	}
-	if(mat_index==6)
-	{
-		GPIOx=GPIOA;
-		GPIO_Pin=GPIO_PIN_3;
-	}
-	switch(mat_index)//DEBUG_BROKEN
+	switch(mat_index)
 	{
 		case 0:  GPIOx=GPIOC; GPIO_Pin=GPIO_PIN_3; break;
 		case 1:  GPIOx=GPIOC; GPIO_Pin=GPIO_PIN_4; break;
@@ -439,17 +437,6 @@ void set_mat(u8 mat_index,bool is_high)
 		case 5:  GPIOx=GPIOD; GPIO_Pin=GPIO_PIN_2; break;
 		default: GPIOx=GPIOA; GPIO_Pin=GPIO_PIN_3; break;
 	}
-	/*switch(mat_index)//DEBUG_BROKEN
-	{
-		case 0:  GPIOx=GPIOD; GPIO_Pin=GPIO_PIN_4; break;
-		case 1:  GPIOx=GPIOD; GPIO_Pin=GPIO_PIN_2; break;
-		case 2:  GPIOx=GPIOC; GPIO_Pin=GPIO_PIN_7; break;
-		case 3:  GPIOx=GPIOC; GPIO_Pin=GPIO_PIN_6; break;
-		case 4:  GPIOx=GPIOC; GPIO_Pin=GPIO_PIN_5; break;
-		case 5:  GPIOx=GPIOC; GPIO_Pin=GPIO_PIN_4; break;
-		case 6:  GPIOx=GPIOC; GPIO_Pin=GPIO_PIN_3; break;
-		default: GPIOx=GPIOA; GPIO_Pin=GPIO_PIN_3; break;
-	}*/
 	if(is_high) GPIOx->ODR |= (uint8_t)GPIO_Pin;
 	else        GPIOx->ODR &= (uint8_t)(~(GPIO_Pin));
 	GPIOx->DDR |= (uint8_t)GPIO_Pin;
@@ -484,9 +471,9 @@ void flush_leds(u8 led_count)
 	if(led_write_index==0)
 	{//no non-zero LEDs found, so fill in default values
 		led_write_index=1;
-		pwm_sleep[buffer_index]=6<<10;
+		pwm_sleep[buffer_index]=1<<10;
 		pwm_brightness_index[0][buffer_index]=DEBUG_LED_INDEX;
-		pwm_brightness[0][buffer_index]=1;
+		pwm_brightness[0][buffer_index]=0;
 	}
 	pwm_led_count[buffer_index]=led_write_index;//save the led count for the volatile pwm routine state machine.
 	//note: user may have requeted more LEDs to be lit then are actually there, so use the found LED count (leds>0 brightness), led_write_index,

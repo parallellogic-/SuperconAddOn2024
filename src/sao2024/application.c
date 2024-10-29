@@ -20,7 +20,7 @@ void run_application()
 	bool is_target_element_placed;//for cycle, is_reverse_direction
 	//setup_application();
 	get_button_event(0xFF,0xFF,1);//clear_button_events();
-	while(1)
+	while(is_application())
 	{
 		effective_led_count=1;//default empty list
 		is_new_state=0;//flag to signify a new state has been entered
