@@ -28,8 +28,8 @@ bool button_pressed_event[BUTTON_COUNT][2];//event flag registering a button pus
 
 void hello_world()
 {//basic program that blinks the debug LED ON/OFF
-	const u8 cycle_speed=8;//larger=faster
-	const u8 white_speed=5;//smaller=faster
+	const u8 cycle_speed=10;//larger=faster
+	const u8 white_speed=2;//smaller=faster
 	u16 frame=0;
 	while(0)
 	{
@@ -48,7 +48,8 @@ void hello_world()
 		set_hue_max(5,(frame<<cycle_speed)+0xD554);
 		//set_debug(  (frame>>6)&0x01?(~(frame<<2)):(frame<<2));
 		//set_white((frame>>6)%12,(millis()/1024)&0x01?0xFF:0);
-		set_white((frame>>(white_speed+1))%12,(frame>>white_speed)&0x01?(~(frame<<(8-white_speed))):(frame<<(8-white_speed)));
+		//set_white((frame>>(white_speed+1))%12,(frame>>white_speed)&0x01?(~(frame<<(8-white_speed))):(frame<<(8-white_speed)));
+		set_white((frame>>(white_speed+1))%12,0xFF);
 		flush_leds(7);
 	}
 }
@@ -88,7 +89,7 @@ void setup_main()
 	//CLK->CKDIVR |= (uint8_t)CLK_PRESCALER_HSIDIV1;
 	//CLK_HSIPrescalerConfig(CLK_PRESCALER_HSIDIV1);  // Set clock speed
 	
-	//GPIO_Init(GPIOD, GPIO_PIN_1, GPIO_MODE_IN_PU_NO_IT);//SWIM input to choose between application and developer modes
+	GPIO_Init(GPIOD, GPIO_PIN_1, GPIO_MODE_IN_PU_NO_IT);//SWIM input to choose between application and developer modes
 	
 	//configure LED interrupt on TIM2
 	//run pwm interrupt at ~2.000 kHz period (to allow for >40 Hz frames with all LEDs ON)
@@ -122,13 +123,23 @@ u32 millis()
 	return atomic_counter>>9;//TIM2->PSCR + shift = 14
 }
 
+void update_developer_gpio()
+{
+	if(is_valid_i2c_received)
+		GPIO_Init(GPIOD, GPIO_PIN_5, (
+				get_button_event(0xFF,0xFF,0) |
+				is_button_down(1) |
+				is_button_down(0)
+			)?GPIO_MODE_OUT_PP_HIGH_SLOW:GPIO_MODE_OUT_PP_LOW_SLOW);
+}
+
 //log short or long press button events for application layer to use as user input
 //PRECON: don't press buttons at the same time (state machine gets confused).  Leveraging just one u32 to store timestamp of button press start to conserve memory
 void update_buttons()
 {
 	u32 elapsed_pressed_ms;
 	u8 button_index;
-	if(is_valid_i2c_received) GPIO_Init(GPIOD, GPIO_PIN_6, (is_button_down(0)||is_button_down(1))?GPIO_MODE_OUT_PP_HIGH_SLOW:GPIO_MODE_OUT_PP_LOW_SLOW);
+	update_developer_gpio();
 	if(button_start_ms)
 	{
 		set_debug(255);
@@ -152,7 +163,7 @@ void update_buttons()
 }
 
 //returns true if the API has registered the requested type of event
-//use 0xFF for u8 parmaeter to apply to all (all buttons and/or all types of events: long/shrot)
+//use 0xFF for u8 parmaeter to apply to all (all buttons and/or all types of events: long/shrot) - result will be OR'd together
 //get one button or many, get short or long press, clear from event queue (pop() behavior) or not (peek() behavior)
 bool get_button_event(u8 button_index,u8 is_long,bool is_clear)
 {
@@ -184,7 +195,7 @@ bool is_button_down(u8 index)
 	{
 		case 0:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_3); break; }//left button
 		case 1:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_4); break; }//right button
-		//case 2:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_1); }//SWIM IO input
+		case 2:{ return !GPIO_ReadInputPin(GPIOD, GPIO_PIN_1); }//SWIM IO input
 	}
 	return 0;
 }
@@ -205,9 +216,9 @@ u8 i2c_transaction_byte_count=0;
 u8 get_developer_flag(){ return developer_flag; }
 void set_developer_flag(u8 value)
 {
-	if(value!=0) GPIO_Init(GPIOD, GPIO_PIN_5, GPIO_MODE_OUT_PP_HIGH_SLOW);//frame_buffer_pin
+	if(value!=0) GPIO_Init(GPIOD, GPIO_PIN_6, GPIO_MODE_OUT_PP_HIGH_SLOW);//frame_buffer_pin
 	developer_flag=value;
-	if(value==0) GPIO_Init(GPIOD, GPIO_PIN_5, GPIO_MODE_OUT_PP_LOW_SLOW);
+	if(value==0) GPIO_Init(GPIOD, GPIO_PIN_6, GPIO_MODE_OUT_PP_LOW_SLOW);
 }
 
 // ********************** Data link function ****************************
@@ -277,11 +288,13 @@ void set_developer_flag(u8 value)
 			return *(u8_MyBuffp++);
 		else if(this_addr==6 || this_addr==7)
 		{
+			update_developer_gpio();
 			return
-				get_button_event(1,1,this_addr==7)<<5 |
-				get_button_event(0,1,this_addr==7)<<4 |
-				get_button_event(1,0,this_addr==7)<<3 |
-				get_button_event(0,0,this_addr==7)<<2 |
+				get_button_event(1,1,this_addr==7)<<7 |
+				get_button_event(0,1,this_addr==7)<<6 |
+				get_button_event(1,0,this_addr==7)<<5 |
+				get_button_event(0,0,this_addr==7)<<4 |
+				is_button_down(2)<<2 |
 				is_button_down(1)<<1 |
 				is_button_down(0);
 		}

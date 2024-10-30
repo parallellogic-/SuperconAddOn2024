@@ -6,8 +6,7 @@
 int main()
 {
 	setup_main();
-	//hello_world();
-	//if(0 || is_button_down(0) || is_button_down(1)) run_developer();//DEBUG_BROKEN default to developer mode
+	if(is_button_down(0) || is_button_down(1)) hello_world();
 	run_application();
 	run_developer();
 	return 0;

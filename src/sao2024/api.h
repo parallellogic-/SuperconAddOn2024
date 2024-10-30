@@ -34,3 +34,4 @@ u8 I2C_byte_write(void);
 bool is_application(void);
 u8 get_developer_flag(void);
 void set_developer_flag(u8 value);
+void update_developer_gpio(void);
