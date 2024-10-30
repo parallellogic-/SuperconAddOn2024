@@ -26,6 +26,19 @@ bool button_pressed_event[BUTTON_COUNT][2];//event flag registering a button pus
 #define BUTTON_LONG_PRESS_MS 512 //number of millisconds to consititue a long press rather than a short press
 #define BUTTON_MINIMUM_PRESS_MS 50 //minimum time a button needs to be pressed down to be registered as a complete button press
 
+//I2C
+#define ADDRESS_COUNT_WRITE 7
+#define ADDRESS_COUNT_READ 9
+u8 u8_My_Buffer[ADDRESS_COUNT_WRITE];
+u8 *u8_MyBuffp;
+u8 MessageBegin;
+u8 this_addr;
+bool is_developer_debug=1;
+u8 developer_flag=0;//can't call flush_leds within I2C service routine because flush waits for the LED interrupt to finish, which can't happen when inside another interrupt
+//so raise flag for developer to service interrupt
+u8 i2c_transaction_byte_count=0;
+
+
 void hello_world()
 {//basic program that blinks the debug LED ON/OFF
 	const u8 cycle_speed=10;//larger=faster
@@ -115,6 +128,7 @@ void setup_main()
 	I2C_Init(100000, I2C_SLAVE_ADDRESS_DEFAULT<<1, I2C_DUTYCYCLE_2, I2C_ACK_CURR, I2C_ADDMODE_7BIT, 16);
 	I2C_ITConfig(I2C_IT_EVT | I2C_IT_BUF | I2C_IT_ERR, ENABLE);  // Enable I2C interrupts
 	I2C_Cmd(ENABLE);
+	u8_My_Buffer[6]=0x03;//setup the default behavior of the button output interrupts
 	enableInterrupts();  // Enable global interrupts
 }
 
@@ -125,12 +139,10 @@ u32 millis()
 
 void update_developer_gpio()
 {
+	bool is_instantaneous=(u8_My_Buffer[6]&0x01)&&(is_button_down(1) | is_button_down(0));
+	bool is_event        =(u8_My_Buffer[6]&0x02)&&(get_button_event(0xFF,0xFF,0));
 	if(is_valid_i2c_received)
-		GPIO_Init(GPIOD, GPIO_PIN_5, (
-				get_button_event(0xFF,0xFF,0) |
-				is_button_down(1) |
-				is_button_down(0)
-			)?GPIO_MODE_OUT_PP_HIGH_SLOW:GPIO_MODE_OUT_PP_LOW_SLOW);
+		GPIO_Init(GPIOD, GPIO_PIN_5, ( is_instantaneous | is_event )?GPIO_MODE_OUT_PP_HIGH_SLOW:GPIO_MODE_OUT_PP_LOW_SLOW);
 }
 
 //log short or long press button events for application layer to use as user input
@@ -199,19 +211,6 @@ bool is_button_down(u8 index)
 	}
 	return 0;
 }
-
-#define ADDRESS_COUNT_WRITE 6
-#define ADDRESS_COUNT_READ 8
-
-   u8 u8_My_Buffer[ADDRESS_COUNT_WRITE];
-   u8 *u8_MyBuffp;
-   u8 MessageBegin;
-
-u8 this_addr;
-bool is_developer_debug=1;
-u8 developer_flag=0;//can't call flush_leds within I2C service routine because flush waits for the LED interrupt to finish, which can't happen when inside another interrupt
-//so raise flag for developer to service interrupt
-u8 i2c_transaction_byte_count=0;
 
 u8 get_developer_flag(){ return developer_flag; }
 void set_developer_flag(u8 value)
@@ -286,15 +285,15 @@ void set_developer_flag(u8 value)
 	{
 		if (u8_MyBuffp < &u8_My_Buffer[ADDRESS_COUNT_WRITE])
 			return *(u8_MyBuffp++);
-		else if(this_addr==6 || this_addr==7)
+		else if(this_addr==7 || this_addr==8)
 		{
 			update_developer_gpio();
 			return
-				get_button_event(1,1,this_addr==7)<<7 |
-				get_button_event(0,1,this_addr==7)<<6 |
-				get_button_event(1,0,this_addr==7)<<5 |
-				get_button_event(0,0,this_addr==7)<<4 |
-				is_button_down(2)<<2 |
+				get_button_event(1,1,this_addr==8)<<7 |
+				get_button_event(0,1,this_addr==8)<<6 |
+				get_button_event(1,0,this_addr==8)<<5 |
+				get_button_event(0,0,this_addr==8)<<4 |
+				is_button_down(2)<<2 |//returns 1 if the SWIM pin is grounded
 				is_button_down(1)<<1 |
 				is_button_down(0);
 		}

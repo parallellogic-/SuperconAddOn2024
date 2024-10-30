@@ -38,11 +38,24 @@ void loop_slow()
 
 void api_read_buttons()
 {
-  uint8_t read_reg=6;
+  uint8_t set_button_interrupts=4;
+  uint8_t read_reg=7;
   if(Serial.available())
   {//user command to clear events
-    read_reg=7;
-    Serial.read();
+    read_reg=8;
+    switch(Serial.read())
+    {
+      case '0': set_button_interrupts=0; break;//nothing triggers button interrupts
+      case '1': set_button_interrupts=1; break;//interrupt only echos instantaneous button state (low for no presses, high for presses)
+      case '2': set_button_interrupts=2; break;//interrupt only is high when there is a complete event (short or long on either button) ready
+      case '3': set_button_interrupts=3; break;//combo of 1 and 2 (high for either instantanous or event ready)
+    }
+    if(set_button_interrupts<4)
+    {
+      buff[0]=set_button_interrupts;
+      buff_len=1;
+      writeToRegister(6);
+    }
   }
   readFromRegister(read_reg,1);
   
