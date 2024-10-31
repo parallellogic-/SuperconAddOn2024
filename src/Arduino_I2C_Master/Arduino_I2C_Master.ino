@@ -1,23 +1,33 @@
-#include <Wire.h>
-#define SLAVE_ADDRESS 0x30  // STM8 slave address
+//the following code is an example i2c master that demonstrates how to write to the LEDs and read the button states
+//will print "START" to the terminal and then will be begin one of the two demos included:
+//loop_slow() will use one-byte-at-a-time transactions to set each LED
+//loop_fast() will use a multi-byte transaction to set and flush all LEDs at once (and will wait for frame to finish before immediatley sending another one), ~80 FPS
 
-uint8_t buff[257];
-uint8_t buff_len=0;
-int frame=0;
+//connections: SDA, SCL, 3V3, GND.  For loop_fast(), connect the SAO RX pin, (SAO GPIO1) to FRAME_INTERRUPT_PIN on the ARDINO
+//NOTE: GPIO0 and GPIO1 are floating by default.  Events will only be flagged (output from SAO36) once a valid I2C transaction has been received
+
+#include <Wire.h>
+#define SLAVE_ADDRESS 0x30  // SAO slave address
+
+uint8_t buff[257];//array to hold data going to /fram the SAO
+uint8_t buff_len=0;//length of array
+int frame=0;//frame counter tracking how many frames have been sent to the SAO
+const int FRAME_INTERRUPT_PIN=3;
 
 void setup()
 {
     Wire.begin();          // Initialize I2C as master
-    Serial.begin(1000000);    // Initialize Serial for debug output
+    Serial.begin(1000000);    // Initialize Serial for debug output, note that low-end processors may need a lower speed baud rate
     delay(4000);//ensure PC has serial monitor visible
     Serial.println("START");
     pinMode(LED_BUILTIN,OUTPUT);
-    pinMode(3,INPUT);
+    pinMode(FRAME_INTERRUPT_PIN,INPUT);//monitor frame-done interrupt (HIGH when SAO is busy, LOW when frame hrendering has completed)
 }
 
 void loop()
-{
-  loop_fast();
+{//choose which demo to see
+  //loop_slow();//toggles between 3 red LEDs ON, and 3 green LEDs ON, every second
+  loop_fast();//fades all 6 red LEDs in/out, then fades green in/out, then blue, then repeats
 }
 
 void loop_fast()
@@ -30,34 +40,34 @@ void loop_fast()
 void loop_slow()
 {
   digitalWrite(LED_BUILTIN,0);
-  api_write_leds();
-  delay(500);  // Wait for a second before repeating
+  api_write_leds_slow();
+  delay(500);  // Wait before repeating
   digitalWrite(LED_BUILTIN,1);
-  delay(500);  // Wait for a second before repeating
+  delay(500);  // Wait before repeating
 }
 
 void api_read_buttons()
 {
-  uint8_t set_button_interrupts=4;
-  uint8_t read_reg=7;
+  uint8_t set_button_interrupts=4;//apriori invalid value, will be set to valid value later.  This is the button interrupt config register value
+  uint8_t read_reg=7;//read button state from this register
   if(Serial.available())
   {//user command to clear events
-    read_reg=8;
+    read_reg=8;//if a serial command is seen, then read buttons from one address high, which clears the button event flags (clear short/long press event flags)
     switch(Serial.read())
     {
-      case '0': set_button_interrupts=0; break;//nothing triggers button interrupts
-      case '1': set_button_interrupts=1; break;//interrupt only echos instantaneous button state (low for no presses, high for presses)
+      case '0': set_button_interrupts=0; break;//nothing triggers button interrupt
+      case '1': set_button_interrupts=1; break;//interrupt only echos instantaneous button state (low for no presses, high for any press)
       case '2': set_button_interrupts=2; break;//interrupt only is high when there is a complete event (short or long on either button) ready
-      case '3': set_button_interrupts=3; break;//combo of 1 and 2 (high for either instantanous or event ready)
+      case '3': set_button_interrupts=3; break;//combo of 1 and 2 above (high for either instantanous or event-ready)
     }
     if(set_button_interrupts<4)
-    {
-      buff[0]=set_button_interrupts;
+    {//if there is a valid command to change the button interrupt behavior, execute the request here
+      buff[0]=set_button_interrupts;//new button interrupt setting
       buff_len=1;
-      writeToRegister(6);
+      writeToRegister(6);//register that holds the interrupt setting
     }
   }
-  readFromRegister(read_reg,1);
+  readFromRegister(read_reg,1);//query SAO for button state (and clear events if desired)
   
   Serial.print("Read Device: 0x");
   Serial.print(SLAVE_ADDRESS, HEX);
@@ -67,10 +77,16 @@ void api_read_buttons()
   for(int iter=0;iter<buff_len;iter++)
   {
     Serial.print(" 0b");
-    //Serial.print(buff[iter], BIN);
     for (int rep = 7; rep >= 0; rep--) {
-    // Shift the bits to the right and mask with 1 to get the specific bit
-    Serial.print((buff[iter] >> rep) & 1);
+      Serial.print((buff[iter] >> rep) & 1);
+      //bit 0 (LSB) is left button instantaneous state
+      //bit 1 is right button
+      //bit 2 is SWIM pin state
+      //bit 3 is unused
+      //bit 4 is left button short press event flag
+      //bit 5 is right button short press flag
+      //bit 6 is left button long press flag
+      //bit 7 (MSB) is right button long press flag
     }
   }
   Serial.println();
@@ -78,79 +94,53 @@ void api_read_buttons()
 
 void api_write_leds_continuous()
 {
-  if(digitalRead(3)) return;//wait while SAO is still working on last command
+  if(digitalRead(FRAME_INTERRUPT_PIN)) return;//wait while SAO is still working on last command (let it finish rendering the last frame to avoid overwriting data)
   frame++;
-  uint8_t write_reg=3;
-  long tms=millis()>>2;
-  int count=0;
-  int loop_count=6;
-  //int color_offset=6;
-  //if((tms>>9)&0x01) color_offset=0;
-  int color_offset=((tms>>9)%3)*6;
+  uint8_t write_reg=3;//register where to stream LED info to
+  long tms=millis()>>2;//for demo purposes, use time as a state machine to determine what pattern to display
+  int count=0;//LED index
+  int loop_count=6;//number of LED LEDs to light up
+  int color_offset=((tms>>9)%3)*6;//cycle through each of the three colors in RGB
   for(int iter=0;iter<loop_count;iter++)
   {
-    buff[iter*2]=iter+color_offset;
-    //buff[iter*2+1]=(tms>>iter)&0x01?0xFF:0x00;
-    buff[iter*2+1]=((tms>>8)&0x01?~tms:tms)&0x000000FF;//(frame%2)?0xFF:0x00;
-    if(buff[iter*2+1]) count++;
+    buff[iter*2]=iter+color_offset;//after each fade in/out, proceed to the next RGB color
+    buff[iter*2+1]=((tms>>8)&0x01?~tms:tms)&0x000000FF;//fade in/out the LED brightness - all LEDs are given the same brightness in this demo
+    if(buff[iter*2+1]) count++;//count up the number of LEDs iluminated
   }
-  buff[loop_count*2]=loop_count;
+  buff[loop_count*2]=loop_count;//last byte of transaction is the number of LEDs (transaction must be an odd number of bytes to auto-trigger the led_flush function)
   buff_len=loop_count*2+1;
   writeToRegister(write_reg);
-  //delayMicroseconds(1000);
-  //delay(10);
   api_read_buttons();
   Serial.print("Frame: ");
   Serial.println(frame);
 }
 
-void api_write_leds()
-{
-  uint8_t write_reg=3;
-  if(millis()%2000>1000)
-  {
-    buff[0]=0;
-    buff[1]=255;//LED buff[0] brightness
-    buff[2]=1;
-    buff[3]=147;//LED buff[1] brightness
-    buff[4]=2;
-    buff[5]=32;//LED buff[2] brightness
-    buff[6]=3;//effective number of LEDs illuminated
-    buff_len=7;//number of bytes of above message
-  }else{
-    buff[0]=0+6;
-    buff[1]=255;//LED buff[0] brightness
-    buff[2]=1+6;
-    buff[3]=147;//LED buff[1] brightness
-    buff[4]=2+6;
-    buff[5]=32;//LED buff[2] brightness
-    buff[6]=3;//effective number of LEDs illuminated
-    buff_len=7;//number of bytes of above message
-  }
-  writeToRegister(write_reg);
-  Serial.print("Write Device: 0x");
-  Serial.print(SLAVE_ADDRESS, HEX);
-  Serial.print(" | Write Register: 0x");
-  Serial.print(write_reg, HEX);
-  Serial.print(" | Write value:");
-  for(int iter=0;iter<buff_len;iter++)
-  {
-    Serial.print(" 0x");
-    Serial.print(buff[iter], HEX);
-  }
+//alternately illuminate red LEDs ad different rbightenesses, or green LEDs
+void api_write_leds_slow()
+{//this appraoch is slow because it entails a different transaction for each LED index, brightness, and flush operation.  The stream operation performed in the api_write_leds_continuous() method above is faster because all data is written and set in a single i2c transaction
+  buff_len=1;
+  uint8_t rg=0;
+  if(millis()%2000>1000) rg=6;//every other second, change between green and red
+  //write 
+  buff[0]=0+rg; writeToRegister(3); Serial.print("Write Device: 0x"); Serial.print(SLAVE_ADDRESS, HEX); Serial.print(" | Write Register: 0x"); Serial.print(3, HEX); Serial.print(" | Write value:"); Serial.println(buff[0], HEX);//first LED index
+  buff[0]=255;  writeToRegister(4); Serial.print("Write Device: 0x"); Serial.print(SLAVE_ADDRESS, HEX); Serial.print(" | Write Register: 0x"); Serial.print(4, HEX); Serial.print(" | Write value:"); Serial.println(buff[0], HEX);//first LED brightness
+  buff[0]=1+rg; writeToRegister(3); Serial.print("Write Device: 0x"); Serial.print(SLAVE_ADDRESS, HEX); Serial.print(" | Write Register: 0x"); Serial.print(3, HEX); Serial.print(" | Write value:"); Serial.println(buff[0], HEX);
+  buff[0]=147;  writeToRegister(4); Serial.print("Write Device: 0x"); Serial.print(SLAVE_ADDRESS, HEX); Serial.print(" | Write Register: 0x"); Serial.print(4, HEX); Serial.print(" | Write value:"); Serial.println(buff[0], HEX);
+  buff[0]=2+rg; writeToRegister(3); Serial.print("Write Device: 0x"); Serial.print(SLAVE_ADDRESS, HEX); Serial.print(" | Write Register: 0x"); Serial.print(3, HEX); Serial.print(" | Write value:"); Serial.println(buff[0], HEX);//last LED index
+  buff[0]=32;   writeToRegister(4); Serial.print("Write Device: 0x"); Serial.print(SLAVE_ADDRESS, HEX); Serial.print(" | Write Register: 0x"); Serial.print(4, HEX); Serial.print(" | Write value:"); Serial.println(buff[0], HEX);//last LED brightness
+  buff[0]=3;    writeToRegister(5);//number of effective LEDs illuminated.  writing this value to the SAO flushes the LED buffer to the live display.  writing this multiple times will flush the display multiple times, leading to a blank display
   Serial.println();
 }
 
 void api_toggle_debug()
 {
-  uint8_t write_reg=0;
-  uint8_t read_reg=1;
-  //uint8_t write_value='a';
-  buff[0]='a';
+  uint8_t write_reg=0;//the first register is a place for dummy read/writes (will echo back the data written to it when read), and will toggle the debug LED on each read or write operation
+  uint8_t read_reg=1;//registers 1 and 2 are a counter of the number of read and write operations performed (note 255 roll-over)
+  buff[0]='a';//dummy data to write
   buff_len=1;
   writeToRegister(write_reg);
-  delayMicroseconds(150);
-  uint8_t readBackData = readFromRegister(read_reg,2);
+  delayMicroseconds(150);//allow a gap to separate the i2c transactions on the oscope
+  readFromRegister(read_reg,2);//read 2 bytes: the number of read and write operations performed.  Note: a write transaction contails of one write (setting the address) and read (reading the data back)
   // Print the written and read-back values to the serial monitor
   Serial.print("Write Device: 0x");
   Serial.print(SLAVE_ADDRESS, HEX);
@@ -176,63 +166,15 @@ void api_toggle_debug()
   Serial.println();
 }
 
-/*void comm_test()
-{
-    uint8_t registerAddress = 0x0E;  // Example register address
-    uint8_t dataToWrite = 0x55;      // Example data to write (0x55)
-
-    // Write data to the register
-    writeToRegister(registerAddress, dataToWrite);
-
-    // Small delay to ensure the slave processes the write
-    //delay(1);
-    delayMicroseconds(100);
-
-    // Read the data back from the same register
-    uint8_t readBackData = readFromRegister(registerAddress);
-
-
-
-    // Print the written and read-back values to the serial monitor
-    Serial.print("Written Data: 0x");
-    Serial.print(dataToWrite, HEX);
-    Serial.print(" | Read Back Data: 0x");
-    Serial.print(readBackData, HEX);
-    Serial.println();
-
-}*/
-
 void writeToRegister(uint8_t registerAddress)
 {
     Wire.beginTransmission(SLAVE_ADDRESS);  // Begin transmission to the STM8
     Wire.write(registerAddress);            // Specify the register to write to
-    for(int iter=0;iter<buff_len;iter++)
-    {
-      Wire.write(buff[iter]);                       // Write the data byte
-    }
-    //Wire.write(data+1);                       // Write the data byte
+    for(int iter=0;iter<buff_len;iter++) Wire.write(buff[iter]); // Write the data bytes
     Wire.endTransmission();                 // End the transmission
 }
-/*uint8_t readFromRegister(uint8_t registerAddress)
-{
-    Wire.beginTransmission(SLAVE_ADDRESS);  // Begin transmission to the STM8
-    Wire.write(registerAddress);            // Specify the register to read from
-    //Wire.endTransmission(false);            // End transmission, but send a repeated start condition
-    Wire.endTransmission();            // End transmission
-    
-    Wire.requestFrom(SLAVE_ADDRESS, 1);     // Request 1 byte of data from the slave
-    while (Wire.available() == 0);          // Wait until data is available
-    
-    return Wire.read();                     // Read the data byte
-}*/
-/*void writeByteToSensor(uint8_t reg, uint8_t value) {
-    Wire.beginTransmission(SENSOR_ADDR);  // Start communication with the sensor
-    Wire.write(reg);                       // Send the register address
-    Wire.write(value);                     // Send the value to write
-    Wire.endTransmission();                // End the transmission
-}*/
 
-uint8_t readFromRegister(uint8_t reg,uint8_t byte_count) {
+void readFromRegister(uint8_t reg,uint8_t byte_count) {
     Wire.beginTransmission(SLAVE_ADDRESS);  // Start communication with the sensor
     Wire.write(reg);                       // Send the register address
     Wire.endTransmission();                // End transmission, but keep the connection alive
@@ -244,7 +186,5 @@ uint8_t readFromRegister(uint8_t reg,uint8_t byte_count) {
     while (Wire.available()) {
         buff[buff_len]=Wire.read();
         buff_len++;
-        //out=Wire.read();                // Read and return the received byte
     }
-    return 0; // Return 0 if no data was received
 }
