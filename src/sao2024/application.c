@@ -6,22 +6,21 @@
 
 void run_application()
 {
-	u8 new_game_state=0,old_game_state=255;
+	u8 new_game_state=0,old_game_state=255;//stately jump-to statements
 	u8 iter;
-	bool is_new_state=1;
-	u32 game_state_start_ms;
+	bool is_new_state=1;//flag to signify a new state has been entered
+	u32 game_state_start_ms;//amount of time spent in the current state (set animations to always proceed from 0)
 	u32 game_state_elapsed_ms;
-	u8 effective_led_count=1;//two leds ON at half brightness (duration) = 1 effective LED
+	u8 effective_led_count=1;//two leds ON at 180 (255/sqrt(2)) brightness (duration) = 1 effective LED
 	u8 target_pattern[RGB_LED_COUNT];//generate a random pattern.  value is the level (order) each element appears in 0-5
 	u8 level_fractional_progress;//how many leds have been lit up in the current level
-	u8 cursor;
-	u8 game_level;
+	u8 cursor;//where the user is curently poitning
+	u8 game_level;//games have 6 levels to beat in order to win
 	u8 submenu_index;
-	bool is_target_element_placed;//for cycle, is_reverse_direction
-	//setup_application();
-	get_button_event(0xFF,0xFF,1);//clear_button_events();
+	bool is_target_element_placed;//for cyclone, is_reverse_direction
+	get_button_event(0xFF,0xFF,1);//clear button events before starting
 	while(is_application())
-	{
+	{//if a valid i2c command is received (handled by an interrupt), exit application
 		effective_led_count=1;//default empty list
 		is_new_state=0;//flag to signify a new state has been entered
 		if(new_game_state!=old_game_state)
@@ -31,10 +30,6 @@ void run_application()
 			old_game_state=new_game_state;
 		}
 		game_state_elapsed_ms=millis()-game_state_start_ms;
-		//flush_leds(set_frame_rainbow()+1);
-		//flush_leds(set_sparkles(1));
-		//flush_leds(set_sparkles(1)+set_frame_rainbow()-1);
-		//flush_leds(set_frame_rainbow()+set_white_test()-1);
 		switch(new_game_state)
 		{
 			case 0:{//Idle waiting for user input...
@@ -64,7 +59,7 @@ void run_application()
 				}
 				if(get_button_event(0xFF,1,1)) new_game_state=6;//start cyclone game by long pressing the buttons
 			}break;
-			case 1:{//show the target pattern, standby for user input
+			case 1:{//show the target simon says pattern, standby for user input
 				//display the target pattern to the user
 				for(iter=0;iter<RGB_LED_COUNT;iter++)
 				{
@@ -74,7 +69,6 @@ void run_application()
 					}
 				}
 				effective_led_count=6;
-				//effective_led_count=set_frame_rainbow();
 				if(get_button_event(0xFF,0,1)) new_game_state=2;
 				if(get_button_event(0xFF,1,1)) new_game_state=6;
 			}break;
@@ -169,7 +163,7 @@ void run_application()
 }
 
 void set_element_hue(u8 led_index,u8 color_index)
-{
+{//match LED color to *color* silkscreen
 	u16 color;
 	switch(color_index){
 		case 5: set_rgb(led_index,0,146);//dirty white
@@ -186,7 +180,7 @@ void set_element_hue(u8 led_index,u8 color_index)
 }
 
 u8 show_screensaver(u8 screensaver_index)
-{
+{//reward for winning games is to cycle through various screensavers
 	switch(screensaver_index%SCREENSAVER_COUNT)
 	{
 		case 1: return set_frame_rainbow(0)+set_sparkles(0);
@@ -217,14 +211,11 @@ u8 set_sparkles(bool is_fireworks)
 	u16 state;
 	for(iter=0;iter<WHITE_LED_COUNT;iter++)
 	{
-		//set_white(iter,(millis()>>(8+iter))&0x01?0xFF:0);
 		state=(iter<<9)+millis();//randomize start phasing, and incremetn state in time
 		state-=millis()>>(2+(iter&0x03));//randomize the state progression rates
 		state+=millis()>>(2+((iter>>2)&0x02));
-		//if(!((state>>11)&(is_fireworks?0x01:0x03)))//only ON 25% of the time for standard, dim ON 50% of the dime for fireworks
 		if(!(state&(is_fireworks?0x0800:0x1800)))//only ON 25% of the time for standard, dim ON 50% of the dime for fireworks
 		{
-			//set_white(iter,(state>>10)&0x01?(~(state>>2)):(state>>2));//symmetric brighten and darken
 			if(is_fireworks)
 				set_white(iter,(state>>10)&0x01?((~(state>>3))&0x7F):(((state>>6)&0x0F)==0x0F?0xFF:0));//bright flash at start, then fade from half brightness to OFF
 			else
@@ -233,22 +224,3 @@ u8 set_sparkles(bool is_fireworks)
 	}
 	return WHITE_LED_COUNT/4;
 }
-
-/*u8 set_white_test()
-{
-	set_white((millis()>>6)%WHITE_LED_COUNT,0xFF);
-	return 1;
-}*/
-
-/*u8 set_debug_buttons()
-{//light up leds based on button states
-	set_white(0,is_button_down(0)?0xFF:0);
-	set_white(1,is_button_down(1)?0xFF:0);
-	set_white(2,is_button_down(2)?0xFF:0);
-	//set_white(3,get_button_event(u8 button_index,bool is_long));
-	set_white(3,get_button_event(0,0,0)?0xFF:0);
-	set_white(4,get_button_event(0,1,0)?0xFF:0);
-	set_white(5,get_button_event(1,0,0)?0xFF:0);
-	set_white(6,get_button_event(1,1,0)?0xFF:0);
-	return 7;
-}*/
