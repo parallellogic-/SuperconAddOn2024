@@ -25,13 +25,20 @@ Long pressing either button will enter in a Cyclone game:
 
 # Examples
 
+## Idle
+
 Random screen-saver idle display pattern
 
 <img src="/doc/idle.gif" width="420">
 
+
+## Luna Says
+
 Luna highlights the Elements of Harmony is a specific order.  You must repeat her pattern.
 
 <img src="/doc/simon.gif" width="420">
+
+## Cyclone
 
 The Elements of Harmony spin and you must catch each one at the right moment
 
@@ -70,7 +77,7 @@ There are two buttons and 31 LEDs (the RGB LED consists of three colors each tha
 |        3 | 1 (r1)   | 2 (r2)   | 3 (r3)   |          | 26 (w13) | 27 (w14) |          |
 |        4 | 7 (g1)   | 8 (g2)   | 9 (g3)   | 28 (w15) |          | 29 (w16) |          |
 |        5 | 13 (b1)  | 14 (b2)  | 15 (b3)  | 30 (w17) | 31 (w18) |          |          |
-| negative |          |          |          |          |          |          |          |
+| Negative |          |          |          |          |          |          |          |
 
 |       | PORT | PIN |
 |-------|------|-----|
@@ -83,12 +90,13 @@ There are two buttons and 31 LEDs (the RGB LED consists of three colors each tha
 | DEBUG | A    |   3 |
 | BTN0  | D    |   3 |
 | BTN1  | D    |   4 |
+| SWIM  | D    |   1 |
 
 # API
 
 An example program that interfaces with the SAO over I2C (reading button state and setting LEDs) can be found [here](/src/Arduino_I2C_Master/Arduino_I2C_Master.ino)
 
-SAO device address is 0x30
+SAO device 7-bit address is 0x30
 
 | Register Map | R/W | Title                                    | Default | Range, Inclusive | Notes                                                                                                                                                                                                                                                                                                                                                                                                                           |
 |--------------|-----|------------------------------------------|---------|------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
