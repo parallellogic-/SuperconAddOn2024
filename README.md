@@ -111,7 +111,7 @@ Setting the brightness of one LED requires two bytes: one to specify the index (
 
 Producing a frame can be achieved in two ways:
 1) Writing the LED index to register 3, writing the brightness to index 4, then sending additional writes to 3 and 4 for additional LEDs.  Finally a write is sent to register 5 with the effective number of LEDs.  This is a simpler approach but requires additional overhead on the I2C serial link
-<img src="/doc/_v2.png">
+<img src="/doc/timing_v2.png">
 2) Performing a multi-byte write to register 3.  Since the index-brightness-index-brightness... bytes alternate and are followed by a single byte for the effective number of LEDs, there will always be an odd number of bytes in a compelte multi-byte transaction.
 <img src="/doc/timing_v3.png">
 
