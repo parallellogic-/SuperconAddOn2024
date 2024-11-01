@@ -62,10 +62,6 @@ The I2C data and clock lines each have a 10kohm pull up resistor to 3V3 connecte
 
 There are two buttons and 31 LEDs (the RGB LED consists of three colors each that can be individually controlled).  30 of the LEDs are driven by 6 pins in a charlieplexed configuration.  The remaining debug LED, buttons, and serial interface are assigned dedicated pins on the processor.
 
-**example timing diagram of led 3 and 13 ON then sleep, then again display, then change frame (set brightness vs flush)
-
-The above shows how the brightnesses for each LED are set in a buffer nd then colectively flushed to the visible display.
-
 # API
 
 An example program that interfaces with the SAO over I2C (reading button state and setting LEDs) can be found [here](/src/Arduino_I2C_Master/Arduino_I2C_Master.ino)
@@ -110,14 +106,20 @@ Setting of an LED always requires two steps: one (or more) commands to set the b
 Setting the brightness of one LED requires two bytes: one to specify the index (0 to 31 inclusive) and a second to set the brightness (0 to 255, inclusive, 255 is max brightness)
 
 Producing a frame can be achieved in two ways:
+
 1. Writing the LED index to register 3, writing the brightness to index 4, then sending additional writes to 3 and 4 for additional LEDs.  Finally a write is sent to register 5 with the effective number of LEDs.  This is a simpler approach but requires additional overhead on the I2C serial link
+
 <img src="/doc/timing_v2.png">
+
 2. Performing a multi-byte write to register 3.  Since the index-brightness-index-brightness... bytes alternate and are followed by a single byte for the effective number of LEDs, there will always be an odd number of bytes in a compelte multi-byte transaction.
+
 <img src="/doc/timing_v3.png">
 
 Note: Because the writing of a new frame may be completed faster than the time to illuminate the LEDs in the frame, and the SAO has only a single-frame buffer, GPIO1 is used as a busy flag: raised HIGH when a frame begins display and driven LOW when the frame has completed and the SAO is ready for a new frame.  To avoid shearing mid-frame, it is recommended to monitor GPIO1 to be in a LOW state before sending a new frame of data to the SAO.
 
 <img src="/doc/timing.png">
+
+Note: In the absense of an external command, the SAO will continue looping, showing the last frame flushed.
 
 # Resources
 
