@@ -62,6 +62,28 @@ The I2C data and clock lines each have a 10kohm pull up resistor to 3V3 connecte
 
 There are two buttons and 31 LEDs (the RGB LED consists of three colors each that can be individually controlled).  30 of the LEDs are driven by 6 pins in a charlieplexed configuration.  The remaining debug LED, buttons, and serial interface are assigned dedicated pins on the processor.
 
+|          |        0 |        1 |        2 |        3 |        4 |        5 | Positive |
+|----------|---------:|---------:|---------:|---------:|---------:|---------:|----------|
+|        0 |          | 20 (w7)  | 21 (w8)  | 4 (r4)   | 5 (r5)   | 6 (r6)   |          |
+|        1 | 22 (w9)  |          | 23 (w10) | 10 (g4)  | 11 (g5)  | 12 (g6)  |          |
+|        2 | 24 (w11) | 25 (w12) |          | 16 (b4)  | 17 (b5)  | 18 (b6)  |          |
+|        3 | 1 (r1)   | 2 (r2)   | 3 (r3)   |          | 26 (w13) | 27 (w14) |          |
+|        4 | 7 (g1)   | 8 (g2)   | 9 (g3)   | 28 (w15) |          | 29 (w16) |          |
+|        5 | 13 (b1)  | 14 (b2)  | 15 (b3)  | 30 (w17) | 31 (w18) |          |          |
+| negative |          |          |          |          |          |          |          |
+
+|       | PORT | PIN |
+|-------|------|-----|
+| MAT0  | C    |   3 |
+| MAT1  | C    |   4 |
+| MAT2  | C    |   5 |
+| MAT3  | C    |   6 |
+| MAT4  | C    |   7 |
+| MAT5  | D    |   2 |
+| DEBUG | A    |   3 |
+| BTN0  | D    |   3 |
+| BTN1  | D    |   4 |
+
 # API
 
 An example program that interfaces with the SAO over I2C (reading button state and setting LEDs) can be found [here](/src/Arduino_I2C_Master/Arduino_I2C_Master.ino)
@@ -101,7 +123,6 @@ LEDs are indexed 0 to 31 per the below mapping.  Generally, RGB LEDs are indexed
 
 Note: The 8-bit LED brightness value is squared inside the SAO and then shifted down to a 10-bit value to better match the sensitivity of the human eye.  As such, some neighboring brightness values below 32 are non-unique and map to identical brightnesses.
 
-Note: Because the brightness is squared and because brightness is based on the time each LED spins ON, one LED at brightness 255 is equivalent to two LEDs at 180 brightness (255<sup>2</sup> ~= 2 * 180<sup>2</sup>).  Rather 
 
 Setting of an LED always requires two steps: one (or more) commands to set the brightness of the target LED(s), followed by one command to flush the LED buffer to the update interrupt routine.
 
@@ -123,9 +144,14 @@ Note: Because the writing of a new frame may be completed faster than the time t
 
 Note: In the absense of an external command, the SAO will continue looping, showing the last frame flushed.
 
+Note: Because the brightness is squared and because brightness is based on the time each LED spends ON, one LED at brightness 255 is equivalent to two LEDs at 180 brightness (255<sup>2</sup> ~= 2 * 180<sup>2</sup>).  This can be extended further, ex. to three LEDs at 147 brightness (255<sup>2</sup> ~= 3 * 147<sup>2</sup>).  Rather than sleeping during the unused brightness period (to stablize the brightness regardless of whatever brightness each LED is configure to frame-to-frame), the sleep time can be skipped or reduced by setting an "effective" number of LEDs when flushing the frame buffer (on the supposition that the cumulative time each LED will spend ON will not exceed the equivalent amount of time a smaller number of LEDs would be ON for).  Thus, when some LEDs are displayed at partial brighntess, it may be possible to flush the display with an effecitve number of LEDs that is lower than the number of LEDs being illuminated.
+
 # Resources
 
 - Artwork by http://hotglewd.com
 - JLCPCB Multi Color Silkscreen Specification https://jlcpcb.com/help/article/How-to-design-multi-color-silkscreen-using-EasyEDA
 - Contest Specifications https://hackaday.io/contest/197237-supercon-8-add-on-contest/details
 - SAO Standard https://hackaday.io/project/175182-simple-add-ons-sao
+- Schematic:
+
+<img src="/doc/schematic.png">
