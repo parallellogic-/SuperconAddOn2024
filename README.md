@@ -101,6 +101,8 @@ LEDs are indexed 0 to 31 per the below mapping.  Generally, RGB LEDs are indexed
 
 Note: The 8-bit LED brightness value is squared inside the SAO and then shifted down to a 10-bit value to better match the sensitivity of the human eye.  As such, some neighboring brightness values below 32 are non-unique and map to identical brightnesses.
 
+Note: Because the brightness is squared and because brightness is based on the time each LED spins ON, one LED at brightness 255 is equivalent to two LEDs at 180 brightness (255<sup>2</sup> ~= 2 * 180<sup>2</sup>).  Rather 
+
 Setting of an LED always requires two steps: one (or more) commands to set the brightness of the target LED(s), followed by one command to flush the LED buffer to the update interrupt routine.
 
 Setting the brightness of one LED requires two bytes: one to specify the index (0 to 31 inclusive) and a second to set the brightness (0 to 255, inclusive, 255 is max brightness)
@@ -123,7 +125,7 @@ Note: In the absense of an external command, the SAO will continue looping, show
 
 # Resources
 
-- Artwork by hotglewd.com
+- Artwork by http://hotglewd.com
 - JLCPCB Multi Color Silkscreen Specification https://jlcpcb.com/help/article/How-to-design-multi-color-silkscreen-using-EasyEDA
 - Contest Specifications https://hackaday.io/contest/197237-supercon-8-add-on-contest/details
 - SAO Standard https://hackaday.io/project/175182-simple-add-ons-sao
