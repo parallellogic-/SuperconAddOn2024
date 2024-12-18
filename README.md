@@ -34,7 +34,7 @@ Random screen-saver idle display pattern
 
 ## Luna Says
 
-Luna highlights the Elements of Harmony is a specific order.  You must repeat her pattern.
+Luna highlights the Elements of Harmony in a specific order.  You must repeat her pattern.
 
 <img src="/doc/simon.gif" width="420">
 
